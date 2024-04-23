@@ -52,16 +52,21 @@ namespace bluebean.UGFramework
 
         public bool Initialize()
         {
-            var path = AssetPathHelper.GetBundleDataPathInResources();
-            var bundleData = Resources.Load<BundleData>(path);
-            if (bundleData == null)
+            GameClientSetting clientSetting = GameClientSetting.Instance;
+            if ((clientSetting.m_useAssetBundleInEditor && Application.isEditor)
+               || !Application.isEditor)
             {
-                Debug.LogError(string.Format("AssetLoader:LoadBundleData failed,path:{0}", path));
-                return false;
-            }
-            Debug.Log("AssetLoader:LoadBundleData Success");
-            m_bundleData = bundleData;
-            m_bundleDataHelper = new BundleDataHelper(m_bundleData, true);
+                var path = AssetPathHelper.GetBundleDataPathInResources();
+                var bundleData = Resources.Load<BundleData>(path);
+                if (bundleData == null)
+                {
+                    Debug.LogError(string.Format("AssetLoader:LoadBundleData failed,path:{0}", path));
+                    return false;
+                }
+                Debug.Log("AssetLoader:LoadBundleData Success");
+                m_bundleData = bundleData;
+                m_bundleDataHelper = new BundleDataHelper(m_bundleData, true);
+            } 
             return true;
         }
 

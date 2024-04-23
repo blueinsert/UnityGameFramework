@@ -7,7 +7,7 @@ namespace bluebean.UGFramework
 	public class GameClientSetting : ScriptableObject
 	{
         private const string AssetPath = "Assets/GameProject/Resources/GameClientSettingAsset.asset";
-
+        
         public bool m_useAssetBundleInEditor = false;
 
         private static GameClientSetting GetAsset()
