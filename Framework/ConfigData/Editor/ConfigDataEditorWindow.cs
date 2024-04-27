@@ -22,6 +22,14 @@ namespace bluebean.UGFramework.ConfigData
             Instance.Show();
         }
 
+        public ConfigDataSetting ConfigDataSetting
+        {
+            get
+            {
+                return GameClientSetting.Instance.m_configDataSetting;
+            }
+        }
+
         #region 单例模式
         private static ConfigDataEditorWindow m_instance;
         public static ConfigDataEditorWindow Instance
@@ -91,35 +99,35 @@ namespace bluebean.UGFramework.ConfigData
 
         private void CopyTypeDefineCodes2Project()
         {
-            var srcPath = ConfigDataSetting.Instance.m_sourceCodeFilePath;
+            var srcPath = ConfigDataSetting.m_sourceCodeFilePath;
             if (!Directory.Exists(srcPath))
             {
                 Debug.LogError(string.Format("源代码文件目录{0}不存在", srcPath));
                 return;
             }
-            var tarPath = ConfigDataSetting.Instance.m_targetCodeFilePath;
+            var tarPath = ConfigDataSetting.m_targetCodeFilePath;
             if (!Directory.Exists(tarPath))
             {
-                Debug.LogError(string.Format("目标代码文件目录{0}不存在", srcPath));
+                Debug.LogError(string.Format("目标代码文件目录{0}不存在", tarPath));
                 return;
             }
             DirectoryInfo directoryInfo = new DirectoryInfo(srcPath);
             //DirectoryInfo tarDirectoryInfo = new DirectoryInfo(tarPath);
             foreach (var fileInfo in directoryInfo.GetFiles("*.cs"))
             {
-                File.Copy(fileInfo.FullName, string.Format("{0}{1}{2}", ConfigDataSetting.Instance.m_targetCodeFilePath, "/", fileInfo.Name),true);
+                File.Copy(fileInfo.FullName, string.Format("{0}{1}{2}", ConfigDataSetting.m_targetCodeFilePath, "/", fileInfo.Name),true);
             }
         }
 
         private void ImportConfigDataAssetFiles()
         {
-            var srcPath = ConfigDataSetting.Instance.m_sourceSerializedFilePath;
+            var srcPath = ConfigDataSetting.m_sourceSerializedFilePath;
             if (!Directory.Exists(srcPath))
             {
                 Debug.LogError(string.Format("源序列化资源文件目录{0}不存在", srcPath));
                 return;
             }
-            var tarPath = ConfigDataSetting.Instance.m_targetSerializedFilePath;
+            var tarPath = ConfigDataSetting.m_targetSerializedFilePath;
             if (Directory.Exists(tarPath))
             {
                 Directory.Delete(tarPath, true);

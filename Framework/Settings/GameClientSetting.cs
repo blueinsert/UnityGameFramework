@@ -1,13 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using bluebean.UGFramework.ConfigData;
 
 namespace bluebean.UGFramework
 {
-	public class GameClientSetting : ScriptableObject
-	{
+
+    public class GameClientSetting : ScriptableObject
+    {
         private const string AssetPath = "Assets/GameProject/Resources/GameClientSettingAsset.asset";
-        
+
+        [SerializeField]
+        public ConfigDataSetting m_configDataSetting;
+
         public bool m_useAssetBundleInEditor = false;
 
         private static GameClientSetting GetAsset()
