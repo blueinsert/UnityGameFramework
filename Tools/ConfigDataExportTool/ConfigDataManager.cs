@@ -71,46 +71,82 @@ namespace bluebean.ConfigDataExportTool
 
         private object GetInt16(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return Int16.Parse("0");
+            }
             return Int16.Parse(str);
         }
 
         private object GetInt32(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return Int32.Parse("0");
+            }
             return Int32.Parse(str);
         }
 
         private object GetInt64(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return Int64.Parse("0");
+            }
             return Int64.Parse(str);
         }
 
         private object GetUInt16(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return UInt16.Parse("0");
+            }
             return UInt16.Parse(str);
         }
 
         private object GetUInt32(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return UInt32.Parse("0");
+            }
             return UInt32.Parse(str);
         }
 
         private object GetUInt64(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return UInt64.Parse("0");
+            }
             return UInt64.Parse(str);
         }
 
         private object GetDouble(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return Double.Parse("0");
+            }
             return Double.Parse(str);
         }
 
         private object GetFloat(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return float.Parse("0");
+            }
             return float.Parse(str);
         }
 
         private object GetBool(string str)
         {
+            if (string.IsNullOrEmpty(str))
+            {
+                return false;
+            }
             return bool.Parse(str);
         }
 

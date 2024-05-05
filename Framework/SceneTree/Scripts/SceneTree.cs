@@ -71,7 +71,7 @@ namespace bluebean.UGFramework
             LoadingLayerRoot = SceneRoot.transform.Find("LoadingLayerRoot").gameObject;
             UnusedLayerRoot = SceneRoot.transform.Find("UnusedLayerRoot").gameObject;
             PrefabThreeDSceneLayer = Resources.Load<GameObject>("ThreeDSceneLayer");
-            if(PrefabThreeDSceneLayer == null)
+            if (PrefabThreeDSceneLayer == null)
             {
                 Debug.LogError("Prefab of ThreeDSceneLayer is null");
                 return false;
@@ -97,7 +97,7 @@ namespace bluebean.UGFramework
                     layerPrefab = PrefabUISceneLayer;
                     break;
             }
-            if(layerPrefab == null)
+            if (layerPrefab == null)
             {
                 Debug.LogError("SceneManager:CreateLayer layerPrefab is null");
                 onComplete(null);
@@ -109,7 +109,8 @@ namespace bluebean.UGFramework
 
             AddLayerToLoadingRoot(layer);
 
-            var iter = AssetLoader.Instance.LoadAsset<GameObject>(resPath, (p, asset) => {
+            var iter = AssetLoader.Instance.LoadAsset<GameObject>(resPath, (p, asset) =>
+            {
                 OnLoadLayerAssetComplete(layer, asset, onComplete);
             });
             m_coroutineManager.StartCorcoutine(iter);
@@ -161,7 +162,7 @@ namespace bluebean.UGFramework
 
         public void PopLayer(SceneLayer layer)
         {
-            if(layer.m_state != SceneLayerState.Using)
+            if (layer.m_state != SceneLayerState.Using)
             {
                 Debug.LogError("SceneManager:PopLayer but layer's state is not Using");
                 return;
@@ -189,7 +190,7 @@ namespace bluebean.UGFramework
                 layer.transform.SetParent(UILayerRoot1Canvas.transform, false);
                 SortUILayers();
             }
-            else if(layer is ThreeDSceneLayer)
+            else if (layer is ThreeDSceneLayer)
             {
                 layer.transform.SetParent(ThreeDSceneRoot.transform, false);
             }
@@ -208,14 +209,14 @@ namespace bluebean.UGFramework
             {
                 return;
             }
-             lock (m_usingLayerList)
+            lock (m_usingLayerList)
             {
                 List<SceneLayer> thirdDLayers = new List<SceneLayer>();
                 List<SceneLayer> uiLayers = new List<SceneLayer>();
-                for(int i = 0; i < m_usingLayerList.Count; i++)
+                for (int i = 0; i < m_usingLayerList.Count; i++)
                 {
                     SceneLayer layer = m_usingLayerList[i];
-                    if(layer is UISceneLayer)
+                    if (layer is UISceneLayer)
                     {
                         uiLayers.Add(layer);
                     }
@@ -225,19 +226,19 @@ namespace bluebean.UGFramework
                     }
                 }
                 int depth = 0;
-                foreach(var layer in thirdDLayers)
+                foreach (var layer in thirdDLayers)
                 {
                     layer.LayerCamera.depth = depth++;
                 }
                 List<Camera> uiCameras = new List<Camera>();
-                foreach(var layer in uiLayers)
+                foreach (var layer in uiLayers)
                 {
                     if (!uiCameras.Contains(layer.LayerCamera))
                     {
                         uiCameras.Add(layer.LayerCamera);
                     }
                 }
-                foreach(var uiCamera in uiCameras)
+                foreach (var uiCamera in uiCameras)
                 {
                     uiCamera.depth = depth++;
                 }
@@ -254,9 +255,9 @@ namespace bluebean.UGFramework
                 return;
             }
             //冒泡排序
-            for(int i = m_usingLayerList.Count-1; i >= 0; i--)
+            for (int i = m_usingLayerList.Count - 1; i >= 0; i--)
             {
-                for(int j = i - 1; j >= 0; j--)
+                for (int j = i - 1; j >= 0; j--)
                 {
                     var layer1 = m_usingLayerList[i];
                     var layer2 = m_usingLayerList[j];
@@ -269,7 +270,7 @@ namespace bluebean.UGFramework
                     }
                 }
             }
-            for(int i = 0; i < m_usingLayerList.Count; i++)
+            for (int i = 0; i < m_usingLayerList.Count; i++)
             {
                 m_usingLayerList[i].transform.SetAsLastSibling();
             }
