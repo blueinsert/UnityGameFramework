@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using bluebean.UGFramework.ConfigData;
 using bluebean.UGFramework.Log;
@@ -102,12 +103,16 @@ namespace bluebean.UGFramework
             }
         }
 
-        public void StartLoadAllConfigData()
+        public void StartLoadAllConfigData(Action onEnd)
         {
             m_coroutineHelper.StartCorcoutine(m_configDataLoader.LoadAllConfigData((res) => {
                 if (!res)
                 {
                     Debug.Log("ConfigDataLoader Init Error");
+                }
+                if (onEnd != null)
+                {
+                    onEnd();
                 }
             }));
         }
