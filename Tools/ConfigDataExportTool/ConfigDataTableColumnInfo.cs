@@ -67,7 +67,7 @@ namespace bluebean.ConfigDataExportTool
                     ConfigDataManager.Instance.FindMainColumnInfo(m_configDataTable.HeadInfo.m_name, m_name, 0, m_foreignKeys[0], out columnInfo);
                     if (columnInfo.m_type != m_type)
                     {
-                        ConfigDataException except = new ConfigDataException(m_configDataTable.HeadInfo.m_name, m_name, 0, string.Format("外键{0}列类型与主表列不一致", m_foreignKeys[0]));
+                        ConfigDataException except = new ConfigDataException(m_configDataTable.HeadInfo.m_name, m_name, 0, string.Format("外键{0}列类型{1}与主表列类型{2}不一致", m_foreignKeys[0], m_type, columnInfo.m_type));
                         throw except;
                     }
                     m_mainColumnInfoArray[0] = columnInfo;
@@ -81,10 +81,11 @@ namespace bluebean.ConfigDataExportTool
                     ConfigDataTableColumnInfo columnInfo;
                     if(m_foreignKeys[i] != null && m_foreignKeys[i].ToLower() != "null")
                     {
+                        var typeStr = m_subTypeParamTypes[i];
                         ConfigDataManager.Instance.FindMainColumnInfo(m_configDataTable.HeadInfo.m_name, m_name, 0, m_foreignKeys[i], out columnInfo);
-                        if (columnInfo.m_type != m_type)
+                        if (columnInfo.m_type != typeStr)
                         {
-                            ConfigDataException except = new ConfigDataException(m_configDataTable.HeadInfo.m_name, m_name, 0, string.Format("外键{0}列类型与主表列不一致", m_foreignKeys[i]));
+                            ConfigDataException except = new ConfigDataException(m_configDataTable.HeadInfo.m_name, m_name, 0, string.Format("外键{0}列类型{1}与主表列类型{2}不一致", m_foreignKeys[i], typeStr, columnInfo.m_type));
                             throw except;
                         }
                         m_mainColumnInfoArray[i] = columnInfo;

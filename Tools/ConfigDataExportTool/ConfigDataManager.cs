@@ -393,9 +393,9 @@ namespace bluebean.ConfigDataExportTool
                     var mainColumnInfo = columnInfo.m_mainColumnInfoArray[i];
                     if (mainColumnInfo != null)
                     {
-                        for (int j = startRow; j < data.Row; i++)
+                        for (int j = startRow; j < data.Row; j++)
                         {
-                            string cellValue = data.ReadCell(i, columnInfo.m_index);
+                            string cellValue = data.ReadCell(j, columnInfo.m_index);
                             string[] listElemArray = cellValue.Split(new char[] { ConfigDataTableConst.ListElemSplit });
                             string value = listElemArray[i];
                             if (!IsContainValueInMainConfigData(mainColumnInfo, value))
