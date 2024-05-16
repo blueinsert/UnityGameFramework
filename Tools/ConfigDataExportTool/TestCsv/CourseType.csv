@@ -1,6 +1,0 @@
-备注：课程类型,,,
-ENUM,CourseType,,
-BOTH,BOTH,NONE,
-ID,NAME,DESC,
-编号,枚举名,说明,
-1,Inject,注射扎点,param1 课程id

@@ -255,6 +255,8 @@ namespace bluebean.ConfigDataExportTool
             }
             //动态产生assembly
             codeGenerater.ConstructCompileUnit(typeDeclarationDic);
+            codeGenerater.GenerateCode();
+            Console.WriteLine("产生代码文件成功");
             Assembly assembly;
             if(!codeGenerater.GetAeeembly(out assembly))
             {
@@ -262,8 +264,7 @@ namespace bluebean.ConfigDataExportTool
             }
             m_codeDefineAssembly = assembly;
             Console.WriteLine("动态产生assembly成功");
-            codeGenerater.GenerateCode();
-            Console.WriteLine("产生代码文件成功");
+            
         }
 
         #endregion

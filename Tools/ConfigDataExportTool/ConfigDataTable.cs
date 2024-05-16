@@ -124,7 +124,7 @@ namespace bluebean.ConfigDataExportTool
                 typeDefineClass.TypeAttributes = System.Reflection.TypeAttributes.Public;
                 foreach (var pair in HeadInfo.EnumDic)
                 {
-                    typeDefineClass.Members.Add(new CodeSnippetTypeMember(string.Format("{0} = {1}", pair.Key, pair.Value)));
+                    typeDefineClass.Members.Add(new CodeSnippetTypeMember(string.Format("{0} = {1},", pair.Key, pair.Value)));
                 }
 
             }

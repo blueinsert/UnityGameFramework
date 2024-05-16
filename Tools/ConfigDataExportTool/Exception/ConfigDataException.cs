@@ -13,7 +13,7 @@ namespace bluebean.ConfigDataExportTool
 
         public ConfigDataException(string tableName, string columnName,int row, string detail)
         {
-            m_info = string.Format("{3}, in table:{0} column:{1} row:{2}", tableName, columnName, row, detail);
+            m_info = string.Format("发生异常！\n table:{0}\n column:{1}\n row:{2}\n detail:{3}\n, ", tableName, columnName, row, detail);
         }
 
         public override string ToString()
