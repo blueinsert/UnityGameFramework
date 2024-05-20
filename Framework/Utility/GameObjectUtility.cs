@@ -7,6 +7,16 @@ namespace bluebean.UGFramework
 {
     public class GameObjectUtility
     {
+        public static GameObject CloneGameObject(GameObject cloneObj, Transform parent)
+        {
+            GameObject obj = GameObject.Instantiate<GameObject>(cloneObj, parent, false);
+            obj.transform.localPosition = Vector3.zero;
+            obj.transform.localScale = Vector3.one;
+            obj.transform.localRotation = Quaternion.identity;
+            obj.SetActive(true);
+            return obj;
+        }
+
         public static void AttachUIController<T>(GameObject go) where T: UIViewController
         {
             MonoViewController.AttachViewControllerToGameObject(go, "./", typeof(T).FullName, true);
