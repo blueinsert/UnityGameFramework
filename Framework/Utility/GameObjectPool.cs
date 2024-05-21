@@ -5,7 +5,7 @@ using bluebean.UGFramework.UI;
 
 namespace bluebean.UGFramework
 {
-    public class EasyGameObjectPool
+    public class GameObjectPool
     {
         private GameObject m_prefab;
         private GameObject m_root;
@@ -49,7 +49,7 @@ namespace bluebean.UGFramework
 
     }
 
-    public class EasyGameObjectPool<T> where T : MonoViewController
+    public class GameObjectPool<T> where T : MonoViewController
     {
         private GameObject m_prefab;
         private GameObject m_root;
@@ -95,10 +95,50 @@ namespace bluebean.UGFramework
             return ins;
         }
 
-        public  T Allocate()
+        public T Allocate()
         {
             bool isNew;
             return this.Allocate(out isNew);
+        }
+
+    }
+
+    public class GameObjectPool_Manual<T> where T : MonoViewController
+    {
+        private GameObject m_prefab;
+        private GameObject m_root;
+
+        private List<T> m_freeList = new List<T>();
+
+        public void Setup(GameObject prefab, GameObject root)
+        {
+            m_prefab = prefab;
+            m_root = root;
+        }
+
+
+        public T Allocate()
+        {
+            if (m_freeList.Count > 0)
+            {
+                var instance = m_freeList[0];
+                m_freeList.RemoveAt(0);
+                instance.gameObject.SetActive(true);
+                return instance;
+            }
+
+            GameObject go = GameObject.Instantiate(m_prefab);
+            go.transform.SetParent(m_root.transform, false);
+            MonoViewController.AttachViewControllerToGameObject(go, "./", typeof(T).FullName, true);
+            var ins = go.GetComponent<T>();
+            ins.gameObject.SetActive(true);
+            return ins;
+        }
+
+        public void Free(T instance)
+        {
+            instance.gameObject.SetActive(false);
+            m_freeList.Add(instance);
         }
 
     }
