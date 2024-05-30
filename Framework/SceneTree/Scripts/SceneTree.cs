@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using bluebean.UGFramework.UI;
+using UnityEngine.Rendering.Universal;
 
 namespace bluebean.UGFramework
 {
@@ -34,6 +35,9 @@ namespace bluebean.UGFramework
         private List<SceneLayer> m_usingLayerList = new List<SceneLayer>();
 
         private CoroutineScheduler m_coroutineManager = new CoroutineScheduler();
+
+        private Camera m_clearCamera = null;
+        private List<Camera> m_overlayCameraStack = new List<Camera>();
 
         private bool m_isDirty = false;
 
@@ -82,6 +86,19 @@ namespace bluebean.UGFramework
                 Debug.LogError("Prefab of UISceneLayer is null");
                 return false;
             }
+            var clearCameraGo = GameObject.Find("ClearCamera");
+            if(clearCameraGo != null)
+            {
+                m_clearCamera = clearCameraGo.GetComponent<Camera>();
+            }
+            if(m_clearCamera == null)
+            {
+                Debug.LogError("the ClearCamera is not found");
+                return false;
+            }
+            AddCamera2Stack(UILayerRoot2Canvas.worldCamera);
+            AddCamera2Stack(UILayerRoot1Canvas.worldCamera);
+            SetCameraStack(m_clearCamera);
             return true;
         }
 
@@ -193,9 +210,33 @@ namespace bluebean.UGFramework
             else if (layer is ThreeDSceneLayer)
             {
                 layer.transform.SetParent(ThreeDSceneRoot.transform, false);
+                SetCameraStack(layer.LayerCamera);
             }
             layer.gameObject.SetActive(true);
+            
             SetDirty();
+        }
+
+        private void AddCamera2Stack(Camera camera)
+        {
+            var cameraData = camera.GetUniversalAdditionalCameraData();
+            if(cameraData.renderType == CameraRenderType.Overlay)
+            {
+                if (!m_overlayCameraStack.Contains(camera))
+                {
+                    m_overlayCameraStack.Add(camera);
+                }
+            }
+        }
+
+        private void SetCameraStack(Camera camera)
+        {
+            var cameraData = camera.GetUniversalAdditionalCameraData();
+            if (cameraData.renderType == CameraRenderType.Base)
+            {
+                cameraData.cameraStack.Clear();
+                cameraData.cameraStack.AddRange(m_overlayCameraStack);
+            }
         }
 
         private void SetDirty()

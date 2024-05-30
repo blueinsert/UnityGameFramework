@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace bluebean.Mugen3D.Core
+namespace bluebean.UGFramework
 {
     public class Tokenizer
     {
