@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.NetworkInformation;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace bluebean.UGFramework.Build
@@ -11,20 +9,28 @@ namespace bluebean.UGFramework.Build
     public enum BundleDirType
     {
         None,
-        ABS,    // 会放到streamingAssets目录中
+        AB,    // 会放到streamingAssets目录中
     }
 
     public static class BuildManager
     {
-        public const string LogPath = "../BuildResult/Logs/";
+        public static string LogPath
+        {
+            get {
+                return BuildSetting.Instance.LogPath;
+            }
+        }
+
+        public static string BundleDataPath
+        {
+            get
+            {
+                return BuildSetting.Instance.BuildDataPath + "BuildData" + EditorUserBuildSettings.activeBuildTarget + ".asset";
+            }
+        }
+
         public const string BuildPath = "../BuildResult/";
         public const string AssetBundleDir = "";
-
-        public static string GetBundleDataPath()
-        {
-            var path = "Assets/GameProject/Resources/BundleData"+ EditorUserBuildSettings.activeBuildTarget + ".asset";
-            return path;
-        }
 
         public static string GetAssetBundleDir()
         {
@@ -41,9 +47,9 @@ namespace bluebean.UGFramework.Build
         /// <returns></returns>
         public static BundleDirType GetBundleDirType(string path)
         {
-            if (path.EndsWith("_ABS", true, null))
+            if (path.EndsWith("_AB", true, null))
             {
-                return BundleDirType.ABS;
+                return BundleDirType.AB;
             }
             else
             {
@@ -83,6 +89,10 @@ namespace bluebean.UGFramework.Build
         public static bool CheckAssetBundleAsset(List<string> assetPathList)
         {
             bool isright = true;
+            if (!Directory.Exists(LogPath))
+            {
+                Directory.CreateDirectory(LogPath);
+            }
             FileInfo fileResult = new FileInfo(LogPath + "BundleAssetCheckResult.txt");
             StreamWriter fileWr = fileResult.CreateText();
             foreach (var name in assetPathList)
@@ -126,7 +136,7 @@ namespace bluebean.UGFramework.Build
 
             if (!isright)
             {
-                Debug.LogError("Error:Not all needed asset in bundle,show detail in ResourceCheckResult/BundleAssetCheckResult.txt");
+                Debug.LogError("Error:Not all needed asset in bundle,show detail in BundleAssetCheckResult.txt");
             }
 
             return isright;
@@ -150,7 +160,7 @@ namespace bluebean.UGFramework.Build
                 if (GetBundleDirType(path) != BundleDirType.None)
                 {
                     // 出现ooxx_AB/ooxx2_AB/这样的路径，需要特殊处理
-                    if (path.ToUpper().IndexOf("_ABS") < path.Length - 5)
+                    if (path.ToUpper().IndexOf("_AB") < path.Length - 5)
                     {
                         UnityEngine.Debug.LogError("Can not set _AB int dir tree multi times " + path);
                         continue;
@@ -225,7 +235,7 @@ namespace bluebean.UGFramework.Build
         [MenuItem("Framework/Build/Step2_GenerateBundleData")]
         public static void GenerateBundleData()
         {
-            var bundleDataPath = GetBundleDataPath();
+            var bundleDataPath = BundleDataPath;
             var obj = AssetDatabase.LoadAssetAtPath<BundleData>(bundleDataPath);
             var bundleData = obj as BundleData;
             if(bundleData == null)
@@ -371,7 +381,7 @@ namespace bluebean.UGFramework.Build
         [MenuItem("Framework/Build/Step4_UpdateBundleData4BundleVersion")]
         public static bool UpdateBundleData4BundleVersion()
         {
-            var bundleDataPath = GetBundleDataPath();
+            var bundleDataPath = BundleDataPath;
             // 遍历所有bundle
             bool anyChange = false;
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
@@ -434,7 +444,7 @@ namespace bluebean.UGFramework.Build
 
         static void CopyAssetBundels2StreamingAssets()
         {
-            var bundleDataPath = GetBundleDataPath();
+            var bundleDataPath = BundleDataPath;
 
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
             string bundlePath;
