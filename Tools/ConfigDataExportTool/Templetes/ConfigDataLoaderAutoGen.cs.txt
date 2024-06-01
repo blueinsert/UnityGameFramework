@@ -3,6 +3,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework.ConfigData
 {

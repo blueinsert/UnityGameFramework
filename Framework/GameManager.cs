@@ -117,5 +117,10 @@ namespace bluebean.UGFramework
                 }
             }));
         }
+
+        public void RunCoroutine(IEnumerator enumerator)
+        {
+            m_coroutineHelper.StartCorcoutine(enumerator);
+        }
     }
 }

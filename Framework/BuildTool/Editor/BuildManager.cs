@@ -451,7 +451,7 @@ namespace bluebean.UGFramework.Build
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
             System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
             sourcePath = string.Format("{0}", bundleDataPath);
-            targetPath = string.Format("{0}/{1}", Application.streamingAssetsPath, "BundleData.asset");
+            targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, "BundleData.asset");
             if (File.Exists(sourcePath))
             {
                 File.Copy(sourcePath, targetPath, true);

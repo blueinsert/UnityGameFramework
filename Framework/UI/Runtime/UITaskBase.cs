@@ -174,6 +174,11 @@ namespace bluebean.UGFramework.UI
             StartUpdateUITask(intent);
         }
 
+        public void CloseAndReturn(Action<bool> onFinish = null, bool stay4Reuse = false)
+        {
+            UIManager.Instance.CloseAndReturn(CurUIIntent, onFinish, stay4Reuse);
+        }
+
         #endregion
 
         #region Task重载方法
@@ -495,7 +500,6 @@ namespace bluebean.UGFramework.UI
         }
 
         #endregion
-
 
         public T GetAsset<T>(string path) where T : UnityEngine.Object
         {

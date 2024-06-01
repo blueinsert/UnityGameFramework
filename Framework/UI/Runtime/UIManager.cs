@@ -129,12 +129,12 @@ namespace bluebean.UGFramework.UI
             }
         }
 
-        public void TryCloseUITask(string name, bool destroy = false)
+        public void TryCloseUITask(string name, bool stay4Reuse = false)
         {
             var uiTask = FindUITask(name);
             if (uiTask != null && uiTask.State == TaskState.Runing)
             {
-                if (destroy)
+                if (!stay4Reuse)
                 {
                     uiTask.Stop();
                 }
@@ -147,79 +147,74 @@ namespace bluebean.UGFramework.UI
             }
         }
 
-        public void CloseAndReturn2(string targetTaskName, UIIntent intent, Action<bool> onFinish = null, bool destroy = false)
+        public void CloseAndReturn(UIIntent intent, Action<bool> onFinish = null, bool stay4Reuse = false)
         {
             var top = m_uiIntentStack[m_uiIntentStack.Count - 1];
+            //只能安装开启顺序反向关闭
             if (intent != top)
             {
                 Debug.LogError(string.Format("can't close not top uitask:{0} curTop:{1}", intent.Name, top.Name));
                 if (onFinish != null) onFinish(false);
                 return;
             }
-            TryCloseUITask(intent.Name, destroy);
+            TryCloseUITask(intent.Name, stay4Reuse);
             m_uiIntentStack.RemoveAt(m_uiIntentStack.Count - 1);
-            var targetIndex = m_uiIntentStack.FindIndex((elem) => { return elem.Name == targetTaskName; });
-            if (targetIndex == -1)
-            {
-                Debug.LogError(string.Format("can't find target task name:", targetTaskName));
-                if (onFinish != null) onFinish(false);
-                return;
-            }
-            var targetIntent = m_uiIntentStack[targetIndex];
-            m_uiIntentStack.RemoveRange(targetIndex, m_uiIntentStack.Count - targetIndex);
-            StartUITask(targetIntent,onViewUpdateComplete:()=> {
-                if (onFinish != null) onFinish(true);
-            });
-        }
-
-        public void CloseAndReturn(UIIntent intent, Action<bool> onFinish = null, bool destroy = false)
-        {
-            var top = m_uiIntentStack[m_uiIntentStack.Count - 1];
-            if (intent != top)
-            {
-                Debug.LogError(string.Format("can't close not top uitask:{0} curTop:{1}", intent.Name, top.Name));
-                if (onFinish != null) onFinish(false);
-                return;
-            }
-            TryCloseUITask(intent.Name, destroy);
-            m_uiIntentStack.RemoveAt(m_uiIntentStack.Count - 1);
+            //非全屏关闭自身即可
             if (!intent.IsFullScreen)
             {
-
                 if (onFinish != null) onFinish(true);
             }
             else
             {
+                //全屏页面关闭后，需要把之前的页面重新显示出来
                 List<UIIntent> toRecoverIntentList = new List<UIIntent>();
+                //找到第一个在它之前的全屏页面
                 for (int i = m_uiIntentStack.Count - 1; i >= 0; i--)
                 {
                     var uiIntent = m_uiIntentStack[i];
-
                     if (uiIntent.IsFullScreen && uiIntent.IsRecoverOnReturn)
                     {
                         toRecoverIntentList.Add(uiIntent);
                         break;
                     }
-                    else
+                    else if(uiIntent.IsRecoverOnReturn)
                     {
                         toRecoverIntentList.Add(uiIntent);
                     }
                 }
-                m_uiIntentStack.RemoveRange(m_uiIntentStack.Count - toRecoverIntentList.Count, toRecoverIntentList.Count);
                 toRecoverIntentList.Reverse();
-                RecoverUITasks(toRecoverIntentList, onFinish);
+                if (toRecoverIntentList.Count > 0)
+                {
+                    m_uiIntentStack.RemoveRange(m_uiIntentStack.Count - toRecoverIntentList.Count, toRecoverIntentList.Count);
+
+                    RecoverUITasks(toRecoverIntentList, onFinish);
+                }
+                else
+                {
+                    Debug.LogError("toRecoverIntentList.Count==0");
+                    if (onFinish != null) onFinish(false);
+                }
+                
             }
         }
 
         private void RecoverUITasks(List<UIIntent> intents, Action<bool> onFinish)
         {
+            GameManager.Instance.RunCoroutine(Co_RecoverUITasks(intents, onFinish));
+        }
+
+        private IEnumerator Co_RecoverUITasks(List<UIIntent> intents, Action<bool> onFinish)
+        {
+            //int totalCount = intents.Count;
+            //int completedCount = 0;
             for (int i = 0; i < intents.Count; i++)
             {
                 var uiIntent = intents[i];
-                if (uiIntent.IsRecoverOnReturn)
-                {
-                    StartUITask(uiIntent);
-                }
+                StartUITask(uiIntent);
+                yield return new WaitUntil(() => {
+                    var targetTask = FindUITask(uiIntent.Name);
+                    return targetTask != null && targetTask.State == TaskState.Runing;
+                });
             }
             if (onFinish != null) onFinish(true);
         }
