@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace bluebean.UGFramework
+namespace bluebean.UGFramework.Asset
 {
 	public static class AssetBundleUtility
 	{

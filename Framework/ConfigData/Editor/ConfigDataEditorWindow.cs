@@ -9,6 +9,7 @@ using NVelocity;
 using NVelocity.App;
 using NVelocity.Runtime;
 using System.Threading;
+using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework.ConfigData
 {

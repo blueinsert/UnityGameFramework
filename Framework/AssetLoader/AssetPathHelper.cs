@@ -5,18 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace bluebean.UGFramework
+namespace bluebean.UGFramework.Asset
 {
     public class AssetPathHelper
     {
-        public static string GetBundleDataPathInResources()
+        public static string GetBundleDataBundlePathInStreamingAssets()
         {
-            string platform = "StandaloneWindows64";
-            if (Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsEditor)
-            {
-                platform = "StandaloneWindows64";
-            }
-            var path = "BundleData" + platform;
+            var path = string.Format("{0}/{1}", Application.streamingAssetsPath, "AssetBundles/bundledata_ab.b");
             return path;
         }
 

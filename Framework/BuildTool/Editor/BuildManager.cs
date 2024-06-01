@@ -1,4 +1,5 @@
-﻿using System;
+﻿using bluebean.UGFramework.Asset;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -26,7 +27,7 @@ namespace bluebean.UGFramework.Build
         {
             get
             {
-                return BuildSetting.Instance.BuildDataPath + "BuildData" + EditorUserBuildSettings.activeBuildTarget + ".asset";
+                return BuildSetting.Instance.BuildDataPath + "BundleData.asset";
             }
         }
 
@@ -413,7 +414,7 @@ namespace bluebean.UGFramework.Build
             {
                 UnityEditor.EditorUtility.SetDirty(bundleData);
                 AssetDatabase.SaveAssets();
-                // 为了BundleData本身build一次bundle
+                // 为了BundleData本身build一次bundle todo remove
                 if (!BuildAssetBundles())
                 {
                     UnityEngine.Debug.LogError("UpdateBundleData4BundleVersion() Failed to build asset bundle.");
@@ -428,39 +429,33 @@ namespace bluebean.UGFramework.Build
         [MenuItem("Framework/Build/Step5_CopyAssetBundels2StreamingAssets")]
         static void CopyAssetBundels2StreamingAssets()
         {
-            var bundleDataPath = BundleDataPath;
-
-            var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
-            string bundlePath = null;
+          
+            string sourcePath = null;
             string targetPath = null;
-            System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
+           
             var assetBundlesDir = AssetBundleDir;
             EditorUtility.PrepareDirectory(StreamingAssetsBundlePath);
-            foreach (var data in bundleData.m_bundleList)
+            
+            foreach (var filePath in Directory.GetFiles(assetBundlesDir))
             {
-                bundlePath = string.Format("{0}/{1}", assetBundlesDir, data.m_bundleName);
-                targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(bundlePath));
-                if (File.Exists(bundlePath))
+                sourcePath = filePath;
+                targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(sourcePath));
+                if (File.Exists(sourcePath))
                 {
-                    File.Copy(bundlePath, targetPath, true);
-                    UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
+                    File.Copy(sourcePath, targetPath, true);
+                    UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", sourcePath, targetPath));
                 }
             }
 
-            bundlePath = string.Format("{0}/{1}", assetBundlesDir, "bundledata_ab.b");
-            targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(bundlePath));
-            if (File.Exists(bundlePath))
-            {
-                File.Copy(bundlePath, targetPath, true);
-                UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
-            }
-
-            bundlePath = string.Format("{0}", bundleDataPath);
+            var bundleDataPath = BundleDataPath;
+            var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
+            System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
+            sourcePath = string.Format("{0}", bundleDataPath);
             targetPath = string.Format("{0}/{1}", Application.streamingAssetsPath, "BundleData.asset");
-            if (File.Exists(bundlePath))
+            if (File.Exists(sourcePath))
             {
-                File.Copy(bundlePath, targetPath, true);
-                UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
+                File.Copy(sourcePath, targetPath, true);
+                UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", sourcePath, targetPath));
             }
             UnityEngine.Debug.Log(string.Format("Copy Complete!"));
             AssetDatabase.Refresh();
@@ -485,7 +480,7 @@ namespace bluebean.UGFramework.Build
         [MenuItem("Framework/Build/BuildWindowsExe")]
         static void BuildWindowsExe()
         {
-            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows);
             Debug.Log(string.Format("Start BuildWindowsExe,{0}", EditorUserBuildSettings.activeBuildTarget));
             BuildAllAssets();
             CopyAssetBundels2StreamingAssets();

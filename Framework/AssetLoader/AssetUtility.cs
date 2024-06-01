@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
-namespace bluebean.UGFramework
+namespace bluebean.UGFramework.Asset
 {
     public class AssetUtility
     {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using bluebean.Mugen3D;
 using bluebean.UGFramework;
+using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework.Sound
 {

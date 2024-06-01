@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using bluebean.UGFramework.UI;
 using UnityEngine.Rendering.Universal;
+using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework
 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using bluebean.UGFramework.Asset;
 using bluebean.UGFramework.ConfigData;
 using bluebean.UGFramework.Log;
 using bluebean.UGFramework.UI;

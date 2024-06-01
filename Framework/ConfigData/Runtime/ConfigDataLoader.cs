@@ -1,4 +1,5 @@
-﻿using System;
+﻿using bluebean.UGFramework.Asset;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -39,7 +40,7 @@ namespace bluebean.UGFramework.ConfigData
             InitAllDeserializeFuncs();
             foreach(var tableName in m_allConfigTableNames)
             {
-                string assetPath = "Assets/GameProject/RuntimeAssets/ConfigData_ABS/ConfigData" + tableName + ".asset";
+                string assetPath = "Assets/GameProject/RuntimeAssets/ConfigData_AB/ConfigData" + tableName + ".asset";
                 yield return AssetLoader.Instance.LoadAsset<AssetObject>(assetPath, (p, scriptableObj) => {
                     if (scriptableObj != null)
                     {

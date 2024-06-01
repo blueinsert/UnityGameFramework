@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using bluebean.UGFramework;
+using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework.UI
 {
@@ -70,7 +71,7 @@ namespace bluebean.UGFramework.UI
     /// <summary>
     /// UITask
     /// </summary>
-    public abstract class UITaskBase : Task, IAssetProvider
+    public abstract class UITaskBase : Task
     {
         #region 变量
         /// <summary>
