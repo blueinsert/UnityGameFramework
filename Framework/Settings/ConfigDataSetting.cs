@@ -12,12 +12,10 @@ namespace bluebean.UGFramework.ConfigData
     }
 
     [System.Serializable]
-    public class ConfigDataSetting : ScriptableObject
+    public class ConfigDataSetting : ScriptableObjectSingleton<ConfigDataSetting>
     {
-        /// <summary>
-        /// 配置路径
-        /// </summary>
-        private const string ConfigDataSettingAssetPath = "Assets/Framework/ConfigData/Editor/ConfigDataSettingAsset.asset";
+        //反射引用
+        private static string AssetPath = "Assets/GameProject/Resources/ConfigDataSettingAsset.asset";
 
         [Header("配置表数据序列化类型")]
         public ConfigDataSerializeType m_configDataSerializeType = ConfigDataSerializeType.Bin;
@@ -30,34 +28,5 @@ namespace bluebean.UGFramework.ConfigData
         [Header("目标序列化资源文件路径")]
         public string m_targetSerializedFilePath;
 
-        private static ConfigDataSetting GetAsset()
-        {
-            ConfigDataSetting setting = AssetDatabase.LoadAssetAtPath(ConfigDataSettingAssetPath, typeof(ConfigDataSetting)) as ConfigDataSetting;
-            return setting;
-        }
-
-        private static ConfigDataSetting CreateAsset()
-        {
-            ConfigDataSetting setting = ScriptableObject.CreateInstance<ConfigDataSetting>();
-            AssetDatabase.CreateAsset(setting, ConfigDataSettingAssetPath);
-            return setting;
-        }
-
-        private static ConfigDataSetting m_instance;
-        public static ConfigDataSetting Instance
-        {
-            get
-            {
-                if (m_instance == null)
-                {
-                    m_instance = GetAsset();
-                    if (m_instance == null)
-                    {
-                        m_instance = CreateAsset();
-                    }
-                }
-                return m_instance;
-            }
-        }
     }
 }

@@ -18,10 +18,6 @@ namespace bluebean.UGFramework
             /// </summary>
             public string m_bundleName = null;
             /// <summary>
-            /// 版本号
-            /// </summary>
-            public int m_version = 1;
-            /// <summary>
             /// 通过BuildPipeline.GetHashForAssetBundle的到的
             /// </summary>
             public string m_bundleHash = null;
@@ -38,16 +34,6 @@ namespace bluebean.UGFramework
             /// </summary>
             public List<string> m_assetList = new List<string>();
         }
-
-        /// <summary>
-        /// BundleData自身的版本号
-        /// </summary>
-        public int m_version = 1;
-
-        /// <summary>
-        /// basicVersion不同是不能靠热更完成更新的，应当提示重新下载
-        /// </summary>
-        public int m_basicVersion = 1;
 
         /// <summary>
         /// bundle列表
@@ -97,28 +83,6 @@ namespace bluebean.UGFramework
                     m_assetPath2BundleDataDict.Add(m_assetPathIgnoreCase ? assetPath.ToLower() : assetPath, elem);
                 });
             });
-        }
-
-        /// <summary>
-        /// 通过bundle名称获取BundleVersion
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns>版本号，-1表示找不到对应name的bundle</returns>
-        public int GetBundleVersionByName(string name)
-        {
-            BundleData.SingleBundleData data;
-
-            // 如果是BundleData自己，做特殊处理
-            //if (name == PathHelper.BundleDataBundleName)
-            //{
-            //    return m_internalBundleData.m_version;
-            //}
-
-            if (!m_bundleDataDict.TryGetValue(name, out data))
-            {
-                return -1;
-            }
-            return data.m_version;
         }
 
         /// <summary>

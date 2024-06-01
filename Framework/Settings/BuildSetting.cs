@@ -9,16 +9,17 @@ namespace bluebean.UGFramework
         //反射引用
         private readonly static string AssetPath = "Assets/GameProject/Resources/BuildSettingAsset.asset";
 
-        [Header("构建临时文件存放目录")]
+        [Header("构建临时文件存放目录,相对于工程路径")]
         [SerializeField]
-        public string BuildPath = "../Build/";
+        public string BuildPath = "Build/";
         [SerializeField]
-        public string LogPath = "../Build/Logs/";
+        public string LogPath = "Build/Logs/";
+        [SerializeField]
+        public string AssetBundleDir = "Build/AssetBundles/";
+
         [Header("BuildDataPath")]
-        public string BuildDataPath = "Assets/StreamingAssets/BundleData/";
-        [Header("资源包存放目录")]
-        [SerializeField]
-        public string AssetBundleDir = "StreamingAssets/AssetBundles/";
+        public string BuildDataPath = "Assets/GameProject/RuntimeAssets/BundleData_AB/";
+        
         [Header("Exe打包目录")]
         [SerializeField]
         public string WinExeDir = "../Build/Win/";

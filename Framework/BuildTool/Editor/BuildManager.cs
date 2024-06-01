@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Build.Content;
 using UnityEngine;
 
 namespace bluebean.UGFramework.Build
@@ -29,13 +30,12 @@ namespace bluebean.UGFramework.Build
             }
         }
 
-        public const string BuildPath = "../BuildResult/";
-        public const string AssetBundleDir = "";
-
-        public static string GetAssetBundleDir()
+        public static string AssetBundleDir
         {
-            var path = "./AssetBundles/" + EditorUserBuildSettings.activeBuildTarget;
-            return path;
+            get
+            {
+                return BuildSetting.Instance.AssetBundleDir + EditorUserBuildSettings.activeBuildTarget;
+            }
         }
 
         public const string StreamingAssetsBundlePath = "Assets/StreamingAssets/AssetBundles/";
@@ -241,7 +241,6 @@ namespace bluebean.UGFramework.Build
             if(bundleData == null)
             {
                 bundleData = EditorUtility.CreateScriptableObjectAsset<BundleData>(bundleDataPath);
-                //bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
             }
             bundleData.m_bundleList.Clear();
             // 获取所有的bundle名称
@@ -251,7 +250,7 @@ namespace bluebean.UGFramework.Build
             foreach (var bundleName in bundleNames)
             {
                 // 跳过bundledata自己
-                if (bundleName.IndexOf("BundleData_ABS".ToLower()) != -1)
+                if (bundleName.IndexOf("BundleData_AB".ToLower()) != -1)
                 {
                     continue;
                 }
@@ -312,21 +311,14 @@ namespace bluebean.UGFramework.Build
             // 对列表排序,避免排序不稳定带来的内容变化
             bundleData.m_bundleList.Sort((b1, b2) => { return String.CompareOrdinal(b1.m_bundleName, b2.m_bundleName); });
 
-            // 增加bundleData版本号
-            bundleData.m_version = 0;//todo
-
-            // 保存基础版本号
-            bundleData.m_basicVersion = 0;//todo
-
-
             // 保存
             UnityEditor.EditorUtility.SetDirty(bundleData);
             AssetDatabase.SaveAssets();
 
             // 设置bundleData自身的assetLabel
-            //var bundleNameForBundleData = AssetBundleUtility.GetBundleNameByAssetPath("BundleData_ABS");
-            //SetupAssetLabelInfo(bundleDataPath, bundleNameForBundleData);
-            //AssetDatabase.SaveAssets();
+            var bundleNameForBundleData = AssetBundleUtility.GetBundleNameByAssetPath("BundleData_AB");
+            SetupAssetLabelInfo(bundleDataPath, bundleNameForBundleData);
+            AssetDatabase.SaveAssets();
             UnityEngine.Debug.Log("GenerateBundleData completed");
         }
 
@@ -336,7 +328,7 @@ namespace bluebean.UGFramework.Build
         [MenuItem("Framework/Build/Step3_BuildAssetBundles")]
         public static bool BuildAssetBundles()
         {
-            var dir = GetAssetBundleDir();
+            var dir = AssetBundleDir;
             if (!EditorUtility.PrepareDirectory(dir))
             {
                 UnityEngine.Debug.LogErrorFormat("Failed to prepareDirectory: {0}", dir);
@@ -362,7 +354,7 @@ namespace bluebean.UGFramework.Build
         }
 
         /// <summary>
-        ///     获取文件大小
+        /// 获取文件大小
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
@@ -378,17 +370,18 @@ namespace bluebean.UGFramework.Build
         /// 更新bundledata中的版本信息
         /// 需要在产生AssetBundles之后进行
         /// </summary>
-        [MenuItem("Framework/Build/Step4_UpdateBundleData4BundleVersion")]
-        public static bool UpdateBundleData4BundleVersion()
+        [MenuItem("Framework/Build/Step4_UpdateBundleDataAfterGenerated")]
+        public static bool UpdateBundleDataAfterGenerated()
         {
             var bundleDataPath = BundleDataPath;
-            // 遍历所有bundle
+            var assetBundlesDir = AssetBundleDir;
+            
             bool anyChange = false;
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
             string bundlePath;
 
             System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
-            var assetBundlesDir = GetAssetBundleDir();
+            // 遍历所有bundle
             foreach (var data in bundleData.m_bundleList)
             {
                 // 如果hash产生变化，说明版本更新
@@ -397,12 +390,13 @@ namespace bluebean.UGFramework.Build
                 bundlePath = string.Format("{0}/{1}", assetBundlesDir, data.m_bundleName);
                 if (!BuildPipeline.GetHashForAssetBundle(bundlePath, out hash))
                 {
-                    Debug.Log(string.Format("Failed to GetHashFor: {0}", bundlePath));
+                    Debug.LogError(string.Format("Failed to GetHashFor: {0}", bundlePath));
                     continue;
                 }
                 if (!BuildPipeline.GetCRCForAssetBundle(bundlePath, out crc))
                 {
-                    Debug.Log(string.Format("Failed to GetCRCFor: {0}", bundlePath));
+                    Debug.LogError(string.Format("Failed to GetCRCFor: {0}", bundlePath));
+                    continue;
                 }
 
                 if (String.CompareOrdinal(data.m_bundleHash, hash.ToString()) != 0 ||
@@ -410,25 +404,15 @@ namespace bluebean.UGFramework.Build
                 {
                     data.m_bundleHash = hash.ToString();
                     data.m_bundleCRC = crc;
-                    data.m_version += 1;//todo
                     data.m_size = GetFileSize(bundlePath);
                     anyChange = true;
                 }
             }
 
-            // 增加bundleData版本号
             if (anyChange)
             {
-                //更新bundleData版本号
-                bundleData.m_version += 1;//todo
-
-                // 保存基础版本号
-                bundleData.m_basicVersion = 0;//todo
-
-                // 保存
                 UnityEditor.EditorUtility.SetDirty(bundleData);
                 AssetDatabase.SaveAssets();
-
                 // 为了BundleData本身build一次bundle
                 if (!BuildAssetBundles())
                 {
@@ -441,27 +425,44 @@ namespace bluebean.UGFramework.Build
             return true;
         }
 
-
+        [MenuItem("Framework/Build/Step5_CopyAssetBundels2StreamingAssets")]
         static void CopyAssetBundels2StreamingAssets()
         {
             var bundleDataPath = BundleDataPath;
 
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
-            string bundlePath;
-
+            string bundlePath = null;
+            string targetPath = null;
             System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
-            var assetBundlesDir = GetAssetBundleDir();
+            var assetBundlesDir = AssetBundleDir;
             EditorUtility.PrepareDirectory(StreamingAssetsBundlePath);
             foreach (var data in bundleData.m_bundleList)
             {
                 bundlePath = string.Format("{0}/{1}", assetBundlesDir, data.m_bundleName);
-                string targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(bundlePath));
+                targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(bundlePath));
                 if (File.Exists(bundlePath))
                 {
                     File.Copy(bundlePath, targetPath, true);
                     UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
                 }
             }
+
+            bundlePath = string.Format("{0}/{1}", assetBundlesDir, "bundledata_ab.b");
+            targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, Path.GetFileName(bundlePath));
+            if (File.Exists(bundlePath))
+            {
+                File.Copy(bundlePath, targetPath, true);
+                UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
+            }
+
+            bundlePath = string.Format("{0}", bundleDataPath);
+            targetPath = string.Format("{0}/{1}", Application.streamingAssetsPath, "BundleData.asset");
+            if (File.Exists(bundlePath))
+            {
+                File.Copy(bundlePath, targetPath, true);
+                UnityEngine.Debug.Log(string.Format("Copy {0} => {1}", bundlePath, targetPath));
+            }
+            UnityEngine.Debug.Log(string.Format("Copy Complete!"));
             AssetDatabase.Refresh();
         }
 
@@ -473,7 +474,7 @@ namespace bluebean.UGFramework.Build
             {
                 return false;
             }
-            if (!UpdateBundleData4BundleVersion())
+            if (!UpdateBundleDataAfterGenerated())
             {
                 UnityEngine.Debug.LogErrorFormat("Failed to UpdateBundleData4BundleVersion.");
                 return false;
@@ -488,10 +489,11 @@ namespace bluebean.UGFramework.Build
             Debug.Log(string.Format("Start BuildWindowsExe,{0}", EditorUserBuildSettings.activeBuildTarget));
             BuildAllAssets();
             CopyAssetBundels2StreamingAssets();
-            var outputDir = "ClientRelease/" + EditorUserBuildSettings.activeBuildTarget + "/Mugen3D.exe";
+            var buildSetting = BuildSetting.Instance;
+            var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
             string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
             BuildOptions o = BuildOptions.None;
-            var result = BuildPipeline.BuildPlayer(scenes,string.Format(BuildPath + outputDir),BuildTarget.StandaloneWindows, o);
+            var result = BuildPipeline.BuildPlayer(scenes, outputDir, BuildTarget.StandaloneWindows, o);
             if (result!=null)
             {
                 Debug.Log(string.Format("BuildWindowsExe BuildPipeline.BuildPlay finish: {0}",
@@ -508,13 +510,14 @@ namespace bluebean.UGFramework.Build
             Debug.Log(string.Format("Start BuildAndroidApk,{0}", EditorUserBuildSettings.activeBuildTarget));
             BuildAllAssets();
             CopyAssetBundels2StreamingAssets();
-            var outputDir = "ClientRelease/" + EditorUserBuildSettings.activeBuildTarget +"/Mugen3D.apk";
+            var buildSetting = BuildSetting.Instance;
+            var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
             string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
             BuildOptions o = BuildOptions.None;
             try
             {
                 var result = BuildPipeline.BuildPlayer(scenes,
-                                        string.Format(BuildPath + outputDir),
+                                        outputDir,
                                         BuildTarget.Android, o);
                 if (result != null)
                 {
