@@ -171,7 +171,7 @@ namespace bluebean.UGFramework.UI
 
         public void OnNewIntent(UIIntent intent)
         {
-            StartUpdateUITask(intent);
+            StartUITaskUpdatePipeline(intent);
         }
 
         public void CloseAndReturn(Action<bool> onFinish = null, bool stay4Reuse = false)
@@ -198,7 +198,7 @@ namespace bluebean.UGFramework.UI
 
         protected virtual bool OnStart(UIIntent intent)
         {
-            StartUpdateUITask(intent);
+            StartUITaskUpdatePipeline(intent);
             return true;
         }
 
@@ -214,7 +214,7 @@ namespace bluebean.UGFramework.UI
 
         protected virtual bool OnResume(UIIntent intent)
         {
-            StartUpdateUITask(intent);
+            StartUITaskUpdatePipeline(intent);
             if (MainLayer != null && MainLayer.State == SceneLayerState.Unused)
                 SceneTree.Instance.PushLayer(MainLayer);
             return true;
@@ -260,7 +260,7 @@ namespace bluebean.UGFramework.UI
         /// 更新UITask
         /// </summary>
         /// <param name="intent"></param>
-        protected void StartUpdateUITask(UIIntent intent = null)
+        protected void StartUITaskUpdatePipeline(UIIntent intent = null)
         {
             if (intent != null)
             {
@@ -426,7 +426,7 @@ namespace bluebean.UGFramework.UI
             }
         }
 
-        protected virtual void OnCreateAllUIViewController()
+        protected virtual void OnAllUIViewControllerCreateCompleted()
         {
 
         }
@@ -452,7 +452,7 @@ namespace bluebean.UGFramework.UI
             {
                 uiViewController.AutoBindFields();
             }
-            OnCreateAllUIViewController();
+            OnAllUIViewControllerCreateCompleted();
         }
 
         /// <summary>

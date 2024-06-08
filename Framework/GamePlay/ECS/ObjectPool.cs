@@ -8,12 +8,12 @@ namespace bluebean.UGFramework.GamePlay
 {
     public interface IReuseable
     {
-       bool IsActive();
+       bool IsInusing();
 
-        void SetActive(bool isActive);
+        void SetInusing(bool isInusing);
     }
 
-    public class ObjectPool<T> :IRollbackAble where T : class,IReuseable,IRollbackAble
+    public class ObjectPool<T> where T : class,IReuseable
     {
         public List<T> m_array;
 
@@ -31,9 +31,9 @@ namespace bluebean.UGFramework.GamePlay
         {
             for(int i = 0; i < m_array.Count; i++)
             {
-                if (!m_array[i].IsActive())
+                if (!m_array[i].IsInusing())
                 {
-                    m_array[i].SetActive(true);
+                    m_array[i].SetInusing(true);
                     return m_array[i];
                 }
             }
@@ -41,20 +41,5 @@ namespace bluebean.UGFramework.GamePlay
             return default(T);
         }
 
-        public void RollBackTo(SnapShotReader reader)
-        {
-            for (int i = 0; i < m_array.Count; i++)
-            {
-                m_array[i].RollBackTo(reader);
-            }
-        }
-
-        public void TakeSnapShot(SnapShotWriter writer)
-        {
-            for (int i = 0; i < m_array.Count; i++)
-            {
-                m_array[i].TakeSnapShot(writer);
-            }
-        }
     }
 }

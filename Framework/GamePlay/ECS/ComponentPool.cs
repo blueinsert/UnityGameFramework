@@ -25,9 +25,9 @@ namespace bluebean.UGFramework.GamePlay
         {
             for (int i = 0; i < m_array.Count; i++)
             {
-                if (!m_array[i].IsActive())
+                if (!m_array[i].IsInusing())
                 {
-                    m_array[i].SetActive(true);
+                    m_array[i].SetInusing(true);
                     return m_array[i];
                 }
             }
@@ -47,7 +47,7 @@ namespace bluebean.UGFramework.GamePlay
         {
             foreach (var comp in m_array)
             {
-                if (comp.IsActive())
+                if (comp.IsInusing())
                 {
                     //var e = m_battleWorld.GetEntityById(comp.OwnEntityId);
                     //if (e == null)

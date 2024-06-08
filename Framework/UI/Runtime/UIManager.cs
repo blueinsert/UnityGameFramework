@@ -229,6 +229,7 @@ namespace bluebean.UGFramework.UI
         private void OnUITaskStop(UITaskBase uiTask)
         {
             var intent = uiTask.CurUIIntent;
+            Debug.Log(string.Format("UIManager:OnUITaskStop {0}", intent.Name));
             //从字典中移除
             m_uiTaskDic.Remove(uiTask.Name);
         }
