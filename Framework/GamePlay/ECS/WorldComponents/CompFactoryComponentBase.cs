@@ -10,9 +10,6 @@ namespace bluebean.UGFramework.GamePlay
         {
         }
 
-        public T CreateComponent<T>() where T : ComponentBase
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract T CreateComponent<T>() where T : ComponentBase;
     }
 }

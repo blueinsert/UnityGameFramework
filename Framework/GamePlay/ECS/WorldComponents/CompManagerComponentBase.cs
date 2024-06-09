@@ -4,20 +4,16 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.GamePlay
 {
-    public class CompManagerComponentBase : WorldComponentBase, IComponentManager
+    public abstract class CompManagerComponentBase : WorldComponentBase, IComponentManager
     {
         public CompManagerComponentBase(TheWorldBase world) : base(world)
         {
         }
 
-        public IcomponentFactory GetComponentCreater()
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract IcomponentFactory GetComponentCreater();
 
-        public T GetComponent4Entity<T>(int entityId) where T : ComponentBase
-        {
-            throw new System.NotImplementedException();
-        }
+        public abstract T GetComponent4Entity<T>(int entityId) where T : ComponentBase;
+
+        public abstract int GetAllComponents4Entity(int entityId, ComponentBase[] array);
     }
 }

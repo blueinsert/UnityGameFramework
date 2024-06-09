@@ -10,7 +10,7 @@ namespace bluebean.UGFramework.GamePlay
 
         private int m_id = -1;
 
-        private bool m_isActive = false;
+        private bool m_isInusing = false;
 
         public Entity()
         {
@@ -25,12 +25,12 @@ namespace bluebean.UGFramework.GamePlay
 
         public bool IsInusing()
         {
-            return m_isActive;
+            return m_isInusing;
         }
 
         public void SetInusing(bool isActive)
         {
-            m_isActive = isActive;
+            m_isInusing = isActive;
         }
     }
 }

@@ -16,6 +16,6 @@ namespace bluebean.UGFramework.GamePlay
         public virtual void PreInitialize() { }
         public virtual void Initialize() { }
 
-        public virtual void PoseInitialize() { }
+        public virtual void PostInitialize() { }
     }
 }

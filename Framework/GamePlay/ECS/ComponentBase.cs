@@ -34,5 +34,9 @@ namespace bluebean.UGFramework.GamePlay
         {
             m_ownEntityId = id;
         }
+
+        public virtual void Initialize() { }
+
+        public virtual void DeInitialize() { }
     }
 }

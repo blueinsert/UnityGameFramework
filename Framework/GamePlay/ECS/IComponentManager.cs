@@ -7,6 +7,8 @@ namespace bluebean.UGFramework.GamePlay
     {
         T GetComponent4Entity<T>(int entityId) where T : ComponentBase;
 
+        int GetAllComponents4Entity(int entityId, ComponentBase[] array);
+
         IcomponentFactory GetComponentCreater();
     }
 }

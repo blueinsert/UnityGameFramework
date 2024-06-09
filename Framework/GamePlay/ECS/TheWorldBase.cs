@@ -22,12 +22,23 @@ namespace bluebean.UGFramework.GamePlay
 
         protected Dictionary<Type, WorldComponentBase> m_funcComponentDic = new Dictionary<Type, WorldComponentBase>();
         private CompManagerComponentBase m_componentManagerComponent = null;
+        private IcomponentFactory m_compCreater = null;
 
-        protected T CreateWorldComponent<T>() where T : WorldComponentBase
+        public T CreateWorldComponent<T>() where T : WorldComponentBase
         {
             var instance = Activator.CreateInstance(typeof(T),this);
             m_funcComponentDic.Add(typeof(T), instance as T);
             return instance as T;
+        }
+
+        public T GetWorldComponent<T>() where T : WorldComponentBase
+        {
+            WorldComponentBase instance = null;
+            if(m_funcComponentDic.TryGetValue(typeof(T), out instance))
+            {
+                return instance as T;
+            }
+            return null;
         }
 
         protected abstract CompManagerComponentBase CreateCompManagerComponent();
@@ -36,7 +47,9 @@ namespace bluebean.UGFramework.GamePlay
         protected virtual void ConstructFuncComponents()
         {
             m_componentManagerComponent = CreateCompManagerComponent();
+            m_compCreater = m_componentManagerComponent.GetComponentCreater();
         }
+
 
         public void Initialize()
         {
@@ -51,22 +64,10 @@ namespace bluebean.UGFramework.GamePlay
             }
             foreach (var pair in m_funcComponentDic)
             {
-                pair.Value.PoseInitialize();
+                pair.Value.PostInitialize();
             }
         }
 
-        public List<Entity> GetAllEntities()
-        {
-            var entityList = new List<Entity>();//todo 减少new
-            foreach (var entity in m_entityPool.m_array)
-            {
-                if (entity.IsInusing())
-                {
-                    entityList.Add(entity);
-                }
-            }
-            return entityList;
-        }
 
         /// <summary>
         /// 添加System
@@ -103,6 +104,7 @@ namespace bluebean.UGFramework.GamePlay
             entity.SetId(AllocateEntityId());
             Debug.Log(string.Format("TheWorld:AddEntity entityId:{0}", entity.ID));
             Debug_ReportEnityPool();
+            SetDirty();
             return entity;
         }
 
@@ -111,15 +113,19 @@ namespace bluebean.UGFramework.GamePlay
             return m_maxEntityId++;
         }
 
-        public void AddComponent4Entity<T>(int entityId) where T:ComponentBase
+        public T AddComponent4Entity<T>(int entityId) where T:ComponentBase
         {
             var entity = GetEntityById(entityId);
-            AddComponent4Entity<T>(entity);
+            return AddComponent4Entity<T>(entity);
         }
 
-        public void AddComponent4Entity<T>(Entity entity) where T : ComponentBase
+        public T AddComponent4Entity<T>(Entity entity) where T : ComponentBase
         {
-            //todo
+            var comp = CreateComponent<T>();
+            comp.SetOwnEntityId(entity.ID);
+            comp.Initialize();
+            SetDirty();
+            return comp;
         }
 
         public void RemoveEntity(Entity entity)
@@ -171,8 +177,16 @@ namespace bluebean.UGFramework.GamePlay
 
         protected void DoRemoveEntity(Entity entity)
         {
-            Debug.Log(string.Format("TheWorld:DoRemoveEntity entityId:{0}", entity.ID));  
-            //todo
+            Debug.Log(string.Format("TheWorld:DoRemoveEntity entityId:{0}", entity.ID));
+            entity.SetInusing(false);
+            ComponentBase[] temp = null;
+            var count = GetAllComponents4Entity(entity.ID, temp);
+            for(int i = 0; i < count; i++)
+            {
+                var comp = temp[i];
+                comp.SetInusing(false);
+                comp.DeInitialize();
+            }
         }
 
         public void Step()
@@ -186,7 +200,17 @@ namespace bluebean.UGFramework.GamePlay
                     DoRemoveEntity(entity);
                 }
                 m_toRemoveEntityList.Clear();
+                SetDirty();
             }
+        }
+
+        /// <summary>
+        /// 运行时添加实体后，设置为dirty
+        /// </summary>
+        /// <returns></returns>
+        public void SetDirty()
+        {
+            m_isDirty = true;
         }
 
         public bool IsDirty()
@@ -194,19 +218,42 @@ namespace bluebean.UGFramework.GamePlay
             return m_isDirty;
         }
 
+        public T CreateComponent<T>() where T : ComponentBase
+        {
+            return m_compCreater.CreateComponent<T>();
+        }
+
+        #region IEntityManager
+        public List<Entity> GetAllEntities()
+        {
+            var entityList = new List<Entity>();//todo 减少new
+            foreach (var entity in m_entityPool.m_array)
+            {
+                if (entity.IsInusing())
+                {
+                    entityList.Add(entity);
+                }
+            }
+            return entityList;
+        }
+        #endregion
+
+        #region IComponentManager
+
+        public int GetAllComponents4Entity(int entityId, ComponentBase[] array)
+        {
+            return m_componentManagerComponent.GetAllComponents4Entity(entityId, array);
+        }
+
         public T GetComponent4Entity<T>(int entityId) where T : ComponentBase
         {
             return m_componentManagerComponent.GetComponent4Entity<T>(entityId);
         }
 
-        public T CreateComponent<T>() where T : ComponentBase
-        {
-            return GetComponentCreater().CreateComponent<T>();
-        }
-
         public IcomponentFactory GetComponentCreater()
         {
-            return m_componentManagerComponent.GetComponentCreater();
+            return ((IComponentManager)m_componentManagerComponent).GetComponentCreater();
         }
+        #endregion
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace bluebean.UGFramework.GamePlay
 {
 
-    public class ComponentPool<T> : IRollbackAble where T : ComponentBase, IReuseable, IRollbackAble
+    public class ComponentPool<T> where T : ComponentBase, IReuseable
     {
         public List<T> m_array;
 
@@ -35,37 +35,25 @@ namespace bluebean.UGFramework.GamePlay
             return default(T);
         }
 
-        public void RollBackTo(SnapShotReader reader)
+        public void Foreach(Action<ComponentBase> action)
         {
             for (int i = 0; i < m_array.Count; i++)
             {
-                m_array[i].RollBackTo(reader);
+                action(m_array[i]);
             }
         }
 
-        public void RecoverRefInEntity()
+        public ComponentBase GetUsedComponent(int ownerId)
         {
-            foreach (var comp in m_array)
+            for (int i = 0; i < m_array.Count; i++)
             {
-                if (comp.IsInusing())
+                var elem = m_array[i];
+                if(elem.IsInusing() && elem.OwnEntityId == ownerId)
                 {
-                    //var e = m_battleWorld.GetEntityById(comp.OwnEntityId);
-                    //if (e == null)
-                    //{
-                    //    Debug.LogError(string.Format("m_battleWorld.GetEntityById failed,entityId:{0}", comp.OwnEntityId));
-                    //}
-                    //if (e != null)
-                    //    e.AddOwnCompRef(comp);
+                    return elem;
                 }
             }
-        }
-
-        public void TakeSnapShot(SnapShotWriter writer)
-        {
-            for (int i = 0; i < m_array.Count; i++)
-            {
-                m_array[i].TakeSnapShot(writer);
-            }
+            return null;
         }
     }
 }
