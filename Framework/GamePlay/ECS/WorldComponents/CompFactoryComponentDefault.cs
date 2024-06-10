@@ -15,7 +15,7 @@ namespace bluebean.UGFramework.GamePlay
         public CompFactoryComponentDefault(TheWorldBase world) : base(world)
         {
         }
-
+         
 
         public override void PostInitialize()
         {

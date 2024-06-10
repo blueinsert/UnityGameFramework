@@ -97,9 +97,9 @@ namespace bluebean.UGFramework
                 Debug.LogError("the ClearCamera is not found");
                 return false;
             }
-            AddCamera2Stack(UILayerRoot2Canvas.worldCamera);
-            AddCamera2Stack(UILayerRoot1Canvas.worldCamera);
-            SetCameraStack(m_clearCamera);
+            AddOverlayerCamera(UILayerRoot2Canvas.worldCamera);
+            AddOverlayerCamera(UILayerRoot1Canvas.worldCamera);
+            SetOverlayerCameraStack4Base(m_clearCamera);
             return true;
         }
 
@@ -211,14 +211,14 @@ namespace bluebean.UGFramework
             else if (layer is ThreeDSceneLayer)
             {
                 layer.transform.SetParent(ThreeDSceneRoot.transform, false);
-                SetCameraStack(layer.LayerCamera);
+                SetOverlayerCameraStack4Base(layer.LayerCamera);
             }
             layer.gameObject.SetActive(true);
             
             SetDirty();
         }
 
-        private void AddCamera2Stack(Camera camera)
+        private void AddOverlayerCamera(Camera camera)
         {
             var cameraData = camera.GetUniversalAdditionalCameraData();
             if(cameraData.renderType == CameraRenderType.Overlay)
@@ -230,13 +230,21 @@ namespace bluebean.UGFramework
             }
         }
 
-        private void SetCameraStack(Camera camera)
+        private void SetOverlayerCameraStack4Base(Camera camera)
         {
             var cameraData = camera.GetUniversalAdditionalCameraData();
             if (cameraData.renderType == CameraRenderType.Base)
             {
-                cameraData.cameraStack.Clear();
-                cameraData.cameraStack.AddRange(m_overlayCameraStack);
+                //cameraData.cameraStack.Clear();
+                //cameraData.cameraStack.AddRange(m_overlayCameraStack);
+
+                foreach(var overCamera in m_overlayCameraStack)
+                {
+                    if (!cameraData.cameraStack.Contains(overCamera))
+                    {
+                        cameraData.cameraStack.Add(overCamera);
+                    }
+                }
             }
         }
 
