@@ -1,8 +1,0 @@
-备注：常量类型,,,
-ENUM,ConstType,,
-BOTH,BOTH,NONE,
-ID,Name,Value,
-编号,枚举名,值,说明
-1,EndoscopeRadius,8.6,毫米
-2,FourdirLength,60,毫米
-3,FourdirJointCount,30,

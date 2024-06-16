@@ -397,12 +397,14 @@ namespace bluebean.ConfigDataExportTool
                         for (int j = startRow; j < data.Row; j++)
                         {
                             string cellValue = data.ReadCell(j, columnInfo.m_index);
-                            string[] listElemArray = cellValue.Split(new char[] { ConfigDataTableConst.ListElemSplit });
-                            string value = listElemArray[i];
-                            if (!IsContainValueInMainConfigData(mainColumnInfo, value))
-                            {
-                                ConfigDataException except = new ConfigDataException(tableName, columnName, j, string.Format("外键列数据{0}在主表列中找不到", value));
-                                throw except;
+                            if (!string.IsNullOrEmpty(cellValue)) {
+                                string[] listElemArray = cellValue.Split(new char[] { ConfigDataTableConst.ListElemSplit });
+                                string value = listElemArray[i];
+                                if (!IsContainValueInMainConfigData(mainColumnInfo, value))
+                                {
+                                    ConfigDataException except = new ConfigDataException(tableName, columnName, j, string.Format("外键列数据{0}在主表列中找不到", value));
+                                    throw except;
+                                }
                             }
                         }
                     }

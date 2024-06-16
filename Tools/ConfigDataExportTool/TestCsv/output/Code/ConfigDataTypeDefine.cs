@@ -12,15 +12,15 @@ namespace bluebean.ConfigData {
     
     
     [System.SerializableAttribute()]
-    public class ConfigDataConst {
+    public class ConfigDataPosition {
         
         private int m_ID;
         
-        private string m_TypeEnum;
+        private int m_X;
         
-        private int m_Value;
+        private int m_Y;
         
-        private string m_StrValue;
+        private int m_Z;
         
         public int ID {
             get {
@@ -31,38 +31,118 @@ namespace bluebean.ConfigData {
             }
         }
         
-        public string TypeEnum {
+        public int X {
             get {
-                return this.m_TypeEnum;
+                return this.m_X;
             }
             set {
-                this.m_TypeEnum = value;
+                this.m_X = value;
             }
         }
         
-        public int Value {
+        public int Y {
             get {
-                return this.m_Value;
+                return this.m_Y;
             }
             set {
-                this.m_Value = value;
+                this.m_Y = value;
             }
         }
         
-        public string StrValue {
+        public int Z {
             get {
-                return this.m_StrValue;
+                return this.m_Z;
             }
             set {
-                this.m_StrValue = value;
+                this.m_Z = value;
             }
         }
     }
     
-    public enum ConfigDataConstType {
+    [System.SerializableAttribute()]
+    public class ConfigDataPositionGroup {
         
-EndoscopeRadius = 1,
-FourdirLength = 2,
-FourdirJointCount = 3,
+        private int m_ID;
+        
+        private System.Collections.Generic.List<System.Int32> m_GroupIds;
+        
+        private int m_RandomType;
+        
+        private int m_Param1;
+        
+        private int m_Param2;
+        
+        private int m_Param3;
+        
+        private int m_Param4;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> GroupIds {
+            get {
+                return this.m_GroupIds;
+            }
+            set {
+                this.m_GroupIds = value;
+            }
+        }
+        
+        public int RandomType {
+            get {
+                return this.m_RandomType;
+            }
+            set {
+                this.m_RandomType = value;
+            }
+        }
+        
+        public int Param1 {
+            get {
+                return this.m_Param1;
+            }
+            set {
+                this.m_Param1 = value;
+            }
+        }
+        
+        public int Param2 {
+            get {
+                return this.m_Param2;
+            }
+            set {
+                this.m_Param2 = value;
+            }
+        }
+        
+        public int Param3 {
+            get {
+                return this.m_Param3;
+            }
+            set {
+                this.m_Param3 = value;
+            }
+        }
+        
+        public int Param4 {
+            get {
+                return this.m_Param4;
+            }
+            set {
+                this.m_Param4 = value;
+            }
+        }
+    }
+    
+    public enum ConfigDataPositionRandomType {
+        
+FromList = 1,
+SphereRange = 2,
     }
 }
