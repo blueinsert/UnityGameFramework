@@ -506,7 +506,7 @@ namespace bluebean.UGFramework.Build
             BuildAllAssets();
             CopyAssetBundels2StreamingAssets();
             var buildSetting = BuildSetting.Instance;
-            var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
+            var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.AndroidApkName);
             string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
             BuildOptions o = BuildOptions.None;
             try

@@ -22,7 +22,7 @@ namespace bluebean.UGFramework.GamePlay
 
         protected Dictionary<Type, WorldComponentBase> m_funcComponentDic = new Dictionary<Type, WorldComponentBase>();
         private CompManagerComponentBase m_componentManagerComponent = null;
-        private IcomponentFactory m_compCreater = null;
+        private CompFactoryComponentBase m_compCreater = null;
 
         public T CreateWorldComponent<T>() where T : WorldComponentBase
         {
@@ -42,12 +42,12 @@ namespace bluebean.UGFramework.GamePlay
         }
 
         protected abstract CompManagerComponentBase CreateCompManagerComponent();
-
+        protected abstract CompFactoryComponentBase CreateComponentCreaterComponent();
 
         protected virtual void ConstructFuncComponents()
         {
             m_componentManagerComponent = CreateCompManagerComponent();
-            m_compCreater = m_componentManagerComponent.GetComponentCreater();
+            m_compCreater = CreateComponentCreaterComponent();
         }
 
 
