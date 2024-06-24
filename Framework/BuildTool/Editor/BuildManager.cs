@@ -487,7 +487,7 @@ namespace bluebean.UGFramework.Build
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
             string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
-            BuildOptions o = BuildOptions.None;
+            BuildOptions o = BuildOptions.StrictMode;
             var result = BuildPipeline.BuildPlayer(scenes, outputDir, BuildTarget.StandaloneWindows, o);
             if (result!=null)
             {
@@ -508,7 +508,7 @@ namespace bluebean.UGFramework.Build
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.AndroidApkName);
             string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
-            BuildOptions o = BuildOptions.None;
+            BuildOptions o = BuildOptions.StrictMode;
             try
             {
                 var result = BuildPipeline.BuildPlayer(scenes,
