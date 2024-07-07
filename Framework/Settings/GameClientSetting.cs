@@ -2,9 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using bluebean.UGFramework.ConfigData;
+using System;
 
 namespace bluebean.UGFramework
 {
+    [Serializable]
+    public class LogConfig
+    {
+        [SerializeField]
+        public string LogPrefix = "Log_";
+    }
 
     public class GameClientSetting : ScriptableObjectSingleton<GameClientSetting>
     {
@@ -15,7 +22,8 @@ namespace bluebean.UGFramework
         public ConfigDataSetting m_configDataSetting;
         [SerializeField]
         public bool m_useAssetBundleInEditor = false;
+        [SerializeField]
+        public LogConfig m_logConfg = null;
 
-       
     }
 }

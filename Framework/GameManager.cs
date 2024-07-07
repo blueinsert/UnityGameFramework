@@ -50,8 +50,9 @@ namespace bluebean.UGFramework
 
         public bool Intialize()
         {
+            var clientSetting = GameClientSetting.Instance;
             var logMgr = LogManager.CreateLogManager();
-            logMgr.Initlize(true, true, UnityEngine.Application.persistentDataPath, "/Mugen3D_");
+            logMgr.Initlize(true, true, UnityEngine.Application.persistentDataPath, clientSetting.m_logConfg.LogPrefix);
             m_configDataLoader = ConfigDataLoader.CreateInstance();
             m_coroutineHelper = new CoroutineScheduler();
             m_assetLoader = AssetLoader.CreateInstance();

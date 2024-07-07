@@ -32,7 +32,7 @@ namespace bluebean.UGFramework.Log
 
         private string GetNewFileFullPath()
         {
-            string fullPath = _logFileRoot + _logName + DateTime.Now.ToString("yyyy_MMdd_HHmm_ss") + ".txt";
+            string fullPath = Path.Combine(_logFileRoot, _logName + DateTime.Now.ToString("yyyy_MMdd_HHmm_ss") + ".txt");
             return fullPath;
         }
 

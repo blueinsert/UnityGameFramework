@@ -51,7 +51,7 @@ namespace bluebean.UGFramework.Log
 
             if (needFileLog)
             {
-                if(FileLogger==null)
+                if(FileLogger == null)
                     FileLogger = new FileLogger(logFileRoot, logName);
             }
             return true;
