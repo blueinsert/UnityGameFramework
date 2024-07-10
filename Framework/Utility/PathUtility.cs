@@ -1,5 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 using UnityEngine;
 
 namespace bluebean.UGFramework
@@ -10,6 +16,56 @@ namespace bluebean.UGFramework
     /// </summary>
     public static class PathUtility
     {
+
+        /// <summary>
+        /// 从Hierarchy窗口中获取路径
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="relativeRoot"></param>
+        /// <returns></returns>
+        static public string GetRelativeHierarchy(GameObject obj, GameObject relativeRoot)
+        {
+            if (obj == null)
+                return "Empty Object";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(obj.name);
+
+            while (obj.transform.parent != null && obj.transform.parent.gameObject != relativeRoot)
+            {
+                obj = obj.transform.parent.gameObject;
+                sb.Insert(0, "/");
+                sb.Insert(0, obj.name);
+            }
+
+            return sb.ToString();
+        }
+
+#if UNITY_EDITOR
+
+        /// <summary>
+        /// 在编辑器中获取路径，对象Hierarchy路径或者，asset的资源路径
+        /// </summary>
+        [MenuItem("Assets/BlackJack/Get Path", false, 1)]
+        [MenuItem("BlackJack/Util/Get Path %k", false, 4)]
+        static void GetPath()
+        {
+            if (Selection.activeTransform != null)
+            {
+                GameObject sel = Selection.activeTransform.gameObject;
+                EditorGUIUtility.systemCopyBuffer = GetRelativeHierarchy(sel, null);
+            }
+            else if (Selection.activeObject != null)
+            {
+                UnityEngine.Object sel = Selection.activeObject;
+                if (AssetDatabase.Contains(sel))
+                {
+                    EditorGUIUtility.systemCopyBuffer = AssetDatabase.GetAssetPath(sel);
+                }
+            }
+            Debug.Log("GetPath finish!");
+        }
+#endif
         /// <summary>
         /// 去掉文件扩展名
         /// </summary>
