@@ -46,8 +46,8 @@ namespace bluebean.UGFramework
         /// <summary>
         /// 在编辑器中获取路径，对象Hierarchy路径或者，asset的资源路径
         /// </summary>
-        [MenuItem("Assets/BlackJack/Get Path", false, 1)]
-        [MenuItem("BlackJack/Util/Get Path %k", false, 4)]
+        [MenuItem("Assets/FrameworkUtil/Get Path", false, 1)]
+        [MenuItem("Framework/Util/Get Path %k", false, 4)]
         static void GetPath()
         {
             if (Selection.activeTransform != null)
