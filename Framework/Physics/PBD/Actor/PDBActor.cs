@@ -15,6 +15,14 @@ namespace bluebean.UGFramework.Physics
         protected Vector3[] m_X = null;
         protected Vector3[] m_V = null;
 
+        public int ParcileCount { get { return m_X.Length; } }
+
+        /// <summary>
+        /// 每个粒子在solver positions数组中的索引
+        /// </summary>
+        //[HideInInspector]
+        public int[] m_particleIndicesInSolver;
+
         protected TetMesh m_tetMesh = null;
 
         public MeshFilter m_meshFilter = null;
@@ -23,6 +31,11 @@ namespace bluebean.UGFramework.Physics
         public Vector3 GetParticlePosition(int index)
         {
             return m_X[index];
+        }
+
+        public Vector3 GetParticleInitPosition(int particleIndex)
+        {
+            return m_tetMesh.GetParticlePos(particleIndex);
         }
 
         public void ModifyParticelPosition(int particleId, Vector3 deltaPos)

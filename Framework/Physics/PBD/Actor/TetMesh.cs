@@ -138,11 +138,19 @@ namespace bluebean.UGFramework.Physics
 
         public bool IsParticleFixed(int particleIndex)
         {
+            if (particleIndex == 25)
+                return true;
+            return false;
             if (particleIndex < 0 || particleIndex >= m_particleColors.Length)
             {
                 return false;
             }
             return m_particleColors[particleIndex].r > 0;
+        }
+
+        public Vector3 GetParticlePos(int particleIndex)
+        {
+            return m_pos[particleIndex];
         }
     }
 }

@@ -1,11 +1,16 @@
+using bluebean.UGFramework.DataStruct;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.UIElements;
+using static UnityEditor.ShaderData;
+using static UnityEngine.InputManagerEntry;
 
 namespace bluebean.UGFramework.Physics
 {
-    public class PDBSolver : MonoBehaviour, ISolverEnv
+    public class PDBSolver : MonoBehaviour, ISolverEnv, ISolver
     {
         public int m_targetFrameRate = 60;
         public float m_dtSubStep = 0.0333f;
@@ -30,6 +35,18 @@ namespace bluebean.UGFramework.Physics
         public List<PDBActor> m_actors = new List<PDBActor>();
         public Dictionary<int, PDBActor> m_actorDic = new Dictionary<int, PDBActor>();
 
+        // all particle positions [NonSerialized] private
+        public NativeVector4List m_positions = new NativeVector4List();
+        private NativeIntList m_freeList = new NativeIntList();
+
+        public NativeVector4List ParticlePositions
+        {
+            get
+            {
+                return m_positions;
+            }
+        }
+
         public void Awake()
         {
             Application.targetFrameRate = m_targetFrameRate;
@@ -38,19 +55,75 @@ namespace bluebean.UGFramework.Physics
             m_dtSubStep = m_dtStep / m_subStep;
         }
 
-        public void RegisterActor(PDBActor actor)
+        private void EnsureParticleArraysCapacity(int count)
         {
-            m_actorDic.Add(actor.ActorId, actor);
-            m_actors.Add(actor);
+            // only resize if the count is larger than the current amount of particles:
+            if (count >= m_positions.count)
+            {
+                m_positions.ResizeInitialized(count);
+            }
+
+            //if (count >= m_ParticleToActor.Length)
+            //{
+            //    Array.Resize(ref m_ParticleToActor, count * 2);
+            //}
         }
 
-        public void UnRegisterActor(PDBActor actor)
+        private void AllocateParticles(int[] particleIndices)
+        {
+
+            // If attempting to allocate more particles than we have:
+            if (particleIndices.Length > m_freeList.count)
+            {
+                int grow = particleIndices.Length - m_freeList.count;
+
+                // append new free indices:
+                for (int i = 0; i < grow; ++i)
+                    m_freeList.Add(m_positions.count + i);
+
+                // grow particle arrays:
+                EnsureParticleArraysCapacity(m_positions.count + particleIndices.Length);
+            }
+
+            // determine first particle in the free list to use:
+            int first = m_freeList.count - particleIndices.Length;
+
+            // copy free indices to the input array:
+            m_freeList.CopyTo(particleIndices, first, particleIndices.Length);
+
+            // shorten the free list:
+            m_freeList.ResizeUninitialized(first);
+
+        }
+
+        public void AddActor(PDBActor actor)
+        {
+            if (!m_actorDic.ContainsKey(actor.ActorId))
+            {
+                m_actorDic.Add(actor.ActorId, actor);
+                m_actors.Add(actor);
+
+                actor.m_particleIndicesInSolver = new int[actor.ParcileCount];
+
+                AllocateParticles(actor.m_particleIndicesInSolver);
+
+                //load init position
+                for(int i = 0; i < actor.ParcileCount; i++)
+                {
+                    var index = actor.m_particleIndicesInSolver[i];
+                    var pos = actor.GetParticleInitPosition(i);
+                    this.m_positions[index] = pos;
+                }
+            }   
+        }
+
+        public void RemoveActor(PDBActor actor)
         {
             m_actors.Remove(actor);
             m_actorDic.Remove(actor.ActorId);
         }
 
-        public void RegisterConstrain(ConstrainBase constrain)
+        public void AddConstrain(ConstrainBase constrain)
         {
             constrain.SetSolveEnv(this);
             switch (constrain.m_type)

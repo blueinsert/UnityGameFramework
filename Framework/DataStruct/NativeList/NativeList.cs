@@ -8,7 +8,7 @@ using System.Collections;
 
 namespace bluebean.UGFramework.DataStruct
 {
-    public unsafe abstract class ObiNativeList<T> : IEnumerable<T>, IDisposable, ISerializationCallbackReceiver where T : struct
+    public unsafe abstract class NativeList<T> : IEnumerable<T>, IDisposable, ISerializationCallbackReceiver where T : struct
     {
         public T[] serializedContents;
         protected void* m_AlignedPtr = null;
@@ -69,14 +69,14 @@ namespace bluebean.UGFramework.DataStruct
         }
 
         // Declare parameterless constructor, called by Unity upon deserialization.
-        protected ObiNativeList()
+        protected NativeList()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_SafetyHandle = AtomicSafetyHandle.Create();
 #endif
         }
 
-        public ObiNativeList(int capacity = 8, int alignment = 16)
+        public NativeList(int capacity = 8, int alignment = 16)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_SafetyHandle = AtomicSafetyHandle.Create();
@@ -85,7 +85,7 @@ namespace bluebean.UGFramework.DataStruct
             ChangeCapacity(capacity);
         }
 
-        ~ObiNativeList()
+        ~NativeList()
         {
             Dispose(false);
         }
@@ -212,7 +212,7 @@ namespace bluebean.UGFramework.DataStruct
             m_Capacity = newCapacity;
         }
 
-        public bool Compare(ObiNativeList<T> other)
+        public bool Compare(NativeList<T> other)
         {
             if (other == null || !isCreated || !other.isCreated)
                 throw new ArgumentNullException();
@@ -223,7 +223,7 @@ namespace bluebean.UGFramework.DataStruct
             return UnsafeUtility.MemCmp(m_AlignedPtr, other.m_AlignedPtr, m_Count * m_Stride) == 0;
         }
 
-        public void CopyFrom(ObiNativeList<T> source)
+        public void CopyFrom(NativeList<T> source)
         {
             if (source == null || !isCreated || !source.isCreated)
                 throw new ArgumentNullException();
@@ -234,7 +234,7 @@ namespace bluebean.UGFramework.DataStruct
             UnsafeUtility.MemCpy(m_AlignedPtr, source.m_AlignedPtr, source.count * m_Stride);
         }
 
-        public void CopyFrom(ObiNativeList<T> source, int sourceIndex, int destIndex, int length)
+        public void CopyFrom(NativeList<T> source, int sourceIndex, int destIndex, int length)
         {
             if (source == null || !isCreated || !source.isCreated)
                 throw new ArgumentNullException();

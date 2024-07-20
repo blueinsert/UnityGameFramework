@@ -25,7 +25,7 @@ namespace bluebean.UGFramework.Physics
         {
             base.Initialize();
             m_solver = GetComponentInParent<PDBSolver>();
-            m_solver.RegisterActor(this);
+            m_solver.AddActor(this);
             PushStretchConstrains2Solver();
             PushVolumeConstrains2Solver();
             for (int i = 0; i < CollideConstrainCountMax; i++)
@@ -68,7 +68,7 @@ namespace bluebean.UGFramework.Physics
             for (int i = 0; i < m_collideConstrainCount; i++)
             {
                 var constrain = m_collideConstrains[i];
-                m_solver.RegisterConstrain(constrain);
+                m_solver.AddConstrain(constrain);
             }
         }
 
@@ -82,7 +82,7 @@ namespace bluebean.UGFramework.Physics
                     m_actorId = this.ActorId,
                     m_edgeIndex = e,
                 };
-                m_solver.RegisterConstrain(constrain);
+                m_solver.AddConstrain(constrain);
             }
         }
 
@@ -96,7 +96,7 @@ namespace bluebean.UGFramework.Physics
                     m_actorId = this.ActorId,
                     m_tetIndex = i,
                 };
-                m_solver.RegisterConstrain(constrain);
+                m_solver.AddConstrain(constrain);
             }
         }
 
