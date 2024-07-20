@@ -5,6 +5,7 @@ using UnityEngine;
 using bluebean.Mugen3D;
 using bluebean.UGFramework;
 using bluebean.UGFramework.Asset;
+using bluebean.UGFramework.DataStruct;
 
 namespace bluebean.UGFramework.Sound
 {
