@@ -49,10 +49,11 @@ namespace bluebean.UGFramework.Physics
         public override JobHandle Apply(JobHandle inputDeps, float substepTime)
         {
             var job = new StretchConstrainApplyJob() {
-                m_edges = this.m_edgeList.AsNativeArray<int2>(),
+                m_edges = m_edges,
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,
                 m_counts = this.m_solver.PositionConstraintCounts,
+                m_particleProperties = this.m_solver.ParticleProperties,
             };
             return job.Schedule(m_constrainCount, 4, inputDeps);
         }
@@ -60,9 +61,9 @@ namespace bluebean.UGFramework.Physics
         public override JobHandle Solve(JobHandle inputDeps, float substepTime)
         {
             var job = new StretchConstrainSolveJob() {
-                m_edges = this.m_edgeList.AsNativeArray<int2>(),
-                m_restLen = this.m_restLenList.AsNativeArray<float>(),
-                m_compliances = this.m_complianceList.AsNativeArray<float>(),
+                m_edges = this.m_edges,
+                m_restLen = this.m_restLens,
+                m_compliances = this.m_compliances,
                 m_invMasses = this.m_solver.InvMasses,
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,

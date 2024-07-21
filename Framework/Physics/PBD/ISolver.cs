@@ -11,6 +11,7 @@ namespace bluebean.UGFramework.Physics
     {
         NativeArray<float4> ParticlePositions { get; }
         NativeArray<float4> ParticleVels { get; }
+        NativeArray<float4> ParticleProperties { get; }
         NativeArray<float4> ExternalForces { get; }
         NativeArray<float> InvMasses { get; }
         NativeArray<float4> PositionDeltas { get; }

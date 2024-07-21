@@ -1,3 +1,4 @@
+using bluebean.UGFramework.DataStruct;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -37,14 +38,14 @@ namespace bluebean.UGFramework.Physics
                 m_pos[i] = new Vector3(x, y, z);
             }
 
-            m_tet = new Vector4Int[m_numTets];
+            m_tet = new VectorInt4[m_numTets];
             for (int i = 0; i < m_numTets; i++)
             {
                 int p1 = BunnyMeshData.TetIds[i * 4];
                 int p2 = BunnyMeshData.TetIds[i * 4 + 1];
                 int p3 = BunnyMeshData.TetIds[i * 4 + 2];
                 int p4 = BunnyMeshData.TetIds[i * 4 + 3];
-                m_tet[i] = new Vector4Int(p1, p2, p3, p4);
+                m_tet[i] = new VectorInt4(p1, p2, p3, p4);
             }
 
             m_edge = new Vector2Int[m_numEdges];

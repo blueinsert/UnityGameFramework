@@ -1,21 +1,16 @@
 using bluebean.UGFramework.DataStruct;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
-using UnityEngine.UIElements;
-using static UnityEditor.ShaderData;
-using static UnityEngine.InputManagerEntry;
 
 namespace bluebean.UGFramework.Physics
 {
-    public class PDBSolver : MonoBehaviour, ISolver
+    public class PBDSolver : MonoBehaviour, ISolver
     {
         public int m_targetFrameRate = 60;
         public float m_dtSubStep = 0.0333f;
@@ -42,6 +37,7 @@ namespace bluebean.UGFramework.Physics
         // all particle positions [NonSerialized] private
         public NativeVector4List m_positionList = new NativeVector4List();
         public NativeVector4List m_velList = new NativeVector4List();
+        public NativeVector4List m_propertyList = new NativeVector4List();
         public NativeVector4List m_externalForceList = new NativeVector4List();
         private NativeIntList m_freeList = new NativeIntList();
         private NativeFloatList m_invMassList = new NativeFloatList();
@@ -51,6 +47,7 @@ namespace bluebean.UGFramework.Physics
 
         private NativeArray<float4> m_particlePositions;
         private NativeArray<float4> m_particleVels;
+        private NativeArray<float4> m_particleProperties;
         private NativeArray<float4> m_externalForces;
         private NativeArray<float> m_invMasses;
         private NativeArray<float4> m_positionDeltas;
@@ -64,6 +61,7 @@ namespace bluebean.UGFramework.Physics
         public NativeArray<int> PositionConstraintCounts => m_positionConstraintCounts;
         public NativeArray<float4> ParticleVels => m_particleVels;
         public NativeArray<float4> ExternalForces => m_externalForces;
+        public NativeArray<float4> ParticleProperties => m_particleProperties;
         #endregion
 
 
@@ -74,6 +72,20 @@ namespace bluebean.UGFramework.Physics
             m_damping_subStep = Mathf.Pow(m_damping, 1.0f / m_subStep);
             m_dtSubStep = m_dtStep / m_subStep;
             InitConstrains();
+        }
+
+        void OnDestroy()
+        {
+            Debug.Log("PBDSolver:OnDestroy");
+            m_positionList.Dispose();
+            m_velList.Dispose();
+            m_propertyList.Dispose();
+            m_externalForceList.Dispose();
+            m_freeList.Dispose();
+            m_invMassList.DefaultIfEmpty();
+            m_positionDeltaList.Dispose();
+            m_gradientList.Dispose();
+            m_positionConstraintCountList.Dispose();
         }
 
         private void InitConstrains()
@@ -91,6 +103,7 @@ namespace bluebean.UGFramework.Physics
             m_positionDeltas = m_positionDeltaList.AsNativeArray<float4>();
             m_gradients = m_gradientList.AsNativeArray<float4>();
             m_positionConstraintCounts = m_positionConstraintCountList.AsNativeArray<int>();
+            m_particleProperties = m_propertyList.AsNativeArray<float4>();
         }
 
         private void EnsureParticleArraysCapacity(int count)
@@ -105,6 +118,7 @@ namespace bluebean.UGFramework.Physics
                 m_positionDeltaList.ResizeInitialized(count);
                 m_gradientList.ResizeInitialized(count);
                 m_positionConstraintCountList.ResizeInitialized(count);
+                m_propertyList.ResizeInitialized(count);
 
                 OnParticleCountChange();
             }
@@ -165,6 +179,14 @@ namespace bluebean.UGFramework.Physics
                     this.m_positionDeltaList[index] = Vector4.zero;
                     this.m_gradientList[index] = Vector4.zero;
                     this.m_positionConstraintCountList[index] = 0;
+                    if(i == 25)
+                    {
+                        this.m_propertyList[index] = new Vector4(1, 0, 0, 0);
+                    }
+                    else
+                    {
+                        this.m_propertyList[index] = Vector4.zero;
+                    }
                 }
             }
         }
@@ -219,18 +241,22 @@ namespace bluebean.UGFramework.Physics
                 m_externalForces = ExternalForces,
                 m_velocities = ParticleVels,
                 m_inverseMasses = InvMasses,
+                m_particleProperties = this.ParticleProperties,
             };
             handle = predictPositionsJob.Schedule(ParticlePositions.Count(), 4, handle);
-            for (int i = 0; i < (int)ConstrainType.Max; i++)
+            
+            for (int i = 1; i < (int)ConstrainType.Max; i++)
             {
                 var constrain = m_constrains[i];
                 handle = constrain.Solve(handle, m_dtSubStep);
             }
-            for (int i = 0; i < (int)ConstrainType.Max; i++)
+            
+            for (int i = 1; i < (int)ConstrainType.Max; i++)
             {
                 var constrain = m_constrains[i];
                 handle = constrain.Apply(handle, m_dtSubStep);
             }
+            
             handle.Complete();
             /*
             Profiler.BeginSample("SolveStrethConstrains");

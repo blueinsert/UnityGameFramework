@@ -21,15 +21,12 @@ namespace bluebean.UGFramework.Physics
 
         [ReadOnly] public float sorFactor;
 
+        [ReadOnly] public NativeArray<float4> m_particleProperties;
+
         /// <summary>
         /// 粒子位置数组
         /// </summary>
-        [ReadOnly] public NativeArray<float4> m_positions;
-
-        /// <summary>
-        /// 本次约束求解产生的位置梯度
-        /// </summary>
-        [NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] public NativeArray<float4> m_gradients;
+        [NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] public NativeArray<float4> m_positions;
         /// <summary>
         /// 本次约束求解产生的位置变化
         /// </summary>
@@ -59,7 +56,9 @@ namespace bluebean.UGFramework.Physics
                 var p = particleIndices[j];
                 if (m_counts[p] > 0)
                 {
-                    m_positions[p] += m_deltas[p] / m_counts[p];
+                    float4 property = m_particleProperties[p];
+                    if (!PBDUtil.IsParticleFixed(property))
+                        m_positions[p] += m_deltas[p] / m_counts[p];
                     m_deltas[p] = float4.zero;
                     m_counts[p] = 0;
                 }

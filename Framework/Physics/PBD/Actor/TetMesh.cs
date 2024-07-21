@@ -1,3 +1,4 @@
+using bluebean.UGFramework.DataStruct;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,7 +22,7 @@ namespace bluebean.UGFramework.Physics
         //顶点or粒子位置数组
         public Vector3[] m_pos = null;
         //四面体顶点索引数组，每一个元素代表一个四面体，四个分量代表四个顶点
-        public Vector4Int[] m_tet = null;
+        public VectorInt4[] m_tet = null;
         //每个元素代表一条边，两个分量代表顶点索引
         public Vector2Int[] m_edge = null;
         //每个元素代表一个表面，三个分量代表顶点索引
@@ -124,10 +125,10 @@ namespace bluebean.UGFramework.Physics
             return m_restVol[tetIndex];
         }
 
-        public Vector4Int GetTetVertexIndex(int tetIndex)
+        public VectorInt4 GetTetVertexIndex(int tetIndex)
         {
             var tet = m_tet[tetIndex];
-            Vector4Int res = new Vector4Int((int)tet.x, (int)tet.y, (int)tet.z, (int)tet.w);
+            VectorInt4 res = new VectorInt4((int)tet.x, (int)tet.y, (int)tet.z, (int)tet.w);
             return res;
         }
 

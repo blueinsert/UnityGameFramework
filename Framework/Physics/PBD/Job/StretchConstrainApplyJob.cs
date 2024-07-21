@@ -16,10 +16,13 @@ namespace bluebean.UGFramework.Physics
         /// 边顶点索引数组
         /// </summary>
         [ReadOnly] public NativeArray<int2> m_edges;
+
+        [ReadOnly] public NativeArray<float4> m_particleProperties;
+
         /// <summary>
         /// 粒子位置数组
         /// </summary>
-        [ReadOnly] public NativeArray<float4> m_positions;
+        [NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] public NativeArray<float4> m_positions;
         /// <summary>
         /// 本次约束求解产生的位置变化
         /// </summary>
@@ -38,13 +41,20 @@ namespace bluebean.UGFramework.Physics
             var j = e[1];
             if (m_counts[i] > 0)
             {
-                m_positions[i] += m_deltas[i] / m_counts[i];
+                float4 property = m_particleProperties[i];
+                if(!PBDUtil.IsParticleFixed(property)) {
+                    m_positions[i] += m_deltas[i] / m_counts[i];
+                }
                 m_deltas[i] = float4.zero;
                 m_counts[i] = 0;
             }
             if (m_counts[j] > 0)
             {
-                m_positions[j] += m_deltas[j] / m_counts[j];
+                float4 property = m_particleProperties[j];
+                if (!PBDUtil.IsParticleFixed(property))
+                {
+                    m_positions[j] += m_deltas[j] / m_counts[j];
+                }
                 m_deltas[j] = float4.zero;
                 m_counts[j] = 0;
             }
