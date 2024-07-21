@@ -2,6 +2,11 @@ using bluebean.UGFramework.DataStruct;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Net.NetworkInformation;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.UIElements;
@@ -10,7 +15,7 @@ using static UnityEngine.InputManagerEntry;
 
 namespace bluebean.UGFramework.Physics
 {
-    public class PDBSolver : MonoBehaviour, ISolverEnv, ISolver
+    public class PDBSolver : MonoBehaviour, ISolver
     {
         public int m_targetFrameRate = 60;
         public float m_dtSubStep = 0.0333f;
@@ -28,24 +33,39 @@ namespace bluebean.UGFramework.Physics
         [Header("重力加速度")]
         public Vector3 m_g = new Vector3(0, -9.8f, 0);
 
-        public List<VolumeConstrain> m_volumeConstrains = new List<VolumeConstrain>();
-        public List<StretchConstrain> m_stretchConstrains = new List<StretchConstrain>();
-        public List<CollideConstrain> m_collideConstrains = new List<CollideConstrain>();
-
         public List<PDBActor> m_actors = new List<PDBActor>();
         public Dictionary<int, PDBActor> m_actorDic = new Dictionary<int, PDBActor>();
 
-        // all particle positions [NonSerialized] private
-        public NativeVector4List m_positions = new NativeVector4List();
-        private NativeIntList m_freeList = new NativeIntList();
+        public Dictionary<int, ConstrainGroup> m_constrains = new Dictionary<int, ConstrainGroup>();
 
-        public NativeVector4List ParticlePositions
-        {
-            get
-            {
-                return m_positions;
-            }
-        }
+        #region 粒子数据
+        // all particle positions [NonSerialized] private
+        public NativeVector4List m_positionList = new NativeVector4List();
+        public NativeVector4List m_velList = new NativeVector4List();
+        public NativeVector4List m_externalForceList = new NativeVector4List();
+        private NativeIntList m_freeList = new NativeIntList();
+        private NativeFloatList m_invMassList = new NativeFloatList();
+        private NativeVector4List m_positionDeltaList = new NativeVector4List();
+        private NativeVector4List m_gradientList = new NativeVector4List();
+        private NativeIntList m_positionConstraintCountList = new NativeIntList();
+
+        private NativeArray<float4> m_particlePositions;
+        private NativeArray<float4> m_particleVels;
+        private NativeArray<float4> m_externalForces;
+        private NativeArray<float> m_invMasses;
+        private NativeArray<float4> m_positionDeltas;
+        private NativeArray<float4> m_gradients;
+        private NativeArray<int> m_positionConstraintCounts;
+
+        public NativeArray<float4> ParticlePositions => m_particlePositions;
+        public NativeArray<float> InvMasses => m_invMasses;
+        public NativeArray<float4> PositionDeltas => m_positionDeltas;
+        public NativeArray<float4> Gradients => m_gradients;
+        public NativeArray<int> PositionConstraintCounts => m_positionConstraintCounts;
+        public NativeArray<float4> ParticleVels => m_particleVels;
+        public NativeArray<float4> ExternalForces => m_externalForces;
+        #endregion
+
 
         public void Awake()
         {
@@ -53,14 +73,40 @@ namespace bluebean.UGFramework.Physics
             m_dtStep = 1.0f / m_targetFrameRate;
             m_damping_subStep = Mathf.Pow(m_damping, 1.0f / m_subStep);
             m_dtSubStep = m_dtStep / m_subStep;
+            InitConstrains();
+        }
+
+        private void InitConstrains()
+        {
+            m_constrains[(int)ConstrainType.Stretch] = new StretchConstrainGroup(this);
+            m_constrains[(int)ConstrainType.Volume] = new VolumeConstrainGroup(this);
+        }
+
+        private void OnParticleCountChange()
+        {
+            m_particlePositions = m_positionList.AsNativeArray<float4>();
+            m_particleVels = m_velList.AsNativeArray<float4>();
+            m_externalForces = m_externalForceList.AsNativeArray<float4>();
+            m_invMasses = m_invMassList.AsNativeArray<float>();
+            m_positionDeltas = m_positionDeltaList.AsNativeArray<float4>();
+            m_gradients = m_gradientList.AsNativeArray<float4>();
+            m_positionConstraintCounts = m_positionConstraintCountList.AsNativeArray<int>();
         }
 
         private void EnsureParticleArraysCapacity(int count)
         {
             // only resize if the count is larger than the current amount of particles:
-            if (count >= m_positions.count)
+            if (count >= m_positionList.count)
             {
-                m_positions.ResizeInitialized(count);
+                m_positionList.ResizeInitialized(count);
+                m_velList.ResizeInitialized(count);
+                m_externalForceList.ResizeInitialized(count);
+                m_invMassList.ResizeInitialized(count);
+                m_positionDeltaList.ResizeInitialized(count);
+                m_gradientList.ResizeInitialized(count);
+                m_positionConstraintCountList.ResizeInitialized(count);
+
+                OnParticleCountChange();
             }
 
             //if (count >= m_ParticleToActor.Length)
@@ -79,10 +125,10 @@ namespace bluebean.UGFramework.Physics
 
                 // append new free indices:
                 for (int i = 0; i < grow; ++i)
-                    m_freeList.Add(m_positions.count + i);
+                    m_freeList.Add(m_positionList.count + i);
 
                 // grow particle arrays:
-                EnsureParticleArraysCapacity(m_positions.count + particleIndices.Length);
+                EnsureParticleArraysCapacity(m_positionList.count + particleIndices.Length);
             }
 
             // determine first particle in the free list to use:
@@ -103,18 +149,24 @@ namespace bluebean.UGFramework.Physics
                 m_actorDic.Add(actor.ActorId, actor);
                 m_actors.Add(actor);
 
-                actor.m_particleIndicesInSolver = new int[actor.ParcileCount];
+                actor.m_particleIndicesInSolver = new int[actor.GetParticleCount()];
 
                 AllocateParticles(actor.m_particleIndicesInSolver);
 
                 //load init position
-                for(int i = 0; i < actor.ParcileCount; i++)
+                for(int i = 0; i < actor.GetParticleCount(); i++)
                 {
                     var index = actor.m_particleIndicesInSolver[i];
                     var pos = actor.GetParticleInitPosition(i);
-                    this.m_positions[index] = pos;
+                    this.m_positionList[index] = pos;
+                    this.m_externalForceList[index] = Vector4.zero;
+                    this.m_velList[index] = Vector4.zero;
+                    this.m_invMassList[index] = 1;
+                    this.m_positionDeltaList[index] = Vector4.zero;
+                    this.m_gradientList[index] = Vector4.zero;
+                    this.m_positionConstraintCountList[index] = 0;
                 }
-            }   
+            }
         }
 
         public void RemoveActor(PDBActor actor)
@@ -123,152 +175,66 @@ namespace bluebean.UGFramework.Physics
             m_actorDic.Remove(actor.ActorId);
         }
 
-        public void AddConstrain(ConstrainBase constrain)
-        {
-            constrain.SetSolveEnv(this);
-            switch (constrain.m_type)
-            {
-                case ConstrainType.Stretch:
-                    m_stretchConstrains.Add(constrain as StretchConstrain);
-                    break;
-                case ConstrainType.Volume:
-                    m_volumeConstrains.Add(constrain as VolumeConstrain);
-                    break;
-                case ConstrainType.Collide:
-                    m_collideConstrains.Add(constrain as CollideConstrain);
-                    break;
-            }
-        }
 
-        private void ClearStretchConstrains(int actorId)
-        {
-            List<StretchConstrain> toRemoves = new List<StretchConstrain>();
-            foreach (var constrain in m_stretchConstrains)
-            {
-                if (constrain.m_actorId == actorId)
-                {
-                    toRemoves.Add(constrain);
-                }
-            }
-            foreach (var constrain in toRemoves)
-            {
-                m_stretchConstrains.Remove(constrain);
-            }
-
-        }
-
-        private void ClearVolumeConstrains(int actorId)
-        {
-            List<VolumeConstrain> toRemoves = new List<VolumeConstrain>();
-            foreach (var constrain in m_volumeConstrains)
-            {
-                if (constrain.m_actorId == actorId)
-                {
-                    toRemoves.Add(constrain);
-                }
-            }
-            foreach (var constrain in toRemoves)
-            {
-                m_volumeConstrains.Remove(constrain);
-            }
-
-        }
-
-        private void ClearCollideConstrains(int actorId)
-        {
-            List<CollideConstrain> toRemoves = new List<CollideConstrain>();
-            foreach (var constrain in m_collideConstrains)
-            {
-                if (constrain.m_actorId == actorId)
-                {
-                    toRemoves.Add(constrain);
-                }
-            }
-            foreach (var constrain in toRemoves)
-            {
-                m_collideConstrains.Remove(constrain);
-            }
-
-        }
-
-        public void ClearConstrain(int actorId, ConstrainType type)
-        {
-            switch (type)
-            {
-                case ConstrainType.Stretch:
-                    ClearStretchConstrains(actorId);
-                    break;
-                case ConstrainType.Volume:
-                    ClearVolumeConstrains(actorId);
-                    break;
-                case ConstrainType.Collide:
-                    ClearCollideConstrains(actorId);
-                    break;
-            }
-        }
-
-        void PreSubStep()
+        void OnPreSubStep()
         {
             for (int i = 0; i < m_actors.Count; i++)
             {
-                m_actors[i].PreSubStep(m_dtSubStep, m_g);
+                m_actors[i].OnPreSubStep(m_dtSubStep, m_g);
             }
         }
 
-        void PostSubStep()
+        void OnPostSubStep()
         {
             for (int i = 0; i < m_actors.Count; i++)
             {
-                m_actors[i].PostSubStep(m_dtSubStep, m_damping_subStep);
+                m_actors[i].OnPostSubStep(m_dtSubStep, m_damping_subStep);
             }
         }
 
-        void PreStep()
+        void OnPreStep()
         {
             for (int i = 0; i < m_actors.Count; i++)
             {
-                m_actors[i].PreStep();
+                m_actors[i].OnPreStep();
             }
         }
 
-        void PostStep()
+        void OnPostStep()
         {
             for (int i = 0; i < m_actors.Count; i++)
             {
-                m_actors[i].PostStep();
-            }
-        }
-
-        void SolveStrethConstrains()
-        {
-            foreach (var constrain in m_stretchConstrains)
-            {
-                constrain.SetParams(m_edgeCompliance);
-                constrain.Solve(m_dtSubStep);
-            }
-        }
-
-        void SolveVolumeConstrains()
-        {
-            foreach (var constrain in m_volumeConstrains)
-            {
-                constrain.SetParams(m_volumeCompliance);
-                constrain.Solve(m_dtSubStep);
-            }
-        }
-
-        void SolveCollideConstrains()
-        {
-            foreach (var constrain in m_collideConstrains)
-            {
-                constrain.SetParams(m_collideCompliance);
-                constrain.Solve(m_dtSubStep);
+                m_actors[i].OnPostStep();
             }
         }
 
         void Solve()
         {
+            JobHandle handle = new JobHandle();
+            PredictPositionsJob predictPositionsJob = new PredictPositionsJob()
+            {
+                m_deltaTime = m_dtSubStep,
+                m_gravity = new float4(m_g.x,m_g.y,m_g.z,0),
+                m_positions = ParticlePositions,
+                m_externalForces = ExternalForces,
+                m_velocities = ParticleVels,
+                m_inverseMasses = InvMasses,
+            };
+            handle = predictPositionsJob.Schedule(ParticlePositions.Count(), 4, handle);
+            for (int i = 0; i < (int)ConstrainType.Max; i++)
+            {
+                var constrain = m_constrains[i];
+                handle = constrain.Solve(handle, m_dtSubStep);
+            }
+            for (int i = 0; i < (int)ConstrainType.Max; i++)
+            {
+                var constrain = m_constrains[i];
+                handle = constrain.Apply(handle, m_dtSubStep);
+            }
+            handle.Complete();
+            /*
             Profiler.BeginSample("SolveStrethConstrains");
+
             SolveStrethConstrains();
             Profiler.EndSample();
 
@@ -279,92 +245,69 @@ namespace bluebean.UGFramework.Physics
             Profiler.BeginSample("SolveCollideConstrains");
             SolveCollideConstrains();
             Profiler.EndSample();
+            */
         }
 
         void SubStep()
         {
-            Profiler.BeginSample("PreSubStep");
-            PreSubStep();
-            Profiler.EndSample();
-
             Profiler.BeginSample("Solve");
             Solve();
             Profiler.EndSample();
-
-            Profiler.BeginSample("PostSubStep");
-            PostSubStep();
-            Profiler.EndSample();
         }
 
-        void Step()
+
+        // Update is called once per frame
+        void FixedUpdate()
         {
             Profiler.BeginSample("PreStep");
-            PreStep();
+            OnPreStep();
             Profiler.EndSample();
             Profiler.BeginSample("SubStep");
             for (int i = 0; i < m_subStep; i++)
             {
+                Profiler.BeginSample("PreSubStep");
+                OnPreSubStep();
+                Profiler.EndSample();
+
                 SubStep();
+
+                Profiler.BeginSample("PostSubStep");
+                OnPostSubStep();
+                Profiler.EndSample();
             }
             Profiler.EndSample();
             Profiler.BeginSample("PreStep");
-            PostStep();
+            OnPostStep();
             Profiler.EndSample();
         }
 
-        // Update is called once per frame
-        void Update()
+
+        public void PushStretchConstrain(StretchConstrainData stretchConstrainData)
         {
-            Step();
+            var constrainGroup = m_constrains[(int)ConstrainType.Stretch] as StretchConstrainGroup;
+            var actorId = stretchConstrainData.m_actorId;
+            var actor = m_actorDic[actorId];
+            var p1 = actor.m_particleIndicesInSolver[stretchConstrainData.m_edge.x];
+            var p2 = actor.m_particleIndicesInSolver[stretchConstrainData.m_edge.y];
+            constrainGroup.AddConstrain(new VectorInt2(p1, p2), stretchConstrainData.m_restLen, 0);
         }
 
-        #region ISolverEnv
-        public PDBActor GetActor(int id)
+        public void PushVolumeConstrain(VolumeConstrainData volumeConstrainData)
         {
-            return m_actorDic[id];
+            var constrainGroup = m_constrains[(int)ConstrainType.Volume] as VolumeConstrainGroup;
+            var actorId = volumeConstrainData.m_actorId;
+            var actor = m_actorDic[actorId];
+            var p1 = actor.m_particleIndicesInSolver[volumeConstrainData.m_tet.x];
+            var p2 = actor.m_particleIndicesInSolver[volumeConstrainData.m_tet.y];
+            var p3 = actor.m_particleIndicesInSolver[volumeConstrainData.m_tet.z];
+            var p4 = actor.m_particleIndicesInSolver[volumeConstrainData.m_tet.w];
+            constrainGroup.AddConstrain(new VectorInt4(p1, p2, p3, p4), volumeConstrainData.m_restVolume, 0);
         }
 
-        public Vector3 GetParticlePosition(int actorId, int particleId)
+        public Vector3 GetParticlePosition(int particleIndex)
         {
-            var actor = GetActor(actorId);
-            return actor.GetParticlePosition(particleId);
+            var pos = m_positionList[particleIndex];
+            return pos;
         }
-
-        public float GetParticleInvMass(int actorId, int particleId)
-        {
-            var actor = GetActor(actorId);
-            return actor.GetParticleInvMass(particleId);
-        }
-
-        public void ModifyParticelPosition(int actorId, int particleId, Vector3 deltaPos)
-        {
-            var actor = GetActor(actorId);
-            actor.ModifyParticelPosition(particleId, deltaPos);
-        }
-
-        public Vector4Int GetTetVertexIndex(int actorId, int tetIndex)
-        {
-            var actor = GetActor(actorId);
-            return actor.GetTetVertexIndex(tetIndex);
-        }
-
-        public float GetTetRestVolume(int actorId, int tetIndex)
-        {
-            var actor = GetActor(actorId);
-            return actor.GetTetRestVolume(tetIndex);
-        }
-
-        public float GetEdgeRestLen(int actorId, int edgeIndex)
-        {
-            var actor = GetActor(actorId);
-            return actor.GetEdgeRestLen(edgeIndex);
-        }
-
-        public Vector2Int GetEdgeParticles(int actorId, int edgeIndex)
-        {
-            var actor = GetActor(actorId);
-            return actor.GetEdgeParticles(edgeIndex);
-        }
-        #endregion
     }
 }

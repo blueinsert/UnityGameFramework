@@ -1,6 +1,7 @@
 using bluebean.UGFramework.DataStruct;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -9,16 +10,13 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Physics
 {
-    public class VolumeConstrainSolveJob : IJobParallelFor
+    [BurstCompile]
+    public struct VolumeConstrainSolveJob : IJobParallelFor
     {
-        /// <summary>
-        /// 约束在四面体顶点数组中的开始索引
-        /// </summary>
-        [ReadOnly] public NativeArray<int> m_tetStartIndex;
         /// <summary>
         /// 四面体顶点数组
         /// </summary>
-        [ReadOnly] public NativeArray<int> m_tets;
+        [ReadOnly] public NativeArray<int4> m_tets;
         /// <summary>
         /// 四面体初始体积
         /// </summary>
@@ -55,11 +53,11 @@ namespace bluebean.UGFramework.Physics
             //index 是约束索引或四面体索引
             float alpha = m_compliances[index] / m_deltaTimeSqr;
 
-            var sIndex = m_tetStartIndex[index];
-            var p1Index = m_tets[sIndex];
-            var p2Index = m_tets[sIndex + 1];
-            var p3Index = m_tets[sIndex + 2];
-            var p4Index = m_tets[sIndex + 3];
+            var tet = m_tets[index];
+            var p1Index = tet.x;
+            var p2Index = tet.y;
+            var p3Index = tet.z;
+            var p4Index = tet.w;
             var p1 = m_positions[p1Index];
             var p2 = m_positions[p2Index];
             var p3 = m_positions[p3Index];

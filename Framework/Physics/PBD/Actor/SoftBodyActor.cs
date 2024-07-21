@@ -8,12 +8,17 @@ namespace bluebean.UGFramework.Physics
     public class SoftBodyActor : PDBActor
     {
         const int CollideConstrainCountMax = 500;
-        CollideConstrain[] m_collideConstrains = new CollideConstrain[CollideConstrainCountMax];
+        //CollideConstrain[] m_collideConstrains = new CollideConstrain[CollideConstrainCountMax];
         int m_collideConstrainCount = 0;
 
-        private PDBSolver m_solver = null;
-
         private float m_scale = 1.0f;
+
+        protected TetMesh m_tetMesh = null;
+
+        public MeshFilter m_meshFilter = null;
+        public Mesh m_mesh = null;
+
+        Vector3[] m_x;
 
         // Start is called before the first frame update
         void Start()
@@ -24,40 +29,40 @@ namespace bluebean.UGFramework.Physics
         public override void Initialize()
         {
             base.Initialize();
-            m_solver = GetComponentInParent<PDBSolver>();
+            m_tetMesh = GetComponent<TetMesh>();
+
+            m_meshFilter = GetComponent<MeshFilter>();
+            m_mesh = m_meshFilter.mesh;
+
+            m_x = new Vector3[GetParticleCount()];
+            for (int i = 0; i < m_x.Length; i++)
+            {
+                m_x[i] = m_tetMesh.GetParticlePos(i);
+            }
             m_solver.AddActor(this);
             PushStretchConstrains2Solver();
             PushVolumeConstrains2Solver();
-            for (int i = 0; i < CollideConstrainCountMax; i++)
-            {
-                m_collideConstrains[i] = new CollideConstrain();
-            }
-
         }
 
-        public override void PreSubStep(float dt, Vector3 g)
+        public override void OnPreSubStep(float dt, Vector3 g)
         {
-            base.PreSubStep(dt, g);
-            var solver = GetComponentInParent<PDBSolver>();
-            solver.ClearConstrain(ActorId, ConstrainType.Collide);
-            GenerateCollideConstrains();
-            PushCollideConstrains2Solver();
+           
         }
 
         void GenerateCollideConstrains()
         {
             m_collideConstrainCount = 0;
 
-            for (int i = 0; i < m_X.Length; i++)
+            for (int i = 0; i < m_x.Length; i++)
             {
-                var p = m_X[i];
+                var p = m_x[i];
                 float planeY = -5;
                 if (p.y < planeY && m_collideConstrainCount < CollideConstrainCountMax - 1)
                 {
-                    m_collideConstrains[m_collideConstrainCount].m_actorId = this.ActorId;
-                    m_collideConstrains[m_collideConstrainCount].m_index = i;
-                    m_collideConstrains[m_collideConstrainCount].m_normal = new Vector3(0, 1, 0);
-                    m_collideConstrains[m_collideConstrainCount].m_entryPosition = new Vector3(p.x, planeY, p.z);
+                    //m_collideConstrains[m_collideConstrainCount].m_actorId = this.ActorId;
+                    //m_collideConstrains[m_collideConstrainCount].m_index = i;
+                    //m_collideConstrains[m_collideConstrainCount].m_normal = new Vector3(0, 1, 0);
+                    //m_collideConstrains[m_collideConstrainCount].m_entryPosition = new Vector3(p.x, planeY, p.z);
                     m_collideConstrainCount++;
                 }
             }
@@ -67,8 +72,8 @@ namespace bluebean.UGFramework.Physics
         {
             for (int i = 0; i < m_collideConstrainCount; i++)
             {
-                var constrain = m_collideConstrains[i];
-                m_solver.AddConstrain(constrain);
+                //var constrain = m_collideConstrains[i];
+                //m_solver.AddConstrain(constrain);
             }
         }
 
@@ -77,12 +82,13 @@ namespace bluebean.UGFramework.Physics
             for (int e = 0; e < m_tetMesh.m_numEdges; e++)
             {
                 var edge = m_tetMesh.m_edge[e];
-                StretchConstrain constrain = new StretchConstrain()
+                StretchConstrainData constrain = new StretchConstrainData()
                 {
                     m_actorId = this.ActorId,
-                    m_edgeIndex = e,
+                    m_edge = new DataStruct.VectorInt2(edge.x, edge.y),
+                    m_restLen = m_tetMesh.GetEdgeRestLen(e),
                 };
-                m_solver.AddConstrain(constrain);
+                m_solver.PushStretchConstrain(constrain);
             }
         }
 
@@ -91,18 +97,19 @@ namespace bluebean.UGFramework.Physics
             for (int i = 0; i < m_tetMesh.m_numTets; i++)
             {
                 var tet = m_tetMesh.m_tet[i];
-                VolumeConstrain constrain = new VolumeConstrain()
+                VolumeConstrainData constrain = new VolumeConstrainData()
                 {
                     m_actorId = this.ActorId,
-                    m_tetIndex = i,
+                    m_tet = new DataStruct.VectorInt4(tet.x, tet.y, tet.z, tet.w),
+                    m_restVolume = m_tetMesh.GetTetRestVolume(i),
                 };
-                m_solver.AddConstrain(constrain);
+                m_solver.PushVolumeConstrain(constrain);
             }
         }
 
-        public override float GetTetRestVolume(int tetIndex)
+        public float GetTetRestVolume(int tetIndex)
         {
-            var volume = base.GetTetRestVolume(tetIndex);
+            var volume = m_tetMesh.GetTetRestVolume(tetIndex);
             var tet = m_tetMesh.m_tet[tetIndex];
             var fixedCount = 0;
             fixedCount += m_tetMesh.IsParticleFixed(tet[0]) ? 1 : 0;
@@ -128,7 +135,7 @@ namespace bluebean.UGFramework.Physics
             return volume;
         }
 
-        public override float GetEdgeRestLen(int edgeIndex)
+        public float GetEdgeRestLen(int edgeIndex)
         {
             var edge = m_tetMesh.m_edge[edgeIndex];
             var len = m_tetMesh.GetEdgeRestLen(edgeIndex);
@@ -152,10 +159,33 @@ namespace bluebean.UGFramework.Physics
                 m_scale -= speed * Time.deltaTime;
             }
             m_scale = Mathf.Clamp(m_scale, 1.0f, 20.0f);
-            m_mesh.vertices = this.m_X;
-            m_mesh.RecalculateNormals();
-
         }
 
+        public override void OnPostStep()
+        {
+            SyncMesh();
+        }
+
+
+        public void SyncMesh()
+        {
+            for(int i = 0; i < m_particleIndicesInSolver.Length; i++)
+            {
+                var globalIndex = m_particleIndicesInSolver[i];
+                m_x[i] = m_solver.GetParticlePosition(globalIndex);
+            }
+            m_mesh.vertices = m_x;
+            m_mesh.RecalculateNormals();
+        }
+
+        public override int GetParticleCount()
+        {
+            return m_tetMesh.m_pos.Length;
+        }
+
+        public override Vector3 GetParticleInitPosition(int particleIndex)
+        {
+            return m_tetMesh.GetParticlePos(particleIndex);
+        }
     }
 }

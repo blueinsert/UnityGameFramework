@@ -8,7 +8,8 @@ namespace bluebean.UGFramework.Physics
     {
         None = -1,
         Collide,
-        Volume,
+        Volume = 0,
         Stretch,
+        Max,
     }
 }

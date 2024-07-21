@@ -10,11 +10,19 @@ namespace bluebean.UGFramework.Physics
     public interface ISolver
     {
         NativeArray<float4> ParticlePositions { get; }
-         NativeArray<float> InvMasses { get; }
+        NativeArray<float4> ParticleVels { get; }
+        NativeArray<float4> ExternalForces { get; }
+        NativeArray<float> InvMasses { get; }
         NativeArray<float4> PositionDeltas { get; }
-
         NativeArray<float4> Gradients { get; }
-
         NativeArray<int> PositionConstraintCounts { get; }
+
+        void AddActor(PDBActor actor);
+
+        Vector3 GetParticlePosition(int particleIndex);
+
+        void PushStretchConstrain(StretchConstrainData stretchConstrainData);
+
+        void PushVolumeConstrain(VolumeConstrainData volumeConstrainData);
     }
 }

@@ -5,41 +5,41 @@ using Unity.Mathematics;
 
 namespace bluebean.UGFramework.Physics
 {
-    public class StretchConstrainGroup : ConstrainGroup
+    public class VolumeConstrainGroup : ConstrainGroup
     {
         /// <summary>
-        /// 边顶点索引数组
+        /// 四面体顶点索引数组
         /// </summary>
-        public NativeInt2List m_edgeList = new NativeInt2List();
+        public NativeInt4List m_tetList = new NativeInt4List();
         /// <summary>
-        /// 每个约束(边)的初始长度
+        /// 每个约束(四面体)的初始体积
         /// </summary>
-        public NativeFloatList m_restLenList = new NativeFloatList();
+        public NativeFloatList m_restVolumeList = new NativeFloatList();
         /// <summary>
         /// 约束柔度
         /// </summary>
         public NativeFloatList m_complianceList = new NativeFloatList();
 
-        private NativeArray<int2> m_edges;
-        private NativeArray<float> m_restLens;
+        private NativeArray<int4> m_tets;
+        private NativeArray<float> m_restVolumes;
         private NativeArray<float> m_compliances;
 
-        public StretchConstrainGroup(ISolver solver) : base(ConstrainType.Stretch, solver)
+        public VolumeConstrainGroup(ISolver solver) : base(ConstrainType.Volume, solver)
         {
             
         }
 
         private void OnConstrainCountChanged()
         {
-            m_edges = m_edgeList.AsNativeArray<int2>();
-            m_restLens = m_restLenList.AsNativeArray<float>();
+            m_tets = m_tetList.AsNativeArray<int4>();
+            m_restVolumes = m_restVolumeList.AsNativeArray<float>();
             m_compliances = m_complianceList.AsNativeArray<float>();
         }
 
-        public void AddConstrain(VectorInt2 edge, float restLen,float compliance)
+        public void AddConstrain(VectorInt4 tet, float restVolume,float compliance)
         {
-            m_edgeList.Add(edge);
-            m_restLenList.Add(restLen);
+            m_tetList.Add(tet);
+            m_restVolumeList.Add(restVolume);
             m_complianceList.Add(compliance);
             m_constrainCount++;
 
@@ -48,8 +48,8 @@ namespace bluebean.UGFramework.Physics
 
         public override JobHandle Apply(JobHandle inputDeps, float substepTime)
         {
-            var job = new StretchConstrainApplyJob() {
-                m_edges = this.m_edgeList.AsNativeArray<int2>(),
+            var job = new VolumeConstrainApplyJob() {
+                m_tets = m_tets,
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,
                 m_counts = this.m_solver.PositionConstraintCounts,
@@ -59,10 +59,10 @@ namespace bluebean.UGFramework.Physics
 
         public override JobHandle Solve(JobHandle inputDeps, float substepTime)
         {
-            var job = new StretchConstrainSolveJob() {
-                m_edges = this.m_edgeList.AsNativeArray<int2>(),
-                m_restLen = this.m_restLenList.AsNativeArray<float>(),
-                m_compliances = this.m_complianceList.AsNativeArray<float>(),
+            var job = new VolumeConstrainSolveJob() {
+                m_tets = this.m_tets,
+                m_restVolumes = this.m_restVolumes,
+                m_compliances = this.m_compliances,
                 m_invMasses = this.m_solver.InvMasses,
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,

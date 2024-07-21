@@ -163,6 +163,9 @@ MonoBehaviour:
   m_collideCompliance: 0
   m_g: {x: 0, y: -9.8, z: 0}
   m_actors: []
+  m_positions:
+    serializedContents: []
+    m_AlignBytes: 16
 --- !u!4 &9926467
 Transform:
   m_ObjectHideFlags: 0
@@ -431,8 +434,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 725602589}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.2396696, y: -0.053563606, z: 0.013178139, w: 0.9692862}
-  m_LocalPosition: {x: -3.2090359, y: 5.621075, z: 4.942745}
+  m_LocalRotation: {x: 0.020535467, y: 0.97018075, z: -0.22450633, w: 0.0890193}
+  m_LocalPosition: {x: -4.466972, y: 6.6635723, z: 16.109554}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7484,6 +7487,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_actorId: 0
+  m_particleIndicesInSolver: 
   m_meshFilter: {fileID: 0}
   m_mesh: {fileID: 0}
 --- !u!1660057539 &9223372036854775807

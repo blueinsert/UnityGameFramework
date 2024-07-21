@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Physics
 {
+    /*
     public class CollideConstrain : ConstrainBase
     {
         public float m_collideCompliance = 0.0f;
@@ -38,5 +39,5 @@ namespace bluebean.UGFramework.Physics
             }
         }
     }
-
+    */
 }
