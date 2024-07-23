@@ -1,49 +1,28 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace bluebean.UGFramework
 {
-    public class Utility
+    public static class Utility
     {
-        public static string GetCurrentTargetPlatform()
+        
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int PureSign(this float val)
         {
-            string platform = "";
-            if (string.IsNullOrEmpty(platform))
-            {
-                if (!Application.isEditor)
-                {
-                    switch (Application.platform)
-                    {
-                        case RuntimePlatform.Android:
-                            platform = "Android";
-                            break;
-                        case RuntimePlatform.IPhonePlayer:
-                            platform = "iOS";
-                            break;
-                        case RuntimePlatform.OSXPlayer:
-                            platform = "StandaloneOSXIntel";
-                            break;
-                        case RuntimePlatform.WindowsPlayer:
-                            if (IntPtr.Size == 8)
-                                platform = "StandaloneWindows64";
-                            else
-                                platform = "StandaloneWindows";
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                else
-                {
-#if UNITY_EDITOR
-                    platform = UnityEditor.EditorUserBuildSettings.activeBuildTarget.ToString();
-#endif
-                }
-            }
-            return platform;
+            return ((0 <= val) ? 1 : 0) - ((val < 0) ? 1 : 0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Swap<T>(ref T lhs, ref T rhs)
+        {
+            T temp = lhs;
+            lhs = rhs;
+            rhs = temp;
         }
     }
 }

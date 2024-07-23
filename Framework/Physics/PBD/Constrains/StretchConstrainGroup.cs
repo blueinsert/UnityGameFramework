@@ -55,7 +55,7 @@ namespace bluebean.UGFramework.Physics
                 m_counts = this.m_solver.PositionConstraintCounts,
                 m_particleProperties = this.m_solver.ParticleProperties,
             };
-            return job.Schedule(m_constrainCount, 4, inputDeps);
+            return job.Schedule(m_constrainCount, 32, inputDeps);
         }
 
         public override JobHandle Solve(JobHandle inputDeps, float substepTime)
@@ -68,9 +68,10 @@ namespace bluebean.UGFramework.Physics
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,
                 m_counts = this.m_solver.PositionConstraintCounts,
+                m_gradients = this.m_solver.Gradients,
                 m_deltaTimeSqr = substepTime*substepTime,
             };
-            return job.Schedule(m_constrainCount, 4, inputDeps);
+            return job.Schedule(m_constrainCount, 32, inputDeps);
         }
     }
 }

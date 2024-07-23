@@ -87,7 +87,7 @@ namespace bluebean.UGFramework.Asset
 
         protected string GetAssetBundleManifestBundleName()
         {
-            return Utility.GetCurrentTargetPlatform();
+            return SystemUtility.GetCurrentTargetPlatform();
         }
 
         private bool LoadingBundleData()

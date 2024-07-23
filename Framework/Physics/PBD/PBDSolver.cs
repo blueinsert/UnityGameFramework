@@ -175,7 +175,7 @@ namespace bluebean.UGFramework.Physics
                     this.m_positionList[index] = pos;
                     this.m_externalForceList[index] = Vector4.zero;
                     this.m_velList[index] = Vector4.zero;
-                    this.m_invMassList[index] = 1;
+                    this.m_invMassList[index] = actor.GetParticleInvMass(i);
                     this.m_positionDeltaList[index] = Vector4.zero;
                     this.m_gradientList[index] = Vector4.zero;
                     this.m_positionConstraintCountList[index] = 0;
@@ -188,6 +188,7 @@ namespace bluebean.UGFramework.Physics
                         this.m_propertyList[index] = Vector4.zero;
                     }
                 }
+                Debug.Log("AddActor Finish");
             }
         }
 
@@ -245,16 +246,11 @@ namespace bluebean.UGFramework.Physics
             };
             handle = predictPositionsJob.Schedule(ParticlePositions.Count(), 4, handle);
             
-            for (int i = 1; i < (int)ConstrainType.Max; i++)
+            for (int i = 2; i < (int)ConstrainType.Max; i++)
             {
                 var constrain = m_constrains[i];
                 handle = constrain.Solve(handle, m_dtSubStep);
-            }
-            
-            for (int i = 1; i < (int)ConstrainType.Max; i++)
-            {
-                var constrain = m_constrains[i];
-                handle = constrain.Apply(handle, m_dtSubStep);
+                //handle = constrain.Apply(handle, m_dtSubStep);
             }
             
             handle.Complete();

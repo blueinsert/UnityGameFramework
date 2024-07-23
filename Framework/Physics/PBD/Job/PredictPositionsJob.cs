@@ -14,7 +14,6 @@ struct PredictPositionsJob : IJobParallelFor
     [ReadOnly] public NativeArray<float4> m_externalForces;
     [ReadOnly] public NativeArray<float> m_inverseMasses;
     [ReadOnly] public NativeArray<float4> m_particleProperties;
-    //[NativeDisableParallelForRestriction] public NativeArray<float4> m_previousPositions;
     [ReadOnly] public float4 m_gravity;
     [ReadOnly] public float m_deltaTime;
 

@@ -174,6 +174,7 @@ namespace bluebean.UGFramework.Physics
                 var globalIndex = m_particleIndicesInSolver[i];
                 m_x[i] = m_solver.GetParticlePosition(globalIndex);
             }
+            Debug.Log($"m_x[0] {m_x[0]}");
             m_mesh.vertices = m_x;
             m_mesh.RecalculateNormals();
         }
@@ -186,6 +187,11 @@ namespace bluebean.UGFramework.Physics
         public override Vector3 GetParticleInitPosition(int particleIndex)
         {
             return m_tetMesh.GetParticlePos(particleIndex);
+        }
+
+        public override float GetParticleInvMass(int particleIndex)
+        {
+            return m_tetMesh.m_invMass[particleIndex];
         }
     }
 }

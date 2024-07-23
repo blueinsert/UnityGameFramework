@@ -22,6 +22,8 @@ namespace bluebean.UGFramework.Physics
 
         public abstract Vector3 GetParticleInitPosition(int particleIndex);
 
+        public abstract float GetParticleInvMass(int particleIndex);
+
         public virtual void Initialize()
         {
             m_solver = GetComponentInParent<ISolver>();
