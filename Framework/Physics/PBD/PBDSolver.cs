@@ -250,7 +250,7 @@ namespace bluebean.UGFramework.Physics
             {
                 var constrain = m_constrains[i];
                 handle = constrain.Solve(handle, m_dtSubStep);
-                //handle = constrain.Apply(handle, m_dtSubStep);
+                handle = constrain.Apply(handle, m_dtSubStep);
             }
             
             handle.Complete();

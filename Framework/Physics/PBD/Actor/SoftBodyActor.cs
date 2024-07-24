@@ -174,7 +174,7 @@ namespace bluebean.UGFramework.Physics
                 var globalIndex = m_particleIndicesInSolver[i];
                 m_x[i] = m_solver.GetParticlePosition(globalIndex);
             }
-            Debug.Log($"m_x[0] {m_x[0]}");
+            //Debug.Log($"m_x[0] {m_x[0]}");
             m_mesh.vertices = m_x;
             m_mesh.RecalculateNormals();
         }

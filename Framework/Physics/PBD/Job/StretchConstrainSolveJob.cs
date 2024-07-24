@@ -9,7 +9,7 @@ using Unity.Burst;
 
 namespace bluebean.UGFramework.Physics
 {
-    //[BurstCompile]
+    [BurstCompile]
     public struct StretchConstrainSolveJob : IJobParallelFor
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace bluebean.UGFramework.Physics
         /// <summary>
         /// 约束柔度
         /// </summary>
-        public NativeArray<float> m_compliances;
+        [ReadOnly] public NativeArray<float> m_compliances;
         /// <summary>
         /// 粒子位置数组
         /// </summary>
@@ -32,23 +32,12 @@ namespace bluebean.UGFramework.Physics
         /// 粒子质量
         /// </summary>
         [ReadOnly] public NativeArray<float> m_invMasses;
-        /// <summary>
-        /// 本次约束求解产生的位置梯度
-        /// </summary>
-        //[NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] 
-        public NativeArray<float4> m_gradients;
-        /// <summary>
-        /// 本次约束求解产生的位置变化
-        /// </summary>
-        //[NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] 
-        public NativeArray<float4> m_deltas;
-        /// <summary>
-        /// 每个顶点被累计次数
-        /// </summary>
-        //[NativeDisableContainerSafetyRestriction][NativeDisableParallelForRestriction] 
-        public NativeArray<int> m_counts;
 
         [ReadOnly] public float m_deltaTimeSqr;
+
+        [NativeDisableContainerSafetyRestriction]
+        [NativeDisableParallelForRestriction]
+        public NativeArray<float4> m_positionDeltasPerConstrain;
 
         public void Execute(int index)
         {
@@ -70,22 +59,14 @@ namespace bluebean.UGFramework.Physics
                 var inv_mass_j = m_invMasses[j];
                 float C = len - l_e;
                 float w = inv_mass_i + inv_mass_j;
-                var s = -C / (w + alpha + PhysicsUtil.epsilon);
+                var s = -C / (w + alpha);
                 var delta1 = -grads * s * inv_mass_i;
                 var delta2 = grads * s * inv_mass_j;
-                if(float.IsNaN(delta1.x))
-                {
-                    int k = -1;
-                    Debug.LogError($"nan StretchConstrainSolveJob {index}");
-                }
-                if (C != 0)
-                {
-                    m_deltas[i] += delta1;
-                    m_counts[i]++;
-                    m_deltas[j] += delta2;
-                    m_counts[j]++;
-                }
-                
+
+                var startIndex = index * 2;
+                m_positionDeltasPerConstrain[startIndex] = delta1;
+                m_positionDeltasPerConstrain[startIndex + 1] = delta2;
+
             }
         }
     }
