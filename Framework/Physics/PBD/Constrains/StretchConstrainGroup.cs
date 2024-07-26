@@ -54,6 +54,7 @@ namespace bluebean.UGFramework.Physics
 
         public override JobHandle Apply(JobHandle inputDeps, float substepTime)
         {
+            /*
             var sumJob = new StretchConstrainSummarizeJob()
             {
                 m_edges = this.m_edges,
@@ -61,8 +62,17 @@ namespace bluebean.UGFramework.Physics
                 m_deltas = this.m_solver.PositionDeltas,
                 m_counts = this.m_solver.PositionConstraintCounts,
             };
-            //sumJob.Schedule().Complete();
-            inputDeps = sumJob.Schedule(m_constrainCount, 32, inputDeps);
+            */
+            //inputDeps = sumJob.Schedule(m_constrainCount, 32, inputDeps);
+
+            var sumJobSe = new StretchConstrainSummarizeJobSequential(){
+                m_edges = this.m_edges,
+                m_positionDeltasPerConstrain = this.m_positionDeltasPerConstrain,
+                m_deltas = this.m_solver.PositionDeltas,
+                m_counts = this.m_solver.PositionConstraintCounts,
+            };
+            //sumJobSe.Schedule(inputDeps).Complete();
+            inputDeps = sumJobSe.Schedule(inputDeps);
             var job = new PositionDeltaApplyJob() {
                 m_positions = this.m_solver.ParticlePositions,
                 m_deltas = this.m_solver.PositionDeltas,
@@ -83,6 +93,7 @@ namespace bluebean.UGFramework.Physics
                 m_deltaTimeSqr = substepTime*substepTime,
 
                 m_positionDeltasPerConstrain = this.m_positionDeltasPerConstrain,
+                m_compliance = this.m_solver.StretchConstrainCompliance,
             };
             return job.Schedule(m_constrainCount, 32, inputDeps);
         }

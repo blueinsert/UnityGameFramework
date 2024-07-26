@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace bluebean.UGFramework.Physics
@@ -9,6 +10,20 @@ namespace bluebean.UGFramework.Physics
         public const float epsilon = 0.0000001f;
         public const float sqrt3 = 1.73205080f;
         public const float sqrt2 = 1.41421356f;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int PureSign(this float val)
+        {
+            return ((0 <= val) ? 1 : 0) - ((val < 0) ? 1 : 0);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void Swap<T>(ref T lhs, ref T rhs)
+        {
+            T temp = lhs;
+            lhs = rhs;
+            rhs = temp;
+        }
 
         public static Bounds Transform(this Bounds b, Matrix4x4 m)
         {

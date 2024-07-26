@@ -37,8 +37,7 @@ namespace bluebean.UGFramework.Physics
 
 
         public void Execute(int index)
-        {
-           
+        {         
             if (m_counts[index] > 0)
             {
                 float4 property = m_particleProperties[index];

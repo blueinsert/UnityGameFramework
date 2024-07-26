@@ -1,3 +1,4 @@
+using bluebean.UGFramework.Geometry;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -292,5 +293,86 @@ namespace bluebean.UGFramework.Physics
 
             return normals;
         }
+
+        public static Vector3 ProjectPointLine(Vector3 point, Vector3 lineStart, Vector3 lineEnd, out float mu, bool clampToSegment = true)
+        {
+            Vector3 ap = point - lineStart;
+            Vector3 ab = lineEnd - lineStart;
+
+            mu = Vector3.Dot(ap, ab) / Vector3.Dot(ab, ab);
+
+            if (clampToSegment)
+                mu = Mathf.Clamp01(mu);
+
+            return lineStart + ab * mu;
+        }
+
+        #region –Œ◊¥œ‡Ωª≤‚ ‘
+        static Vector3 GetPlaneNormalVector(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            Vector3 v1 = p2 - p1;
+            Vector3 v2 = p3 - p1;
+            Vector3 normal = Vector3.Cross(v1, v2);
+            normal.Normalize();
+            return normal;
+        }
+
+        public static bool IsCuboidCuboidOverlap(CuboidShape c1, CuboidShape c2)
+        {
+            Vector3[] normalVectors = new Vector3[6];
+            normalVectors[0] = GetPlaneNormalVector(c1[0], c1[3], c1[2]);
+            normalVectors[1] = GetPlaneNormalVector(c1[0], c1[4], c1[7]);
+            normalVectors[2] = GetPlaneNormalVector(c1[3], c1[2], c1[6]);
+
+            normalVectors[3] = GetPlaneNormalVector(c2[0], c2[3], c2[2]);
+            normalVectors[4] = GetPlaneNormalVector(c2[0], c2[4], c2[7]);
+            normalVectors[5] = GetPlaneNormalVector(c2[3], c2[2], c2[6]);
+
+            bool isIntersect = true;
+            for (int i = 0; i < 6; i++)
+            {
+                Vector3 normal = normalVectors[i];
+                //
+                float c1Max = float.MinValue;
+                float c1Min = float.MaxValue;
+                foreach (var v in c1)
+                {
+                    float projectValue = Vector3.Dot(v, normal);
+                    if (projectValue > c1Max)
+                    {
+                        c1Max = projectValue;
+                    }
+                    if (projectValue < c1Min)
+                    {
+                        c1Min = projectValue;
+                    }
+                }
+                //
+                float c2Max = float.MinValue;
+                float c2Min = float.MaxValue;
+                foreach (var v in c2)
+                {
+                    float projectValue = Vector3.Dot(v, normal);
+                    if (projectValue > c2Max)
+                    {
+                        c2Max = projectValue;
+                    }
+                    if (projectValue < c2Min)
+                    {
+                        c2Min = projectValue;
+                    }
+                }
+                //
+                if (c2Min > c1Max || c1Min > c2Max)
+                {
+                    isIntersect = false;
+                    //Debug.Log("c1Min:" + c1Min + " c1Max" + c1Max + " c2Min:" + c2Min + " c2Max" + c2Max);
+                    break;
+                }
+
+            }//for six separate axis
+            return isIntersect;
+        }
+        #endregion
     }
 }
