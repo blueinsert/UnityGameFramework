@@ -1,4 +1,6 @@
+using bluebean.UGFramework.DataStruct;
 using bluebean.UGFramework.Geometry;
+using bluebean.UGFramework.Physics;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +9,8 @@ namespace bluebean.UGFramework.Geometry
 {
     public static class GeometryUtil
     {
+        public const float Epsilon = 0.001f;
+
         public static void NearestPointOnTri(in Vector3 p1,
                                                     in Vector3 p2,
                                                     in Vector3 p3,
@@ -372,6 +376,19 @@ namespace bluebean.UGFramework.Geometry
 
             }//for six separate axis
             return isIntersect;
+        }
+
+        public static bool IsSphereMeshOverlap(SphereShape sphere,MeshShape meshShape)
+        {
+            var s2m = meshShape.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
+            var center = s2m.MultiplyPoint3x4(sphere.m_position);
+            var radius = s2m.lossyScale[0] * sphere.m_radius;
+            var dist = BIH.DistanceToSurface(meshShape.m_bihNodes, meshShape.m_triangles, meshShape.m_vertices, meshShape.m_normals, center);
+            if (dist <= radius - Epsilon)
+            {
+                return true;
+            }
+            return false;
         }
         #endregion
     }

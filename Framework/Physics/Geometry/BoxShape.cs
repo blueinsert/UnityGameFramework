@@ -1,3 +1,4 @@
+using bluebean.UGFramework.DataStruct;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,14 +8,19 @@ namespace bluebean.UGFramework.Geometry
 {
     public struct BoxShape : IEnumerable<Vector3>
     {
-        public Vector3 m_p0;
-        public Vector3 m_p1;
-        public Vector3 m_p2;
-        public Vector3 m_p3;
-        public Vector3 m_p4;
-        public Vector3 m_p5;
-        public Vector3 m_p6;
-        public Vector3 m_p7;
+
+        public static Vector4[] s_localPoints = new Vector4[8] {
+            new Vector4(-0.5f, -0.5f, -0.5f, 1),
+            new Vector4(-0.5f, -0.5f, 0.5f, 1),
+            new Vector4(0.5f, -0.5f, 0.5f, 1),
+            new Vector4(0.5f, -0.5f, -0.5f, 1),
+            new Vector4(-0.5f, 0.5f, -0.5f, 1),
+            new Vector4(-0.5f, 0.5f, 0.5f, 1),
+            new Vector4(0.5f, 0.5f, 0.5f, 1),
+            new Vector4(0.5f, 0.5f, -0.5f, 1)
+        };
+
+        public AffineTransform m_local2WorldTransform;
 
         //public CuboidShape() { }
 
@@ -29,49 +35,26 @@ namespace bluebean.UGFramework.Geometry
                 }
                 switch (index)
                 {
-                    case 0: return m_p0;
-                    case 1: return m_p1;
-                    case 2: return m_p2;
-                    case 3: return m_p3;
-                    case 4: return m_p4;
-                    case 5: return m_p5;
-                    case 6: return m_p6;
-                    case 7: return m_p7;
+                    case 0: return s_localPoints[0];
+                    case 1: return s_localPoints[1];
+                    case 2: return s_localPoints[2];
+                    case 3: return s_localPoints[3];
+                    case 4: return s_localPoints[4];
+                    case 5: return s_localPoints[5];
+                    case 6: return s_localPoints[6];
+                    case 7: return s_localPoints[7];
                 }
                 return Vector3.zero;
-            }
-            set
-            {
-                // 检查索引是否越界  
-                if (index < 0 || index > 7)
-                {
-                    throw new IndexOutOfRangeException("Index was out of range.");
-                }
-                switch (index)
-                {
-                    case 0: m_p0 = value; break;
-                    case 1: m_p1 = value; break;
-                    case 2: m_p2 = value; break;
-                    case 3: m_p3 = value; break;
-                    case 4: m_p4 = value; break;
-                    case 5: m_p5 = value; break;
-                    case 6: m_p6 = value; break;
-                    case 7: m_p7 = value; break;
-                }
             }
         }
 
 
         public IEnumerator<Vector3> GetEnumerator()
         {
-            yield return m_p0;
-            yield return m_p1;
-            yield return m_p2;
-            yield return m_p3;
-            yield return m_p4;
-            yield return m_p5;
-            yield return m_p6;
-            yield return m_p7;
+            for(int i=0;i< s_localPoints.Length; i++)
+            {
+                yield return s_localPoints[i];
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()

@@ -4,20 +4,11 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
+    [ExecuteInEditMode]
     public class BoxShapeDesc : MonoBehaviour
     {
-        static Vector4[] s_points = new Vector4[8] {
-            new Vector4(-0.5f, -0.5f, -0.5f, 1),
-            new Vector4(-0.5f, -0.5f, 0.5f, 1),
-            new Vector4(0.5f, -0.5f, 0.5f, 1),
-            new Vector4(0.5f, -0.5f, -0.5f, 1),
-            new Vector4(-0.5f, 0.5f, -0.5f, 1),
-            new Vector4(-0.5f, 0.5f, 0.5f, 1),
-            new Vector4(0.5f, 0.5f, 0.5f, 1),
-            new Vector4(0.5f, 0.5f, -0.5f, 1)
-        };
 
-        private BoxShape m_shape;
+        private BoxShape m_shape = new BoxShape();
 
         public Vector3 m_position = Vector3.zero;
         public Vector3 m_rotation = Vector3.zero;
@@ -29,6 +20,13 @@ namespace bluebean.UGFramework.Geometry
         public void Awake()
         {
             //m_parent = this.transform;
+        }
+
+        private void Update()
+        {
+#if UNITY_EDITOR
+            UpdateShapeIfNeeded();
+#endif
         }
 
         public Matrix4x4 TransformMatrix
@@ -45,48 +43,44 @@ namespace bluebean.UGFramework.Geometry
 
         public void UpdateShapeIfNeeded()
         {
-            m_shape = GetShape();
-        }
+            var local2World = TransformMatrix;
 
-        public BoxShape GetShape()
-        {
-            BoxShape shape = new BoxShape();
-            Matrix4x4 m = TransformMatrix;
-            for (int i = 0; i < s_points.Length; i++)
-            {
-                Vector3 p = m * s_points[i];
-                shape[i] = p;
-            }
-            return shape;
+            m_shape.m_local2WorldTransform.FromMatrix(local2World);
         }
 
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
             Gizmos.color = Color.blue;
-            var shape = GetShape();
-            DrawCuboid(shape);
+            var prev = Gizmos.matrix;
+            var shape = m_shape;
+            var local2WorldMatrix = Matrix4x4.TRS(shape.m_local2WorldTransform.translation, shape.m_local2WorldTransform.rotation, shape.m_local2WorldTransform.scale);
+            Gizmos.matrix = local2WorldMatrix;
+           
+            DrawCuboid(m_shape);
+
+            Gizmos.matrix = prev;
         }
 
-        void DrawCuboid(BoxShape points)
+        void DrawCuboid(BoxShape box)
         {
             //下表面
-            Mesh quad = CreateQuad(points[3], points[2], points[1], points[0]);
+            Mesh quad = CreateQuad(box[3], box[2], box[1], box[0]);
             Gizmos.DrawMesh(quad);
             //上表面
-            quad = CreateQuad(points[4], points[5], points[6], points[7]);
+            quad = CreateQuad(box[4], box[5], box[6], box[7]);
             Gizmos.DrawMesh(quad);
             //左表面
-            quad = CreateQuad(points[5], points[4], points[0], points[1]);
+            quad = CreateQuad(box[5], box[4], box[0], box[1]);
             Gizmos.DrawMesh(quad);
             //右表面
-            quad = CreateQuad(points[7], points[6], points[2], points[3]);
+            quad = CreateQuad(box[7], box[6], box[2], box[3]);
             Gizmos.DrawMesh(quad);
             //前表面
-            quad = CreateQuad(points[4], points[7], points[3], points[0]);
+            quad = CreateQuad(box[4], box[7], box[3], box[0]);
             Gizmos.DrawMesh(quad);
             //后表面
-            quad = CreateQuad(points[6], points[5], points[1], points[2]);
+            quad = CreateQuad(box[6], box[5], box[1], box[2]);
             Gizmos.DrawMesh(quad);
         }
 

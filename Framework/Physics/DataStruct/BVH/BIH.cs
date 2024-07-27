@@ -14,7 +14,7 @@ namespace bluebean.UGFramework.DataStruct
     {
         public static BIHNode[] Build(ref IBounded[] elements, int maxDepth = 10, float maxOverlap = 0.7f)
         {
-            List<BIHNode> nodes = new List<BIHNode>{ new BIHNode(0, elements.Length) };
+            List<BIHNode> nodes = new List<BIHNode> { new BIHNode(0, elements.Length) };
 
             // auxiliar variables to keep track of current tree depth:
             int depth = 0;
@@ -127,7 +127,16 @@ namespace bluebean.UGFramework.DataStruct
             return j;
         }
 
-        public static float DistanceToSurface(Triangle[] triangles,
+        /// <summary>
+        /// 遍历查找
+        /// </summary>
+        /// <param name="triangles"></param>
+        /// <param name="vertices"></param>
+        /// <param name="normals"></param>
+        /// <param name="node"></param>
+        /// <param name="point"></param>
+        /// <returns></returns>
+        private static float DistanceToSurface(Triangle[] triangles,
                                               Vector3[] vertices,
                                               Vector3[] normals,
                                               in BIHNode node,
@@ -143,11 +152,11 @@ namespace bluebean.UGFramework.DataStruct
             {
                 Triangle t = triangles[i];
 
-                    GeometryUtil.NearestPointOnTri(in vertices[t.i1],
-                                               in vertices[t.i2],
-                                               in vertices[t.i3],
-                                               in point,
-                                               out pointOnTri);
+                GeometryUtil.NearestPointOnTri(in vertices[t.i1],
+                                           in vertices[t.i2],
+                                           in vertices[t.i3],
+                                           in point,
+                                           out pointOnTri);
 
                 Vector3 pointToTri = point - pointOnTri;
                 float sqrDistance = pointToTri.sqrMagnitude;
@@ -173,20 +182,7 @@ namespace bluebean.UGFramework.DataStruct
             return Mathf.Sqrt(minDistance) * sign;
         }
 
-        public static float DistanceToSurface(BIHNode[] nodes,
-                                              Triangle[] triangles,
-                                              Vector3[] vertices,
-                                              Vector3[] normals,
-                                              in Vector3 point)
-        {
-
-            if (nodes.Length > 0)
-                return DistanceToSurface(nodes, triangles, vertices, normals, in nodes[0], in point);
-
-            return float.MaxValue;
-        }
-
-        public static float DistanceToSurface(BIHNode[] nodes,
+        private static float DistanceToSurface(BIHNode[] nodes,
                                               Triangle[] triangles,
                                               Vector3[] vertices,
                                               Vector3[] normals,
@@ -277,6 +273,19 @@ namespace bluebean.UGFramework.DataStruct
             }
             else
                 return DistanceToSurface(triangles, vertices, normals, in node, point);
+        }
+
+        public static float DistanceToSurface(BIHNode[] nodes,
+                                      Triangle[] triangles,
+                                      Vector3[] vertices,
+                                      Vector3[] normals,
+                                      in Vector3 point)
+        {
+
+            if (nodes.Length > 0)
+                return DistanceToSurface(nodes, triangles, vertices, normals, in nodes[0], in point);
+
+            return float.MaxValue;
         }
 
     }

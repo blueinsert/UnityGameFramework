@@ -9,6 +9,6 @@ namespace bluebean.UGFramework.Geometry
     {
         public float m_radius;
         public Vector3 m_position;
-        public AffineTransform m_local2World;
+        public AffineTransform m_local2WorldTransform;
     }
 }

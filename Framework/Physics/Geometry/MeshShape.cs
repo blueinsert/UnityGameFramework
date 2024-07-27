@@ -9,11 +9,16 @@ namespace bluebean.UGFramework.Geometry
 {
     public struct MeshShape
     {
-        public NativeBIHNodeList m_bihNodes;
-        public NativeTriangleList m_triangles;
-        public NativeVector3List m_vertices;
+        public BIHNode[] m_bihNodes;
+        public Triangle[] m_triangles;
+        public Vector3[] m_vertices;
+        public Vector3[] m_normals;
 
-        public void Build(Matrix4x4 local2World, Mesh source)
+        public AffineTransform m_local2WorldTransform;
+
+        public bool m_hasCreated;
+
+        public void Build(Mesh source)
         {
             var sourceTris = source.triangles;
             var sourceVertices = source.vertices;
@@ -25,24 +30,21 @@ namespace bluebean.UGFramework.Geometry
                 int t1 = sourceTris[i * 3];
                 int t2 = sourceTris[i * 3 + 1];
                 int t3 = sourceTris[i * 3 + 2];
-                var p1 = local2World.MultiplyPoint3x4(sourceVertices[t1]);
-                var p2 = local2World.MultiplyPoint3x4(sourceVertices[t2]);
-                var p3 = local2World.MultiplyPoint3x4(sourceVertices[t3]);
+                var p1 = sourceVertices[t1];// local2World.MultiplyPoint3x4(sourceVertices[t1]);
+                var p2 = sourceVertices[t2];//local2World.MultiplyPoint3x4(sourceVertices[t2]);
+                var p3 = sourceVertices[t3];// local2World.MultiplyPoint3x4(sourceVertices[t3]);
                 t[i] = new Triangle(t1, t2, t3, p1, p2, p3);
             }
             var sourceBih = BIH.Build(ref t);
 
             Triangle[] tris = Array.ConvertAll(t, x => (Triangle)x);
 
-            if (m_bihNodes != null) m_bihNodes.Dispose();
-            if (m_triangles != null) m_triangles.Dispose();
-            if (m_vertices != null) m_vertices.Dispose();
-            m_bihNodes = new NativeBIHNodeList();
-            m_triangles = new NativeTriangleList();
-            m_vertices = new NativeVector3List();
-            m_bihNodes.AddRange(sourceBih);
-            m_triangles.AddRange(tris);
-            m_vertices.AddRange(sourceVertices);
+            m_bihNodes = sourceBih;
+            m_triangles = tris;
+            m_vertices = sourceVertices;
+            m_normals = source.normals;
+
+            m_hasCreated = true;
         }
     }
 }

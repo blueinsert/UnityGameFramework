@@ -123,6 +123,52 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &119539692
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 119539694}
+  - component: {fileID: 119539693}
+  m_Layer: 0
+  m_Name: OverlapTest
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &119539693
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 119539692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec088df3c19edab468ded56763d2e37d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_sphere: {fileID: 1513621657}
+  m_mesh: {fileID: 585627099}
+--- !u!4 &119539694
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 119539692}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.390826, y: 0.12774849, z: -0.67698956}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &585627093
 GameObject:
   m_ObjectHideFlags: 0
@@ -12419,6 +12465,7 @@ MonoBehaviour:
   m_position: {x: 0.95, y: -0.51, z: -0.55}
   m_radius: 1.42
   m_isDrawGizmons: 1
+  m_gizmonsColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!4 &1513621658
 Transform:
   m_ObjectHideFlags: 0
@@ -12428,7 +12475,7 @@ Transform:
   m_GameObject: {fileID: 1513621656}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -4.56, y: 10.1, z: -9.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12775,3 +12822,4 @@ SceneRoots:
   - {fileID: 585627098}
   - {fileID: 1513621658}
   - {fileID: 1584571335}
+  - {fileID: 119539694}

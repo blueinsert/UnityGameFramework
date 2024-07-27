@@ -30,5 +30,24 @@ namespace bluebean.UGFramework.DataStruct
                 translation[2] = 0;
             }
         }
+
+        public void FromMatrix(Matrix4x4 matrix, bool is2D = false)
+        {
+            translation = matrix.GetPosition();
+            rotation = matrix.rotation;
+            scale = matrix.lossyScale;
+
+            if (is2D)
+            {
+                translation[2] = 0;
+            }
+        }
+
+        public Matrix4x4 ToMatrix()
+        {
+            var local2WorldMatrix = Matrix4x4.TRS(translation,rotation, scale);
+            return local2WorldMatrix;
+        }
+
     }
 }

@@ -12,6 +12,16 @@ namespace bluebean.UGFramework.Geometry
     [RequireComponent(typeof(MeshFilter))]
     public class MeshShapeDesc : MonoBehaviour
     {
+        public MeshShape Shape { 
+            get {
+                if (!m_shape.m_hasCreated)
+                {
+                    UpdateShapeIfNeeded();
+                }
+                return m_shape; 
+            }
+        }
+
         private MeshShape m_shape = new MeshShape();
         public bool m_isDrawGizmons = false;
         [Range(0,10)]
@@ -38,21 +48,33 @@ namespace bluebean.UGFramework.Geometry
         {
             MeshFilter meshFilter = GetComponent<MeshFilter>();
 
-            m_shape.Build(this.transform.localToWorldMatrix, meshFilter.sharedMesh);
+            m_shape.Build(meshFilter.sharedMesh);
+            m_shape.m_local2WorldTransform.FromTransform(this.transform);
         }
+
+        #region Gizmos
 
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
+            if (!m_shape.m_hasCreated)
+            {
+                UpdateShapeIfNeeded();
+            }
             var shape = m_shape;
-            if (shape.m_bihNodes!=null && shape.m_bihNodes.isCreated)
+            var prev = Gizmos.matrix;
+            var local2WorldMatrix = Matrix4x4.TRS(shape.m_local2WorldTransform.translation, shape.m_local2WorldTransform.rotation, shape.m_local2WorldTransform.scale);
+            Gizmos.matrix = local2WorldMatrix;
+            if (shape.m_bihNodes!=null)
             {
                 int depth = 0;
-                TraverseBIHNodeList(shape.m_triangles, shape.m_bihNodes, 0, ref depth);
+                if(m_drawDepth > 0)
+                    TraverseBIHNodeList(shape.m_triangles, shape.m_bihNodes, 0, ref depth);
             }
+            Gizmos.matrix = prev;
         }
 
-        void TraverseBIHNodeList(NativeTriangleList tris, NativeBIHNodeList nodes, int index,ref int depth)
+        void TraverseBIHNodeList(Triangle[] tris, BIHNode[] nodes, int index,ref int depth)
         {
             var node = nodes[index];
             int start = node.start;
@@ -119,5 +141,7 @@ namespace bluebean.UGFramework.Geometry
             mesh.RecalculateNormals();
             return mesh;
         }
+
+        #endregion
     }
 }
