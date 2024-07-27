@@ -92,6 +92,7 @@ namespace bluebean.UGFramework.Physics
                 mesh.vertices = this.m_pos;
                 mesh.triangles = this.m_tetSurfaceTriIds;
                 mesh.RecalculateNormals();
+                mesh.RecalculateBounds();
                 meshFilter.sharedMesh = mesh;
                 if (oldMesh != null)
                 {

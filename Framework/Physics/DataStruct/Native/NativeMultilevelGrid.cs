@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using System.Runtime.CompilerServices;
 //using NativeList = Unity.Collections.NativeList<>;
 
-namespace bluebean.UGFramework.DataStruct
+namespace bluebean.UGFramework.DataStruct.Native
 {
 
     /**

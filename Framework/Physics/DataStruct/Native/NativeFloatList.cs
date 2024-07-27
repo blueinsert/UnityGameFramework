@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using UnityEngine;
 
-namespace bluebean.UGFramework.DataStruct
+namespace bluebean.UGFramework.DataStruct.Native
 {
     [Serializable]
     public class NativeFloatList : NativeList<float>

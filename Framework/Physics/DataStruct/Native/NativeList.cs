@@ -6,7 +6,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using System.Collections;
 
-namespace bluebean.UGFramework.DataStruct
+namespace bluebean.UGFramework.DataStruct.Native
 {
     public unsafe abstract class NativeList<T> : IEnumerable<T>, IDisposable, ISerializationCallbackReceiver where T : struct
     {

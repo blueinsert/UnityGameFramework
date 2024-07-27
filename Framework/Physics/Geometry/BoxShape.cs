@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public struct CuboidShape : IEnumerable<Vector3>
+    public struct BoxShape : IEnumerable<Vector3>
     {
         public Vector3 m_p0;
         public Vector3 m_p1;

@@ -1,4 +1,5 @@
 using bluebean.UGFramework.DataStruct;
+using bluebean.UGFramework.DataStruct.Native;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;

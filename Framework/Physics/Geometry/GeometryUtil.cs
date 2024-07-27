@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace bluebean.UGFramework.Physics
+namespace bluebean.UGFramework.Geometry
 {
     public static class GeometryUtil
     {
@@ -317,7 +317,7 @@ namespace bluebean.UGFramework.Physics
             return normal;
         }
 
-        public static bool IsCuboidCuboidOverlap(CuboidShape c1, CuboidShape c2)
+        public static bool IsCuboidCuboidOverlap(BoxShape c1, BoxShape c2)
         {
             Vector3[] normalVectors = new Vector3[6];
             normalVectors[0] = GetPlaneNormalVector(c1[0], c1[3], c1[2]);

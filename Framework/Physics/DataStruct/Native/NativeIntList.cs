@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace bluebean.UGFramework.DataStruct
+namespace bluebean.UGFramework.DataStruct.Native
 {
     [Serializable]
     public class NativeIntList : NativeList<int>

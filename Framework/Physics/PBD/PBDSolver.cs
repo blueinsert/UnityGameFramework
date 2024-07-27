@@ -1,4 +1,5 @@
 using bluebean.UGFramework.DataStruct;
+using bluebean.UGFramework.DataStruct.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;

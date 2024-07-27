@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public class CuboidShapeDesc : MonoBehaviour
+    public class BoxShapeDesc : MonoBehaviour
     {
         static Vector4[] s_points = new Vector4[8] {
             new Vector4(-0.5f, -0.5f, -0.5f, 1),
@@ -16,6 +16,8 @@ namespace bluebean.UGFramework.Geometry
             new Vector4(0.5f, 0.5f, 0.5f, 1),
             new Vector4(0.5f, 0.5f, -0.5f, 1)
         };
+
+        private BoxShape m_shape;
 
         public Vector3 m_position = Vector3.zero;
         public Vector3 m_rotation = Vector3.zero;
@@ -41,9 +43,14 @@ namespace bluebean.UGFramework.Geometry
             }
         }
 
-        public CuboidShape GetShape()
+        public void UpdateShapeIfNeeded()
         {
-            CuboidShape shape = new CuboidShape();
+            m_shape = GetShape();
+        }
+
+        public BoxShape GetShape()
+        {
+            BoxShape shape = new BoxShape();
             Matrix4x4 m = TransformMatrix;
             for (int i = 0; i < s_points.Length; i++)
             {
@@ -61,7 +68,7 @@ namespace bluebean.UGFramework.Geometry
             DrawCuboid(shape);
         }
 
-        void DrawCuboid(CuboidShape points)
+        void DrawCuboid(BoxShape points)
         {
             //ÏÂ±íÃæ
             Mesh quad = CreateQuad(points[3], points[2], points[1], points[0]);
