@@ -8,14 +8,14 @@ using bluebean.UGFramework.Asset;
 
 namespace bluebean.UGFramework
 {
-    public class SceneTree : ITickable
+    public class SceneTreeManager : ITickable
     {
-        private SceneTree() { }
-        private static SceneTree m_instance;
-        public static SceneTree Instance { get { return m_instance; } }
-        public static SceneTree CreateInstance()
+        private SceneTreeManager() { }
+        private static SceneTreeManager m_instance;
+        public static SceneTreeManager Instance { get { return m_instance; } }
+        public static SceneTreeManager CreateInstance()
         {
-            m_instance = new SceneTree();
+            m_instance = new SceneTreeManager();
             return m_instance;
         }
 
@@ -97,9 +97,9 @@ namespace bluebean.UGFramework
                 Debug.LogError("the ClearCamera is not found");
                 return false;
             }
-            AddOverlayerCamera(UILayerRoot2Canvas.worldCamera);
-            AddOverlayerCamera(UILayerRoot1Canvas.worldCamera);
-            SetOverlayerCameraStack4Base(m_clearCamera);
+            //AddOverlayerCamera(UILayerRoot2Canvas.worldCamera);
+            //AddOverlayerCamera(UILayerRoot1Canvas.worldCamera);
+            //SetOverlayerCameraStack4Base(m_clearCamera);
             return true;
         }
 
@@ -211,13 +211,14 @@ namespace bluebean.UGFramework
             else if (layer is ThreeDSceneLayer)
             {
                 layer.transform.SetParent(ThreeDSceneRoot.transform, false);
-                SetOverlayerCameraStack4Base(layer.LayerCamera);
+                //SetOverlayerCameraStack4Base(layer.LayerCamera);
             }
             layer.gameObject.SetActive(true);
             
             SetDirty();
         }
 
+        /*
         private void AddOverlayerCamera(Camera camera)
         {
             var cameraData = camera.GetUniversalAdditionalCameraData();
@@ -247,6 +248,7 @@ namespace bluebean.UGFramework
                 }
             }
         }
+        */
 
         private void SetDirty()
         {

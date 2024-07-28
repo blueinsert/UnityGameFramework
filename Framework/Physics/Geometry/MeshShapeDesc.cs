@@ -62,6 +62,7 @@ namespace bluebean.UGFramework.Geometry
                 UpdateShapeIfNeeded();
             }
             var shape = m_shape;
+            GizmonsUtil.DrawAabb(shape.WorldAabb, Color.green);
             var prev = Gizmos.matrix;
             var local2WorldMatrix = Matrix4x4.TRS(shape.m_local2WorldTransform.translation, shape.m_local2WorldTransform.rotation, shape.m_local2WorldTransform.scale);
             Gizmos.matrix = local2WorldMatrix;
@@ -71,6 +72,7 @@ namespace bluebean.UGFramework.Geometry
                 if(m_drawDepth > 0)
                     TraverseBIHNodeList(shape.m_triangles, shape.m_bihNodes, 0, ref depth);
             }
+            GizmonsUtil.DrawAabb(shape.Aabb, Color.blue);
             Gizmos.matrix = prev;
         }
 

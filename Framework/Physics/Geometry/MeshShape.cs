@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace bluebean.UGFramework.Geometry
 {
@@ -15,6 +16,44 @@ namespace bluebean.UGFramework.Geometry
         public Vector3[] m_normals;
 
         public AffineTransform m_local2WorldTransform;
+        public Aabb Aabb { 
+            get {
+                if (m_bihNodes.Length > 0)
+                {
+                    return m_bihNodes[0].m_aabb;
+                }
+                return new Aabb();
+            } 
+        }
+
+        public Aabb m_worldAabb;
+        private Vector3[] m_temp;
+        
+        public Aabb WorldAabb
+        {
+            get
+            {
+                if (m_temp == null)
+                {
+                    m_temp = new Vector3[8];
+                }
+                this.Aabb.GetCorners(m_temp);
+                int count = 0;
+                var matrix = m_local2WorldTransform.ToMatrix();
+                foreach (var p in m_temp)
+                {
+                    var wp = matrix.MultiplyPoint3x4(p);
+                    if (count == 0)
+                    {
+                        m_worldAabb.min = wp;
+                        m_worldAabb.max = wp;
+                    }
+                    m_worldAabb.Encapsulate(wp);
+                    count++;
+                }
+                return m_worldAabb;
+            }
+        }
 
         public bool m_hasCreated;
 

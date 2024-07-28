@@ -39,6 +39,7 @@ namespace bluebean.UGFramework.DataStruct
                     Aabb b = elements[start].GetBounds();
                     for (int k = start + 1; k <= end; ++k)
                         b.Encapsulate(elements[k].GetBounds());
+                    node.m_aabb = b;
 
                     // determine split axis (longest one):
                     Vector3 size = b.size;

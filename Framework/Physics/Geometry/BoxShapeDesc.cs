@@ -7,6 +7,7 @@ namespace bluebean.UGFramework.Geometry
     [ExecuteInEditMode]
     public class BoxShapeDesc : MonoBehaviour
     {
+        public BoxShape Shape { get { return m_shape; } }
 
         private BoxShape m_shape = new BoxShape();
 
@@ -19,7 +20,7 @@ namespace bluebean.UGFramework.Geometry
 
         public void Awake()
         {
-            //m_parent = this.transform;
+            UpdateShapeIfNeeded();
         }
 
         private void Update()
@@ -51,6 +52,10 @@ namespace bluebean.UGFramework.Geometry
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
+            UpdateShapeIfNeeded();
+
+            GizmonsUtil.DrawAabb(m_shape.WorldAabb, Color.green);
+
             Gizmos.color = Color.blue;
             var prev = Gizmos.matrix;
             var shape = m_shape;

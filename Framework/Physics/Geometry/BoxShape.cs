@@ -1,4 +1,5 @@
 using bluebean.UGFramework.DataStruct;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -21,6 +22,29 @@ namespace bluebean.UGFramework.Geometry
         };
 
         public AffineTransform m_local2WorldTransform;
+
+        public Aabb m_worldAabb;
+
+        public Aabb WorldAabb { 
+            get
+            {
+                int count = 0;
+                var matrix = m_local2WorldTransform.ToMatrix();
+                foreach(var lp in this)
+                {
+                    var wp = matrix.MultiplyPoint3x4(lp);
+                    if (count == 0)
+                    {
+                        m_worldAabb.min = wp;
+                        m_worldAabb.max = wp;
+                    }
+                    else
+                        m_worldAabb.Encapsulate(wp);
+                    count++;
+                }
+                return m_worldAabb;
+            } 
+        }
 
         //public CuboidShape() { }
 

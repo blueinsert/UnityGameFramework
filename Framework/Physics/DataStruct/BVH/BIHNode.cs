@@ -16,6 +16,7 @@ namespace bluebean.UGFramework.DataStruct
         //public float max;          /**< maximum split plane*/
         public float leftSplitPlane;          /**< minimum split plane*/
         public float rightSplitPlane;          /**< maximum split plane*/
+        public Aabb m_aabb;
 
         public BIHNode(int start, int count)
         {
@@ -25,6 +26,7 @@ namespace bluebean.UGFramework.DataStruct
             axis = 0;
             leftSplitPlane = float.MinValue;
             rightSplitPlane = float.MaxValue;
+            m_aabb = new Aabb();
         }
     }
 }

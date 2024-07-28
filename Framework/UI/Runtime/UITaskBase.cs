@@ -140,7 +140,7 @@ namespace bluebean.UGFramework.UI
             {
                 if (layer != null && layer.m_state == SceneLayerState.Using)
                 {
-                    SceneTree.Instance.PopLayer(layer);
+                    SceneTreeManager.Instance.PopLayer(layer);
                 }
             }
         }
@@ -153,7 +153,7 @@ namespace bluebean.UGFramework.UI
             foreach (var layer in m_layerDic.Values)
             {
                 if (layer != null)
-                    SceneTree.Instance.FreeLayer(layer);
+                    SceneTreeManager.Instance.FreeLayer(layer);
             }
         }
 
@@ -216,7 +216,7 @@ namespace bluebean.UGFramework.UI
         {
             StartUITaskUpdatePipeline(intent);
             if (MainLayer != null && MainLayer.State == SceneLayerState.Unused)
-                SceneTree.Instance.PushLayer(MainLayer);
+                SceneTreeManager.Instance.PushLayer(MainLayer);
             return true;
         }
 
@@ -360,7 +360,7 @@ namespace bluebean.UGFramework.UI
             int loadCompleteCount = 0;
             foreach (var layerDesc in toLoadLayerDescs)
             {
-                SceneTree.Instance.CreateLayer(layerDesc.IsUILayer?SceneLayerType.UI:SceneLayerType.ThreeD, layerDesc.LayerName, layerDesc.AssetPath, (layer) =>
+                SceneTreeManager.Instance.CreateLayer(layerDesc.IsUILayer?SceneLayerType.UI:SceneLayerType.ThreeD, layerDesc.LayerName, layerDesc.AssetPath, (layer) =>
                 {
                     m_layerDic.Add(layerDesc.LayerName, layer);
                     loadCompleteCount++;
@@ -463,7 +463,7 @@ namespace bluebean.UGFramework.UI
             if (m_updateCtx.m_isInit)
             {
                 foreach(var layer in m_layerDic.Values)
-                    SceneTree.Instance.PushLayer(layer);
+                    SceneTreeManager.Instance.PushLayer(layer);
             }
             if (m_viewControllerArray == null)
             {

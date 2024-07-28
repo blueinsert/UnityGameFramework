@@ -1,6 +1,4 @@
 using bluebean.UGFramework.DataStruct;
-using bluebean.UGFramework.Geometry;
-using bluebean.UGFramework.Physics;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -321,7 +319,13 @@ namespace bluebean.UGFramework.Geometry
             return normal;
         }
 
-        public static bool IsCuboidCuboidOverlap(BoxShape c1, BoxShape c2)
+        /// <summary>
+        /// 检测box之间是否相交
+        /// </summary>
+        /// <param name="c1"></param>
+        /// <param name="c2"></param>
+        /// <returns></returns>
+        public static bool IsBoxBoxOverlap(BoxShape c1, BoxShape c2)
         {
             Vector3[] normalVectors = new Vector3[6];
             normalVectors[0] = GetPlaneNormalVector(c1[0], c1[3], c1[2]);
@@ -378,8 +382,80 @@ namespace bluebean.UGFramework.Geometry
             return isIntersect;
         }
 
+        /// <summary>
+        /// 检查球与box是否相交
+        /// </summary>
+        /// <param name="sphere"></param>
+        /// <param name="box"></param>
+        /// <returns></returns>
+        public static bool IsSphereBoxOverlap(SphereShape sphere,BoxShape box)
+        {
+            var sphereAabb = sphere.WorldAabb;
+            var boxAabb = box.WorldAabb;
+            if(!sphereAabb.IntersectsAabb(boxAabb))
+            {
+                return false;
+            }
+            //转为到box的本地坐标系进行计算
+            var s2b = box.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
+            var center = s2b.MultiplyPoint3x4(sphere.m_position);
+            var radius = s2b.lossyScale[0] * sphere.m_radius;
+
+            //获取点到box的最小距离
+            var halfSize = new Vector3(0.5f, 0.5f, 0.5f);
+            var vec = new Vector3(Mathf.Abs(center.x), Mathf.Abs(center.y), Mathf.Abs(center.z));
+            var distVec = vec - halfSize;
+            float minDist = float.MaxValue;
+            if(distVec.x<0 && distVec.y<0 && distVec.z < 0)
+            {
+                //点在内部
+                for(int i = 0; i < 3; i++)
+                {
+                    if (distVec[i] < minDist)
+                    {
+                        minDist = distVec[i];
+                    }
+                }
+            }
+            else
+            {
+                float distSqr = 0;
+                for (int i = 0; i < 3; i++)
+                {
+                    if (distVec[i] > 0)
+                    {
+                        distSqr += distVec[i] * distVec[i];
+                    }
+                }
+                minDist = Mathf.Sqrt(distSqr);
+            }
+            if (minDist < 0)
+                return true;
+            else
+            {
+                if (minDist <= radius - Epsilon)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 检测球与网格是否相交
+        /// </summary>
+        /// <param name="sphere"></param>
+        /// <param name="meshShape"></param>
+        /// <returns></returns>
         public static bool IsSphereMeshOverlap(SphereShape sphere,MeshShape meshShape)
         {
+            var aabbSphere = sphere.WorldAabb;
+            var aabbMesh = meshShape.WorldAabb;
+            if (!aabbSphere.IntersectsAabb(aabbMesh))
+            {
+                return false;
+            }
+
             var s2m = meshShape.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
             var center = s2m.MultiplyPoint3x4(sphere.m_position);
             var radius = s2m.lossyScale[0] * sphere.m_radius;

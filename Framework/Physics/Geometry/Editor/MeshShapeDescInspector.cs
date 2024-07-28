@@ -1,4 +1,5 @@
 using bluebean.UGFramework.UI;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -23,7 +24,9 @@ namespace bluebean.UGFramework.Geometry
             base.OnInspectorGUI();
             if (GUILayout.Button("UpdateShape"))
             {
+                var start = DateTime.Now;
                 m_meshShapeDesc.UpdateShapeIfNeeded();
+                Debug.Log($"MeshShapeUpdate:consume {(DateTime.Now - start).TotalMilliseconds}ms");
             } 
         }
     }

@@ -7,21 +7,47 @@ namespace bluebean.UGFramework.Anim
     [RequireComponent(typeof(MeshFilter))]
     public class MeshProceduralAnim : MonoBehaviour
     {
-        [HideInInspector]
-        public Vector3[] X;
+        //[HideInInspector]
+        public Vector3[] m_verticles;
+        //[HideInInspector]
+        public int[] m_triangles;
+        //[HideInInspector]
+        public Vector2[] m_uvs;
+
         //[HideInInspector]
         [Header("产生的mesh的大小")]
         public float m_meshSize = 1.5f;
         [HideInInspector]
+        [SerializeField]
         public float m_normalizedTime = 0;
         [HideInInspector]
         public bool m_isDirty = false;
 
+        private Mesh m_mesh = null;
         private RangeRemap m_remapComp = null;
+
+        private void Awake()
+        {
+            Debug.Log("MeshProceduralAnim:Awake");
+            SetNormalizedTime(0);
+            AnimSample();
+        }
+
+        private void OnEnable()
+        {
+            Debug.Log("MeshProceduralAnim:OnEnable");
+        }
 
         // Start is called before the first frame update
         void Start()
         {
+            Debug.Log("MeshProceduralAnim:Start");
+        }
+
+        private void OnValidate()
+        {
+            Debug.Log("MeshProceduralAnim:OnValidate");
+            AnimSample();
         }
 
         // Update is called once per frame
@@ -52,44 +78,52 @@ namespace bluebean.UGFramework.Anim
 
         public void GenerateMesh()
         {
-            Mesh mesh = new Mesh();
-
             //Resize the mesh.
             int n = 42;
-            X = new Vector3[n * n];
-            Vector2[] UV = new Vector2[n * n];
-            int[] T = new int[(n - 1) * (n - 1) * 6];
+            m_verticles = new Vector3[n * n];
+            m_uvs = new Vector2[n * n];
+            m_triangles = new int[(n - 1) * (n - 1) * 6];
             for (int j = 0; j < n; j++)
                 for (int i = 0; i < n; i++)
                 {
-                    X[j * n + i] = new Vector3(m_meshSize / 2 - m_meshSize * i / (n - 1), 0, m_meshSize / 2 - m_meshSize * j / (n - 1));
-                    UV[j * n + i] = new Vector3(i / (n - 1.0f), j / (n - 1.0f));
+                    m_verticles[j * n + i] = new Vector3(m_meshSize / 2 - m_meshSize * i / (n - 1), 0, m_meshSize / 2 - m_meshSize * j / (n - 1));
+                    m_uvs[j * n + i] = new Vector3(i / (n - 1.0f), j / (n - 1.0f));
                 }
             int t = 0;
             for (int j = 0; j < n - 1; j++)
                 for (int i = 0; i < n - 1; i++)
                 {
-                    T[t * 6 + 0] = j * n + i;
-                    T[t * 6 + 1] = (j + 1) * n + i + 1;
-                    T[t * 6 + 2] = j * n + i + 1;
-                    T[t * 6 + 3] = j * n + i;
-                    T[t * 6 + 4] = (j + 1) * n + i;
-                    T[t * 6 + 5] = (j + 1) * n + i + 1;
+                    m_triangles[t * 6 + 0] = j * n + i;
+                    m_triangles[t * 6 + 1] = (j + 1) * n + i + 1;
+                    m_triangles[t * 6 + 2] = j * n + i + 1;
+                    m_triangles[t * 6 + 3] = j * n + i;
+                    m_triangles[t * 6 + 4] = (j + 1) * n + i;
+                    m_triangles[t * 6 + 5] = (j + 1) * n + i + 1;
                     t++;
                 }
-            mesh.vertices = X;
-            mesh.triangles = T;
-            mesh.uv = UV;
-            mesh.RecalculateNormals();
-
-            GetComponent<MeshFilter>().sharedMesh = mesh;
-        }
+            if (m_mesh != null)
+                return;
+           
+        } 
 
         private void SyncMesh()
         {
-            Mesh mesh = GetComponent<MeshFilter>().mesh;
-            mesh.vertices = X;
-            mesh.RecalculateNormals();
+            if(m_mesh == null)
+            {
+                m_mesh = GetComponent<MeshFilter>().sharedMesh;
+                if(m_mesh == null)
+                {
+                    m_mesh = new Mesh();
+                    GetComponent<MeshFilter>().sharedMesh = m_mesh;
+                }
+            }
+            m_mesh.vertices = m_verticles;
+            m_mesh.triangles = m_triangles;
+            m_mesh.uv = m_uvs;
+            m_mesh.RecalculateNormals();
+            m_mesh.RecalculateBounds();
+            m_mesh.name = "GeneratedProceduralMesh";
+            
         }
 
         public virtual float ProceduralSample(Vector2 coordinate, float normalizedTime)
@@ -102,12 +136,13 @@ namespace bluebean.UGFramework.Anim
 
         public void AnimSample()
         {
-            for (int i = 0; i < X.Length; i++)
+            //Debug.Log("MeshProceduralAnim:AnimSample");
+            for (int i = 0; i < m_verticles.Length; i++)
             {
-                var p = X[i];
+                var p = m_verticles[i];
                 Vector2 coordinate = new Vector2(p.x, p.z);
                 var value = ProceduralSample(coordinate, m_normalizedTime);
-                X[i].y = value;
+                m_verticles[i].y = value;
             }
             SyncMesh();
         }

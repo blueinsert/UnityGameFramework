@@ -38,7 +38,7 @@ namespace bluebean.UGFramework
         private AssetLoader m_assetLoader;
         private TaskManager m_taskManager;
         private UIManager m_uiManager;
-        private SceneTree m_sceneTree;
+        private SceneTreeManager m_sceneTree;
 
         public ConfigDataLoader ConfigDataLoader { get { return m_configDataLoader; } }
 
@@ -46,7 +46,7 @@ namespace bluebean.UGFramework
         public TaskManager TaskManager { get { return m_taskManager; } }
         public AssetLoader ResourceManager { get { return m_assetLoader; } }
         public UIManager UIManager { get { return m_uiManager; } }
-        public SceneTree SceneTree { get { return m_sceneTree; } }
+        public SceneTreeManager SceneTree { get { return m_sceneTree; } }
 
         public bool Intialize()
         {
@@ -63,7 +63,7 @@ namespace bluebean.UGFramework
             }
             m_taskManager = TaskManager.CreateInstance();
             m_uiManager = UIManager.CreateInstance();
-            m_sceneTree = SceneTree.CreateInstance();
+            m_sceneTree = SceneTreeManager.CreateInstance();
             if (!m_sceneTree.Initialize())
             {
                 Debug.LogError("SceneTree Initialize Failed");
