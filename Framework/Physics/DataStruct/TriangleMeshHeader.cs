@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
 namespace bluebean.UGFramework.DataStruct
 {
     public struct TriangleMeshHeader //we need to use the header in the backend, so it must be a struct.
