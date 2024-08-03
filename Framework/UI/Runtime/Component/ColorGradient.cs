@@ -41,10 +41,10 @@ namespace bluebean.UGFramework.UI
         public Color m_startColor = Color.white;
         public Color m_endColor = Color.black;
 
-        protected override void OnValidate()
-        {
-            CollectColorSpans(true);
-        }
+        //protected override void OnValidate()
+        //{
+        //    CollectColorSpans(true);
+        //}
 
         private void CollectColorSpans(bool force = false)
         {
