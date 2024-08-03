@@ -486,7 +486,7 @@ namespace bluebean.UGFramework.Build
             CopyAssetBundels2StreamingAssets();
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
-            string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
+            string[] scenes = { "Assets/GameProject/Resources/AppEntry.unity" };
             BuildOptions o = BuildOptions.StrictMode;
             var result = BuildPipeline.BuildPlayer(scenes, outputDir, BuildTarget.StandaloneWindows, o);
             if (result!=null)
@@ -507,7 +507,7 @@ namespace bluebean.UGFramework.Build
             CopyAssetBundels2StreamingAssets();
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.AndroidApkName);
-            string[] scenes = { "Assets/GameProject/Resources/GameEntry.unity" };
+            string[] scenes = { "Assets/GameProject/Resources/AppEntry.unity" };
             BuildOptions o = BuildOptions.StrictMode;
             try
             {
