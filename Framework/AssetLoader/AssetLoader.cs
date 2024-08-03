@@ -90,7 +90,7 @@ namespace bluebean.UGFramework.Asset
         #region 外部接口
         public IEnumerator LoadAsset<T>(string path, Action<string, T> onEnd) where T : UnityEngine.Object
         {
-            GameClientSetting clientSetting = GameClientSetting.Instance;
+            AppClientSetting clientSetting = AppClientSetting.Instance;
             UnityEngine.Object[] assets = null;
             bool hasSubAsset = false;
             string mainAssetPath, subAssetPath = "";

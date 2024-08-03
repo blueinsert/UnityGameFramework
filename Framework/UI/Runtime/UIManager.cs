@@ -200,7 +200,7 @@ namespace bluebean.UGFramework.UI
 
         private void RecoverUITasks(List<UIIntent> intents, Action<bool> onFinish)
         {
-            GameManager.Instance.RunCoroutine(Co_RecoverUITasks(intents, onFinish));
+            AppManager.Instance.RunCoroutine(Co_RecoverUITasks(intents, onFinish));
         }
 
         private IEnumerator Co_RecoverUITasks(List<UIIntent> intents, Action<bool> onFinish)

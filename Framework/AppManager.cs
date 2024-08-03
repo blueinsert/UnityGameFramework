@@ -8,19 +8,19 @@ using bluebean.UGFramework.UI;
 
 namespace bluebean.UGFramework
 {
-    public class GameManager : ITickable
+    public class AppManager : ITickable
     {
-        private GameManager() { }
-        public static GameManager m_instance;
-        public static GameManager Instance {
+        private AppManager() { }
+        public static AppManager m_instance;
+        public static AppManager Instance {
             get {
                 return m_instance;
             }
         }
 
-        public static GameManager CreateAndInitializeInstance()
+        public static AppManager CreateAndInitializeInstance()
         {
-            var gameManager = new GameManager();
+            var gameManager = new AppManager();
             if (gameManager.Intialize())
             {
                 m_instance = gameManager;
@@ -50,7 +50,7 @@ namespace bluebean.UGFramework
 
         public bool Intialize()
         {
-            var clientSetting = GameClientSetting.Instance;
+            var clientSetting = AppClientSetting.Instance;
             var logMgr = LogManager.CreateLogManager();
             logMgr.Initlize(true, true, UnityEngine.Application.persistentDataPath, clientSetting.m_logConfg.LogPrefix);
             m_configDataLoader = ConfigDataLoader.CreateInstance();

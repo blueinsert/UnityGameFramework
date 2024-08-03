@@ -13,10 +13,10 @@ namespace bluebean.UGFramework
         public string LogPrefix = "Log_";
     }
 
-    public class GameClientSetting : ScriptableObjectSingleton<GameClientSetting>
+    public class AppClientSetting : ScriptableObjectSingleton<AppClientSetting>
     {
         //反射引用
-        private static string AssetPath = "Assets/GameProject/Resources/GameClientSettingAsset.asset";
+        private static string AssetPath = "Assets/GameProject/Resources/AppClientSettingAsset.asset";
 
         [SerializeField]
         public ConfigDataSetting m_configDataSetting;

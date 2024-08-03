@@ -27,7 +27,7 @@ namespace bluebean.UGFramework.ConfigData
         {
             get
             {
-                return GameClientSetting.Instance.m_configDataSetting;
+                return AppClientSetting.Instance.m_configDataSetting;
             }
         }
 
