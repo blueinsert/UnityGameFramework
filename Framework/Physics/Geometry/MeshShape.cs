@@ -55,8 +55,6 @@ namespace bluebean.UGFramework.Geometry
             }
         }
 
-        public bool m_hasCreated;
-
         public void Build(Mesh source)
         {
             var sourceTris = source.triangles;
@@ -82,8 +80,6 @@ namespace bluebean.UGFramework.Geometry
             m_triangles = tris;
             m_vertices = sourceVertices;
             m_normals = source.normals;
-
-            m_hasCreated = true;
         }
     }
 }

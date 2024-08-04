@@ -12321,13 +12321,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 585627093}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.16392866, y: 0, z: 0, w: 0.98647225}
-  m_LocalPosition: {x: -3.63, y: 6.16, z: -3.47}
+  m_LocalRotation: {x: 0.35331157, y: 0, z: 0, w: 0.9355057}
+  m_LocalPosition: {x: -6.61, y: 6.16, z: -3.47}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: -18.87, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 41.38, y: 0, z: 0}
 --- !u!114 &585627099
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12463,7 +12463,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77eae18c8be4dfb439b6d6c19dcbfb2c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_position: {x: 2.02, y: -0.51, z: -0.55}
+  m_position: {x: 1.74, y: -0.51, z: -0.55}
   m_radius: 1.42
   m_isDrawGizmons: 1
   m_gizmonsColor: {r: 0, g: 0, b: 1, a: 1}
@@ -12476,7 +12476,7 @@ Transform:
   m_GameObject: {fileID: 1513621656}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.42}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -12525,7 +12525,7 @@ Transform:
   m_GameObject: {fileID: 1584571333}
   serializedVersion: 2
   m_LocalRotation: {x: -0.24582571, y: -0.34618744, z: -0.094511345, w: 0.90043974}
-  m_LocalPosition: {x: 1.92, y: -0.83, z: 2.679}
+  m_LocalPosition: {x: 0.89, y: -0.83, z: 7.47}
   m_LocalScale: {x: 1.06, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

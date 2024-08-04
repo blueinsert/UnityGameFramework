@@ -3,15 +3,12 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
+    [ExecuteInEditMode]
     [RequireComponent(typeof(MeshFilter))]
-    public class MeshShapeDesc : MonoBehaviour
+    public class MeshShapeDesc : ShapeDescBase
     {
         public MeshShape Shape { 
             get {
-                if (!m_shape.m_hasCreated)
-                {
-                    UpdateShapeIfNeeded();
-                }
                 return m_shape; 
             }
         }
@@ -21,24 +18,18 @@ namespace bluebean.UGFramework.Geometry
         [Range(0,10)]
         public int m_drawDepth = 3;
 
+        private void OnValidate()
+        {
+            SetDirty();
+        }
+
         // Start is called before the first frame update
         void Start()
         {
-            UpdateShapeIfNeeded();
+            SetDirty();
         }
 
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
-        private void OnEnable()
-        {
-            UpdateShapeIfNeeded();
-        }
-
-        public void UpdateShapeIfNeeded()
+        public override void UpdateShapeImpl()
         {
             MeshFilter meshFilter = GetComponent<MeshFilter>();
 
@@ -51,10 +42,7 @@ namespace bluebean.UGFramework.Geometry
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
-            if (!m_shape.m_hasCreated)
-            {
-                UpdateShapeIfNeeded();
-            }
+           
             var shape = m_shape;
             GizmonsUtil.DrawAabb(shape.WorldAabb, Color.green);
             var prev = Gizmos.matrix;
@@ -137,6 +125,8 @@ namespace bluebean.UGFramework.Geometry
             mesh.RecalculateNormals();
             return mesh;
         }
+
+       
 
         #endregion
     }

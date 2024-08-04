@@ -5,7 +5,7 @@ using UnityEngine;
 namespace bluebean.UGFramework.Geometry
 {
     [ExecuteInEditMode]
-    public class BoxShapeDesc : MonoBehaviour
+    public class BoxShapeDesc : ShapeDescBase
     {
         public BoxShape Shape { get { return m_shape; } }
 
@@ -17,18 +17,6 @@ namespace bluebean.UGFramework.Geometry
 
         public Transform m_parent;
         public bool m_isDrawGizmons = false;
-
-        public void Awake()
-        {
-            UpdateShapeIfNeeded();
-        }
-
-        private void Update()
-        {
-#if UNITY_EDITOR
-            UpdateShapeIfNeeded();
-#endif
-        }
 
         public Matrix4x4 TransformMatrix
         {
@@ -42,17 +30,36 @@ namespace bluebean.UGFramework.Geometry
             }
         }
 
-        public void UpdateShapeIfNeeded()
+        private void OnValidate()
+        {
+            SetDirty();
+        }
+
+        void Start()
+        {
+            SetDirty();
+        }
+
+        void Update()
+        {
+            UpdateShapeIfNeeded();
+        }
+
+        public override void UpdateShapeImpl()
         {
             var local2World = TransformMatrix;
 
             m_shape.m_local2WorldTransform.FromMatrix(local2World);
         }
 
+        public override bool IsNeededUpdate()
+        {
+            return base.IsNeededUpdate();
+        }
+
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
-            UpdateShapeIfNeeded();
 
             GizmonsUtil.DrawAabb(m_shape.WorldAabb, Color.green);
 
@@ -101,5 +108,7 @@ namespace bluebean.UGFramework.Geometry
             mesh.RecalculateNormals();
             return mesh;
         }
+
+        
     }
 }
