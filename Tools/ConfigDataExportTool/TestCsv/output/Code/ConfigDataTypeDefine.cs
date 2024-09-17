@@ -12,6 +12,663 @@ namespace bluebean.ConfigData {
     
     
     [System.SerializableAttribute()]
+    public class ConfigDataConst {
+        
+        private int m_ID;
+        
+        private string m_TypeEnum;
+        
+        private int m_Value;
+        
+        private string m_StrValue;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string TypeEnum {
+            get {
+                return this.m_TypeEnum;
+            }
+            set {
+                this.m_TypeEnum = value;
+            }
+        }
+        
+        public int Value {
+            get {
+                return this.m_Value;
+            }
+            set {
+                this.m_Value = value;
+            }
+        }
+        
+        public string StrValue {
+            get {
+                return this.m_StrValue;
+            }
+            set {
+                this.m_StrValue = value;
+            }
+        }
+    }
+    
+    public enum ConfigDataConstType {
+        
+EndoscopeRadius = 1,
+FourdirLength = 2,
+FourdirJointCount = 3,
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataCourse {
+        
+        private int m_ID;
+        
+        private string m_Name;
+        
+        private string m_Desc;
+        
+        private int m_CourseType;
+        
+        private int m_Param1;
+        
+        private int m_Param2;
+        
+        private int m_Param3;
+        
+        private int m_EndoscopeConfigID;
+        
+        private string m_ScenePrefab;
+        
+        private int m_ScenePosX;
+        
+        private int m_ScenePosY;
+        
+        private int m_ScenePosZ;
+        
+        private int m_SceneScaleX;
+        
+        private int m_SceneScaleY;
+        
+        private int m_SceneScaleZ;
+        
+        private int m_EndoscopeInitPosX;
+        
+        private int m_EndoscopeInitPosY;
+        
+        private int m_EndoscopeInitPosZ;
+        
+        private int m_EndoscopeInitAngleX;
+        
+        private int m_EndoscopeInitAngleY;
+        
+        private int m_EndoscopeInitAngleZ;
+        
+        private int m_EndoscopeScaleX;
+        
+        private int m_EndoscopeScaleY;
+        
+        private int m_EndoscopeScaleZ;
+        
+        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyPos;
+        
+        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyRotation;
+        
+        private string m_OperateDevicePrefab;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string Name {
+            get {
+                return this.m_Name;
+            }
+            set {
+                this.m_Name = value;
+            }
+        }
+        
+        public string Desc {
+            get {
+                return this.m_Desc;
+            }
+            set {
+                this.m_Desc = value;
+            }
+        }
+        
+        public int CourseType {
+            get {
+                return this.m_CourseType;
+            }
+            set {
+                this.m_CourseType = value;
+            }
+        }
+        
+        public int Param1 {
+            get {
+                return this.m_Param1;
+            }
+            set {
+                this.m_Param1 = value;
+            }
+        }
+        
+        public int Param2 {
+            get {
+                return this.m_Param2;
+            }
+            set {
+                this.m_Param2 = value;
+            }
+        }
+        
+        public int Param3 {
+            get {
+                return this.m_Param3;
+            }
+            set {
+                this.m_Param3 = value;
+            }
+        }
+        
+        public int EndoscopeConfigID {
+            get {
+                return this.m_EndoscopeConfigID;
+            }
+            set {
+                this.m_EndoscopeConfigID = value;
+            }
+        }
+        
+        public string ScenePrefab {
+            get {
+                return this.m_ScenePrefab;
+            }
+            set {
+                this.m_ScenePrefab = value;
+            }
+        }
+        
+        public int ScenePosX {
+            get {
+                return this.m_ScenePosX;
+            }
+            set {
+                this.m_ScenePosX = value;
+            }
+        }
+        
+        public int ScenePosY {
+            get {
+                return this.m_ScenePosY;
+            }
+            set {
+                this.m_ScenePosY = value;
+            }
+        }
+        
+        public int ScenePosZ {
+            get {
+                return this.m_ScenePosZ;
+            }
+            set {
+                this.m_ScenePosZ = value;
+            }
+        }
+        
+        public int SceneScaleX {
+            get {
+                return this.m_SceneScaleX;
+            }
+            set {
+                this.m_SceneScaleX = value;
+            }
+        }
+        
+        public int SceneScaleY {
+            get {
+                return this.m_SceneScaleY;
+            }
+            set {
+                this.m_SceneScaleY = value;
+            }
+        }
+        
+        public int SceneScaleZ {
+            get {
+                return this.m_SceneScaleZ;
+            }
+            set {
+                this.m_SceneScaleZ = value;
+            }
+        }
+        
+        public int EndoscopeInitPosX {
+            get {
+                return this.m_EndoscopeInitPosX;
+            }
+            set {
+                this.m_EndoscopeInitPosX = value;
+            }
+        }
+        
+        public int EndoscopeInitPosY {
+            get {
+                return this.m_EndoscopeInitPosY;
+            }
+            set {
+                this.m_EndoscopeInitPosY = value;
+            }
+        }
+        
+        public int EndoscopeInitPosZ {
+            get {
+                return this.m_EndoscopeInitPosZ;
+            }
+            set {
+                this.m_EndoscopeInitPosZ = value;
+            }
+        }
+        
+        public int EndoscopeInitAngleX {
+            get {
+                return this.m_EndoscopeInitAngleX;
+            }
+            set {
+                this.m_EndoscopeInitAngleX = value;
+            }
+        }
+        
+        public int EndoscopeInitAngleY {
+            get {
+                return this.m_EndoscopeInitAngleY;
+            }
+            set {
+                this.m_EndoscopeInitAngleY = value;
+            }
+        }
+        
+        public int EndoscopeInitAngleZ {
+            get {
+                return this.m_EndoscopeInitAngleZ;
+            }
+            set {
+                this.m_EndoscopeInitAngleZ = value;
+            }
+        }
+        
+        public int EndoscopeScaleX {
+            get {
+                return this.m_EndoscopeScaleX;
+            }
+            set {
+                this.m_EndoscopeScaleX = value;
+            }
+        }
+        
+        public int EndoscopeScaleY {
+            get {
+                return this.m_EndoscopeScaleY;
+            }
+            set {
+                this.m_EndoscopeScaleY = value;
+            }
+        }
+        
+        public int EndoscopeScaleZ {
+            get {
+                return this.m_EndoscopeScaleZ;
+            }
+            set {
+                this.m_EndoscopeScaleZ = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyPos {
+            get {
+                return this.m_OperateDeviceDummyPos;
+            }
+            set {
+                this.m_OperateDeviceDummyPos = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyRotation {
+            get {
+                return this.m_OperateDeviceDummyRotation;
+            }
+            set {
+                this.m_OperateDeviceDummyRotation = value;
+            }
+        }
+        
+        public string OperateDevicePrefab {
+            get {
+                return this.m_OperateDevicePrefab;
+            }
+            set {
+                this.m_OperateDevicePrefab = value;
+            }
+        }
+    }
+    
+    public enum ConfigDataCourseType {
+        
+Inject = 1,
+Biopsy = 2,
+Cutting = 3,
+Inspect = 4,
+Inserting = 5,
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataEndoscope {
+        
+        private int m_ID;
+        
+        private string m_Name;
+        
+        private string m_Desc;
+        
+        private string m_Prefab;
+        
+        private System.Collections.Generic.List<System.Int32> m_CameraDummyPos;
+        
+        private System.Collections.Generic.List<System.Int32> m_CameraDummyRotation;
+        
+        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyPos;
+        
+        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyRotation;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string Name {
+            get {
+                return this.m_Name;
+            }
+            set {
+                this.m_Name = value;
+            }
+        }
+        
+        public string Desc {
+            get {
+                return this.m_Desc;
+            }
+            set {
+                this.m_Desc = value;
+            }
+        }
+        
+        public string Prefab {
+            get {
+                return this.m_Prefab;
+            }
+            set {
+                this.m_Prefab = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> CameraDummyPos {
+            get {
+                return this.m_CameraDummyPos;
+            }
+            set {
+                this.m_CameraDummyPos = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> CameraDummyRotation {
+            get {
+                return this.m_CameraDummyRotation;
+            }
+            set {
+                this.m_CameraDummyRotation = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyPos {
+            get {
+                return this.m_OperateDeviceDummyPos;
+            }
+            set {
+                this.m_OperateDeviceDummyPos = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyRotation {
+            get {
+                return this.m_OperateDeviceDummyRotation;
+            }
+            set {
+                this.m_OperateDeviceDummyRotation = value;
+            }
+        }
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataInsertCourse {
+        
+        private int m_ID;
+        
+        private string m_Name;
+        
+        private string m_Desc;
+        
+        private string m_BubbleUIPrefab;
+        
+        private int m_BubbleSpeed;
+        
+        private int m_ScoreWeight4Time;
+        
+        private int m_ScoreWeight4Accuracy;
+        
+        private System.Collections.Generic.List<System.Int32> m_ScoreRankRange;
+        
+        private System.Collections.Generic.List<System.Int32> m_Params4TimeScore;
+        
+        private System.Collections.Generic.List<System.String> m_Plane1BubbleNodeNames;
+        
+        private System.Collections.Generic.List<System.String> m_Plane2BubbleNodeNames;
+        
+        private System.Collections.Generic.List<System.String> m_Plane3BubbleNodeNames;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string Name {
+            get {
+                return this.m_Name;
+            }
+            set {
+                this.m_Name = value;
+            }
+        }
+        
+        public string Desc {
+            get {
+                return this.m_Desc;
+            }
+            set {
+                this.m_Desc = value;
+            }
+        }
+        
+        public string BubbleUIPrefab {
+            get {
+                return this.m_BubbleUIPrefab;
+            }
+            set {
+                this.m_BubbleUIPrefab = value;
+            }
+        }
+        
+        public int BubbleSpeed {
+            get {
+                return this.m_BubbleSpeed;
+            }
+            set {
+                this.m_BubbleSpeed = value;
+            }
+        }
+        
+        public int ScoreWeight4Time {
+            get {
+                return this.m_ScoreWeight4Time;
+            }
+            set {
+                this.m_ScoreWeight4Time = value;
+            }
+        }
+        
+        public int ScoreWeight4Accuracy {
+            get {
+                return this.m_ScoreWeight4Accuracy;
+            }
+            set {
+                this.m_ScoreWeight4Accuracy = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> ScoreRankRange {
+            get {
+                return this.m_ScoreRankRange;
+            }
+            set {
+                this.m_ScoreRankRange = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.Int32> Params4TimeScore {
+            get {
+                return this.m_Params4TimeScore;
+            }
+            set {
+                this.m_Params4TimeScore = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.String> Plane1BubbleNodeNames {
+            get {
+                return this.m_Plane1BubbleNodeNames;
+            }
+            set {
+                this.m_Plane1BubbleNodeNames = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.String> Plane2BubbleNodeNames {
+            get {
+                return this.m_Plane2BubbleNodeNames;
+            }
+            set {
+                this.m_Plane2BubbleNodeNames = value;
+            }
+        }
+        
+        public System.Collections.Generic.List<System.String> Plane3BubbleNodeNames {
+            get {
+                return this.m_Plane3BubbleNodeNames;
+            }
+            set {
+                this.m_Plane3BubbleNodeNames = value;
+            }
+        }
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataInstruments {
+        
+        private int m_ID;
+        
+        private int m_Type;
+        
+        private string m_Name;
+        
+        private string m_Desc;
+        
+        private string m_Prefab;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public int Type {
+            get {
+                return this.m_Type;
+            }
+            set {
+                this.m_Type = value;
+            }
+        }
+        
+        public string Name {
+            get {
+                return this.m_Name;
+            }
+            set {
+                this.m_Name = value;
+            }
+        }
+        
+        public string Desc {
+            get {
+                return this.m_Desc;
+            }
+            set {
+                this.m_Desc = value;
+            }
+        }
+        
+        public string Prefab {
+            get {
+                return this.m_Prefab;
+            }
+            set {
+                this.m_Prefab = value;
+            }
+        }
+    }
+    
+    public enum ConfigDataInstrumentsType {
+        
+InjectionNeedle = 1,
+    }
+    
+    [System.SerializableAttribute()]
     public class ConfigDataPosition {
         
         private int m_ID;
@@ -144,5 +801,53 @@ namespace bluebean.ConfigData {
         
 FromList = 1,
 SphereRange = 2,
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataSound {
+        
+        private int m_ID;
+        
+        private string m_StrKey;
+        
+        private int m_Volume;
+        
+        private string m_Path;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string StrKey {
+            get {
+                return this.m_StrKey;
+            }
+            set {
+                this.m_StrKey = value;
+            }
+        }
+        
+        public int Volume {
+            get {
+                return this.m_Volume;
+            }
+            set {
+                this.m_Volume = value;
+            }
+        }
+        
+        public string Path {
+            get {
+                return this.m_Path;
+            }
+            set {
+                this.m_Path = value;
+            }
+        }
     }
 }

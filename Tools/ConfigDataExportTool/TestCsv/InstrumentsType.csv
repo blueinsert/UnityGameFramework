@@ -1,0 +1,6 @@
+备注：器械类型,,
+ENUM,InstrumentsType,
+BOTH,BOTH,
+ID,Name,
+编号,枚举名,说明
+1,InjectionNeedle,注射针

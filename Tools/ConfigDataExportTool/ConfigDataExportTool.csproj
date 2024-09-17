@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigDataManagerProcessEnv.cs" />
     <Compile Include="ConfigDataTable.cs" />
     <Compile Include="ConfigDataCodeGenerator.cs" />
     <Compile Include="ConfigDataManager.cs" />
@@ -56,6 +57,7 @@
     <Compile Include="CsvParser.cs" />
     <Compile Include="DataGrid.cs" />
     <Compile Include="Exception\ConfigDataException.cs" />
+    <Compile Include="Exception\StringParseException.cs" />
     <Compile Include="LitJson\IJsonWrapper.cs" />
     <Compile Include="LitJson\JsonData.cs" />
     <Compile Include="LitJson\JsonException.cs" />

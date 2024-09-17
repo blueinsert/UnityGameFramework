@@ -1,0 +1,13 @@
+操作器械表,,,,
+DATA,Instruments,,,
+BOTH,BOTH,BOTH,BOTH,BOTH
+ID,Type,Name,Desc,Prefab
+ID,器械类型,名字,描述,器械预制体
+INT32,INT32,STRING,STRING,STRING
+NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL
+NULL,InstrumentsType.ID,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL
+1,1,default,default,Courses/Course_Common_AB/Endoscope/InjectionNeedlePrefab.prefab

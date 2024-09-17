@@ -20,9 +20,18 @@ namespace bluebean.ConfigDataExportTool
                 return m_instance;
             }
         }
+
         public static void CreateInstance()
         {
             m_instance = new ConfigDataManager();
+        }
+
+        public ConfigDataManagerProcessEnv CurProcessEnv
+        {
+            get
+            {
+                return m_curProcessEnv;
+            }
         }
 
         private Dictionary<string, ConfigDataTable> m_configDataDic = new Dictionary<string, ConfigDataTable>();
@@ -39,7 +48,9 @@ namespace bluebean.ConfigDataExportTool
 
         //private ForeignKeyCheckInfo m_checking = new ForeignKeyCheckInfo();
 
-        ToolConfig m_cfg;
+        private ToolConfig m_cfg;
+
+        private ConfigDataManagerProcessEnv m_curProcessEnv = new ConfigDataManagerProcessEnv();
 
         private void CollectTypeStrToTypeDic()
         {
@@ -437,9 +448,15 @@ namespace bluebean.ConfigDataExportTool
         public object GetValueByStr(string type, string value)
         {
             type = type.ToLower();
-            if (m_valueParserDic.ContainsKey(type))
+            try
             {
-                return m_valueParserDic[type](value);
+                if (m_valueParserDic.ContainsKey(type))
+                {
+                    return m_valueParserDic[type](value);
+                }
+            }catch(Exception e)
+            {
+                throw new StringParseException(value, type);
             }
             return null;
         }
@@ -531,11 +548,18 @@ namespace bluebean.ConfigDataExportTool
             {
                 for (int i = ConfigDataTableConst.DataStartRow; i < dataGrid.Row; i++)
                 {
-                    var data = Activator.CreateInstance(configDataType);
+                    m_curProcessEnv.m_curRowIndex = i;
+
+                   var data = Activator.CreateInstance(configDataType);
                     foreach (var pair in configData.HeadInfo.ColumnInfoDic)
                     {
+                       
                         var columnIndex = pair.Key;
                         var columnInfo = pair.Value;
+
+                        m_curProcessEnv.m_curColumnIndex = columnIndex;
+                        m_curProcessEnv.m_curColumnName = columnInfo.m_name;
+
                         var filedInfo = configDataType.GetField("m_" + columnInfo.m_name, BindingFlags.NonPublic | BindingFlags.Instance);
                         string valueStr = dataGrid.ReadCell(i, columnIndex);
                         var value = GetValueByStrForColumn(columnInfo, valueStr);
@@ -558,6 +582,9 @@ namespace bluebean.ConfigDataExportTool
             {
                 return;
             }
+            m_curProcessEnv.Clear();
+            m_curProcessEnv.m_curFilePath = configData.FilePath;
+            m_curProcessEnv.m_curTableName = configData.TableName;
             var listObj = GetValueForConfigData(configData);
             byte[] data;
             string suffix;
