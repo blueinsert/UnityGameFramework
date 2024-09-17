@@ -508,12 +508,12 @@ namespace bluebean.UGFramework.UI
 
         protected void CollectAsset(string assetName)
         {
-            AssetUtility.AddAssetToList(assetName, m_assets);
+            AssetUtility.AddAssetToList(AssetUtility.MakeAssetPath(assetName), m_assets);
         }
 
         protected void CollectSpriteAsset(string assetName)
         {
-            AssetUtility.AddSpriteAssetToList(assetName, m_assets);
+            AssetUtility.AddAssetToList(AssetUtility.MakeSpriteAssetPath(assetName), m_assets);
         }
 
         protected void ClearAssets()

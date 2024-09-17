@@ -29,13 +29,18 @@ namespace bluebean.UGFramework.Asset
 
         #region public static
 
+        public static string MakeAssetPath(string path)
+        {
+            return string.Format("{0}{1}", RuntimeAssetsPath, path);
+        }
+
         public static string MakeSpriteAssetPath(string path)
         {
             if (path.Contains("@"))
             {
                 return path;
             }
-            return string.Format("{0}@{1}", path, Path.GetFileNameWithoutExtension(path));
+            return string.Format("{0}{1}@{2}", RuntimeAssetsPath, path, Path.GetFileNameWithoutExtension(path));
         }
 
 
@@ -44,49 +49,22 @@ namespace bluebean.UGFramework.Asset
         /// </summary>
         /// <param name="name"></param>
         /// <param name="list"></param>
-        public static void AddAssetToList(string name, List<string> list)
+        public static void AddAssetToList(string assetName, List<string> list)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(assetName))
                 return;
             if (list == null)
                 return;
 
-            if (name == "NULL")
+            if (assetName == "NULL")
             {
                 Debug.LogWarning("AddAssetToList, Wrong asset name NULL");
                 return;
             }
-
-            string assetName = AssetUtility.RuntimeAssetsPath + name;
             if (list.Contains(assetName))
                 return;
             list.Add(assetName);
         }
-
-        /// <summary>
-        /// 将Sprite资源名称加到列表，如果已经在列表中就不加
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="list"></param>
-        public static void AddSpriteAssetToList(string name, List<string> list)
-        {
-            if (string.IsNullOrEmpty(name))
-                return;
-            if (list == null)
-                return;
-
-            if (name == "NULL")
-            {
-                Debug.LogWarning("AddSpriteAssetToList, Wrong sprite name NULL");
-                return;
-            }
-
-            if (name.IndexOf('@') >= 0)
-                AddAssetToList(name, list);
-            else
-                AddAssetToList(AssetUtility.MakeSpriteAssetPath(name), list);
-        }
-
 
         #endregion
 
@@ -130,18 +108,23 @@ namespace bluebean.UGFramework.Asset
         /// 获取资源（资源必须已经从UITask或MapSceneTask加载）
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="name"></param>
+        /// <param name="assetPath"></param>
         /// <returns></returns>
-        public T GetAsset<T>(string name) where T : UnityEngine.Object
+        public T GetAsset<T>(string assetPath) where T : UnityEngine.Object
         {
-            if (string.IsNullOrEmpty(name))
+
+            if (string.IsNullOrEmpty(assetPath))
                 return null;
-            UnityEngine.Object o = _GetAsset(name);
+            if (!assetPath.StartsWith(RuntimeAssetsPath))
+            {
+                assetPath = MakeAssetPath(assetPath);
+            }
+            UnityEngine.Object o = _GetAsset(assetPath);
             T ret = o as T;
             if (ret == null)
                 Debug.LogError(string.Format("AssetUtility.GetAsset <{0}> {1} is null, {2}.",
                     typeof(T).Name,
-                    name,
+                    assetPath,
                     o == null ? string.Empty : string.Format("the actual type is: {0}", o.GetType().Name)));
             return ret;
         }
@@ -162,12 +145,10 @@ namespace bluebean.UGFramework.Asset
                 return GetAsset<Sprite>(AssetUtility.MakeSpriteAssetPath(name));
         }
 
-        UnityEngine.Object _GetAsset(string name)
+        private UnityEngine.Object _GetAsset(string aname)
         {
-            if (string.IsNullOrEmpty(name))
+            if (string.IsNullOrEmpty(aname))
                 return null;
-
-            string aname = AssetUtility.RuntimeAssetsPath + name;
 
             foreach (var assetcache in m_dynamicAssetCaches)
             {
@@ -176,7 +157,7 @@ namespace bluebean.UGFramework.Asset
                     return a;
             }
 
-            Debug.LogError("_GetAsset, " + name + " not loaded");
+            Debug.LogError("_GetAsset, " + aname + " not loaded");
             return null;
         }
     }

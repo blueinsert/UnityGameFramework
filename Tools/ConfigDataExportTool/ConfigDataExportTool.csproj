@@ -57,6 +57,7 @@
     <Compile Include="CsvParser.cs" />
     <Compile Include="DataGrid.cs" />
     <Compile Include="Exception\ConfigDataException.cs" />
+    <Compile Include="Exception\ForeignKeyCheckException.cs" />
     <Compile Include="Exception\StringParseException.cs" />
     <Compile Include="LitJson\IJsonWrapper.cs" />
     <Compile Include="LitJson\JsonData.cs" />

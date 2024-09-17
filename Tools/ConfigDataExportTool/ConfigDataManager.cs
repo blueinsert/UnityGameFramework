@@ -330,7 +330,10 @@ namespace bluebean.ConfigDataExportTool
         private bool IsContainValueInMainConfigData(ConfigDataTableColumnInfo mainColumnInfo, string value)
         {
             var configData = mainColumnInfo.m_configDataTable;
-            int startRow = configData.HeadInfo.TableType == ConfigDataType.DATA ? ConfigDataTableConst.DataStartRow : ConfigDataTableConst.EnumStartRow;
+            bool isEnum = configData.HeadInfo.TableType == ConfigDataType.ENUM;
+            int startRow = !isEnum ? ConfigDataTableConst.DataStartRow : ConfigDataTableConst.EnumStartRow;
+            //bool isInt = int.TryParse(value, out var _);
+            
             var data = configData.Data;
             for (int i = startRow; i < data.Row; i++)
             {
@@ -389,11 +392,12 @@ namespace bluebean.ConfigDataExportTool
                 var mainColumnInfo = columnInfo.m_mainColumnInfoArray[0];
                 for (int i = startRow; i < data.Row; i++)
                 {
+                    m_curProcessEnv.m_curRowIndex = i;
+
                     string value = data.ReadCell(i, columnInfo.m_index);
                     if (!IsContainValueInMainConfigData(mainColumnInfo, value))
                     {
-                        ConfigDataException except = new ConfigDataException(tableName, columnName, i, string.Format("外键列数据{0}在主表列中找不到",value));
-                        throw except;
+                        throw new ForeignKeyCheckException(value,configData.TableName,mainColumnInfo.m_name);
                     }
                 }
             }
@@ -402,6 +406,8 @@ namespace bluebean.ConfigDataExportTool
                 
                 for (int i =0;i< columnInfo.m_mainColumnInfoArray.Length;i++)
                 {
+                    m_curProcessEnv.m_curRowIndex = i;
+
                     var mainColumnInfo = columnInfo.m_mainColumnInfoArray[i];
                     if (mainColumnInfo != null)
                     {
@@ -428,9 +434,18 @@ namespace bluebean.ConfigDataExportTool
             Console.WriteLine(string.Format("检查外检约束"));
             foreach (var pair in m_configDataDic)
             {
+
                 var configDataTable = pair.Value;
+
+                m_curProcessEnv.Clear();
+                m_curProcessEnv.m_curFilePath = configDataTable.FilePath;
+                m_curProcessEnv.m_curTableName = configDataTable.TableName;
+
                 foreach (var columnPair in configDataTable.HeadInfo.ColumnInfoDic)
                 {
+                    m_curProcessEnv.m_curColumnName = columnPair.Value.m_name;
+                    m_curProcessEnv.m_curColumnIndex = columnPair.Value.m_index;
+
                     CheckForeignKey(columnPair.Value); 
                 }
             }
