@@ -21,7 +21,7 @@ namespace bluebean.UGFramework
 
         public bool Register(Task task)
         {
-            if(m_taskList.Contains(task) || m_toAddTaskList.Contains(task))
+            if (m_taskList.Contains(task) || m_toAddTaskList.Contains(task))
             {
                 Debug.LogError(string.Format("TaskManager Register Failed has registered the same task {0}", task.Name));
                 return false;
@@ -41,13 +41,14 @@ namespace bluebean.UGFramework
 
         public void Tick()
         {
-            if (m_toAddTaskList.Count != 0) {
+            if (m_toAddTaskList.Count != 0)
+            {
                 m_taskList.AddRange(m_toAddTaskList);
                 m_toAddTaskList.Clear();
             }
             if (m_toRemoveTaskList.Count != 0)
             {
-                foreach(var task in m_toRemoveTaskList)
+                foreach (var task in m_toRemoveTaskList)
                 {
                     m_taskList.Remove(task);
                 }
@@ -58,8 +59,27 @@ namespace bluebean.UGFramework
             }
         }
 
+
+        /// <summary>
+        /// 获取一个指定类型的task
+        /// </summary>
+        /// <param name="taskName"></param>
+        public T FindTask<T>()
+            where T : Task
+        {
+            foreach (var task in m_taskList)
+            {
+                if (task is T)
+                {
+                    return task as T;
+                }
+            }
+            return null;
+        }
+
         private readonly List<Task> m_taskList = new List<Task>();
         private readonly List<Task> m_toAddTaskList = new List<Task>();
         private readonly List<Task> m_toRemoveTaskList = new List<Task>();
+
     }
 }
