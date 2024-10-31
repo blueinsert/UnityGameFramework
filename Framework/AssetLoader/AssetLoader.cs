@@ -164,9 +164,8 @@ namespace bluebean.UGFramework.Asset
             onComplete();
         }
 
-        public void StartLoadAssetCoroutine<T>(List<string> assetPaths, Action<Dictionary<string,T>> onComplete) where T : UnityEngine.Object
+        public void StartLoadAssetCoroutine<T>(List<string> assetPaths, Dictionary<string, T> assetDic, Action onComplete) where T : UnityEngine.Object
         {
-            Dictionary<string, T> assetDic = new Dictionary<string, T>();
             int subCoroutineNum = 3;
             int subCoroutineCompleteCount = 0;
             for(int i = 0; i < subCoroutineNum; i++)
@@ -175,7 +174,7 @@ namespace bluebean.UGFramework.Asset
                     subCoroutineCompleteCount++;
                     if(subCoroutineCompleteCount == subCoroutineNum)
                     {
-                        onComplete(assetDic);
+                        onComplete?.Invoke();
                     }
                 }));
             }

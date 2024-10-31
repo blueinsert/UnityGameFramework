@@ -12,14 +12,16 @@ namespace bluebean.UGFramework
         Stop,
     }
 
-    public abstract class Task : ITickable
+    public abstract class Task : ITickable, IDelayExecMgr
     {
         public TaskState State { get { return m_state; } }
         public string Name { get { return m_name; } }
 
         private string m_name;
         private TaskState m_state = TaskState.Init;
-        
+
+        private DelayExecMgrComp m_delayExecMgrComp;
+
         public event Action EventOnStart;
         public event Action EventOnStop;
         public event Action EventOnPause;
@@ -125,7 +127,23 @@ namespace bluebean.UGFramework
 
         protected virtual void OnTick()
         {
+            if (m_delayExecMgrComp != null)
+                m_delayExecMgrComp.Tick();
+        }
 
+        protected virtual void ConstructComps()
+        {
+            m_delayExecMgrComp = new DelayExecMgrComp();
+        }
+
+        public void PostDelayTimeExecuteAction(Action action, float delaySeconds)
+        {
+            ((IDelayExecMgr)m_delayExecMgrComp)?.PostDelayTimeExecuteAction(action, delaySeconds);
+        }
+
+        public void PostDelayTicksExecuteAction(Action action, ulong delayTickCount)
+        {
+            ((IDelayExecMgr)m_delayExecMgrComp)?.PostDelayTicksExecuteAction(action, delayTickCount);
         }
     }
 

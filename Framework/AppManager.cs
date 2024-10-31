@@ -8,7 +8,7 @@ using bluebean.UGFramework.UI;
 
 namespace bluebean.UGFramework
 {
-    public class AppManager : ITickable
+    public class AppManager : ITickable, IDelayExecMgr
     {
         private AppManager() { }
         public static AppManager m_instance;
@@ -39,6 +39,8 @@ namespace bluebean.UGFramework
         private TaskManager m_taskManager;
         private UIManager m_uiManager;
         private SceneTreeManager m_sceneTree;
+
+        private DelayExecMgrComp m_delayExecMgrComp;
 
         public ConfigDataLoader ConfigDataLoader { get { return m_configDataLoader; } }
 
@@ -87,6 +89,8 @@ namespace bluebean.UGFramework
 
         public void Tick()
         {
+            Timer.Tick();
+
             if (m_coroutineHelper != null)
             {
                 m_coroutineHelper.Tick();
@@ -103,6 +107,21 @@ namespace bluebean.UGFramework
             {
                 m_sceneTree.Tick();
             }
+        }
+
+        protected virtual void ConstructComps()
+        {
+            m_delayExecMgrComp = new DelayExecMgrComp();
+        }
+
+        public void PostDelayTimeExecuteAction(Action action, float delaySeconds)
+        {
+            ((IDelayExecMgr)m_delayExecMgrComp)?.PostDelayTimeExecuteAction(action, delaySeconds);
+        }
+
+        public void PostDelayTicksExecuteAction(Action action, ulong delayTickCount)
+        {
+            ((IDelayExecMgr)m_delayExecMgrComp)?.PostDelayTicksExecuteAction(action, delayTickCount);
         }
 
         public void StartLoadAllConfigData(Action onEnd)
