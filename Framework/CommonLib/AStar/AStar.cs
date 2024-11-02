@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 using static TreeEditor.TreeEditorHelper;
 
 namespace bluebean.PathFinding
@@ -434,8 +435,8 @@ namespace bluebean.PathFinding
                 else
                 {
                     m_State = SearchState.Failed;
-                }
-                FreeSolutionNodes();               
+                    FreeSolutionNodes();
+                }         
                 return m_State;
             }
             // New: Allow user abort
@@ -529,7 +530,7 @@ namespace bluebean.PathFinding
                     // 	The g value for this successor ...
                     float newg = n.g + n.m_UserState.GetCost(successor.m_UserState);
 
-                    if (newg > m_movePoint)
+                    if (m_movePoint > 0 && newg > m_movePoint)
                         continue;
 
                     // Now we need to find whether the node is on the open or closed lists
