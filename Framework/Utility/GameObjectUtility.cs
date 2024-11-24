@@ -17,9 +17,9 @@ namespace bluebean.UGFramework
             return obj;
         }
 
-        public static void AttachUIController<T>(GameObject go) where T: UIViewController
+        public static T AttachController<T>(GameObject go) where T: MonoViewController
         {
-            MonoViewController.AttachViewControllerToGameObject(go, "./", typeof(T).FullName, true);
+            return MonoViewController.AttachViewControllerToGameObject(go, "./", typeof(T).FullName, true) as T;
         }
 
         public static void SetLayer_R(GameObject go, int layer)
