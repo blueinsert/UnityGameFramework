@@ -605,11 +605,21 @@ namespace bluebean.UGFramework
 
         protected void CollectAsset(string assetName)
         {
+            if (string.IsNullOrEmpty(assetName))
+            {
+                Debug.Log("SceneTaskBase:CollectAsset string.IsNullOrEmpty(assetName)");
+                return;
+            }
             AssetUtility.AddAssetToList(AssetUtility.MakeAssetPath(assetName), m_assets);
         }
 
         protected void CollectSpriteAsset(string assetName)
         {
+            if (string.IsNullOrEmpty(assetName))
+            {
+                Debug.Log("SceneTaskBase:CollectSpriteAsset string.IsNullOrEmpty(assetName)");
+                return;
+            }
             AssetUtility.AddAssetToList(AssetUtility.MakeSpriteAssetPath(assetName), m_assets);
         }
 
