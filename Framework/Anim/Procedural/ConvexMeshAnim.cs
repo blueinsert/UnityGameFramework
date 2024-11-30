@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Anim
 {
+    [ExecuteInEditMode]
     public class ConvexMeshAnim : MeshProceduralAnim
     {
         public float m_a = 2.0f;

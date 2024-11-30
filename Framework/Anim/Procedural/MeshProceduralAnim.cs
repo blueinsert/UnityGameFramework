@@ -5,6 +5,7 @@ using UnityEngine;
 namespace bluebean.UGFramework.Anim
 {
     [RequireComponent(typeof(MeshFilter))]
+    [ExecuteInEditMode]
     public class MeshProceduralAnim : MonoBehaviour
     {
         //[HideInInspector]
