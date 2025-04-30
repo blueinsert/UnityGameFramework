@@ -2,6 +2,7 @@ using bluebean.UGFramework.DataStruct;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace bluebean.UGFramework.Geometry
 {
@@ -439,6 +440,20 @@ namespace bluebean.UGFramework.Geometry
                 }
             }
             return false;
+        }
+
+        public static bool IsSphereSphereOverlap(SphereShape sphere1, SphereShape sphere2)
+        {
+            //转换到世界坐标系进行计算
+            var l2w1 = sphere1.m_local2WorldTransform.ToMatrix();
+            var center1 = l2w1.MultiplyPoint3x4(sphere1.m_position);
+            var radius1 = l2w1.lossyScale[0] * sphere1.m_radius;
+
+            var l2w2 = sphere2.m_local2WorldTransform.ToMatrix();
+            var center2 = l2w2.MultiplyPoint3x4(sphere2.m_position);
+            var radius2 = l2w2.lossyScale[0] * sphere2.m_radius;
+
+            return (center1 - center2).magnitude < radius1 + radius2;
         }
 
         /// <summary>
