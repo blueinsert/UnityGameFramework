@@ -328,14 +328,24 @@ namespace bluebean.UGFramework.Geometry
         /// <returns></returns>
         public static bool IsBoxBoxOverlap(BoxShape c1, BoxShape c2)
         {
+            var aabb1 = c1.WorldAabb;
+            var aabb2 = c2.WorldAabb;
+            if (!aabb1.IntersectsAabb(aabb2))
+            {
+                return false;
+            }
+            List<Vector3> wc1 = new List<Vector3>();
+            List<Vector3> wc2 = new List<Vector3>();
+            c1.GetWorldCorners(wc1);
+            c2.GetWorldCorners(wc2);
             Vector3[] normalVectors = new Vector3[6];
-            normalVectors[0] = GetPlaneNormalVector(c1[0], c1[3], c1[2]);
-            normalVectors[1] = GetPlaneNormalVector(c1[0], c1[4], c1[7]);
-            normalVectors[2] = GetPlaneNormalVector(c1[3], c1[2], c1[6]);
+            normalVectors[0] = GetPlaneNormalVector(wc1[0], wc1[3], wc1[2]);
+            normalVectors[1] = GetPlaneNormalVector(wc1[0], wc1[4], wc1[7]);
+            normalVectors[2] = GetPlaneNormalVector(wc1[3], wc1[2], wc1[6]);
 
-            normalVectors[3] = GetPlaneNormalVector(c2[0], c2[3], c2[2]);
-            normalVectors[4] = GetPlaneNormalVector(c2[0], c2[4], c2[7]);
-            normalVectors[5] = GetPlaneNormalVector(c2[3], c2[2], c2[6]);
+            normalVectors[3] = GetPlaneNormalVector(wc2[0], wc2[3], wc2[2]);
+            normalVectors[4] = GetPlaneNormalVector(wc2[0], wc2[4], wc2[7]);
+            normalVectors[5] = GetPlaneNormalVector(wc2[3], wc2[2], wc2[6]);
 
             bool isIntersect = true;
             for (int i = 0; i < 6; i++)
@@ -344,7 +354,7 @@ namespace bluebean.UGFramework.Geometry
                 //
                 float c1Max = float.MinValue;
                 float c1Min = float.MaxValue;
-                foreach (var v in c1)
+                foreach (var v in wc1)
                 {
                     float projectValue = Vector3.Dot(v, normal);
                     if (projectValue > c1Max)
@@ -359,7 +369,7 @@ namespace bluebean.UGFramework.Geometry
                 //
                 float c2Max = float.MinValue;
                 float c2Min = float.MaxValue;
-                foreach (var v in c2)
+                foreach (var v in wc2)
                 {
                     float projectValue = Vector3.Dot(v, normal);
                     if (projectValue > c2Max)

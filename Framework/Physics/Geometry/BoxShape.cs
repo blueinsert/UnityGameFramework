@@ -85,5 +85,15 @@ namespace bluebean.UGFramework.Geometry
         {
             return GetEnumerator();
         }
+
+        public void GetWorldCorners(List<Vector3> worldCorners)
+        {
+            worldCorners.Clear();
+            foreach(var c in this)
+            {
+                var wc = m_local2WorldTransform.ToMatrix().MultiplyPoint3x4(c);
+                worldCorners.Add(wc);
+            }
+        }
     }
 }
