@@ -283,7 +283,7 @@ namespace bluebean.UGFramework.UI
                         for (int i = m_uiIntentStack.Count - 1; i >= 0; i--)
                         {
                             var uiIntent = m_uiIntentStack[i];
-                            TryCloseUITask(uiIntent.Name);
+                            TryCloseUITask(uiIntent.Name, true);
                         }
                     }
                     //加入栈
