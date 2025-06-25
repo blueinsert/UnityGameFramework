@@ -15,8 +15,7 @@ namespace bluebean.UGFramework.ConfigData
 	    private Dictionary<int,ConfigDataEndoscope> m_configDataEndoscope = new Dictionary<int,ConfigDataEndoscope>();
 	    private Dictionary<int,ConfigDataInsertCourse> m_configDataInsertCourse = new Dictionary<int,ConfigDataInsertCourse>();
 	    private Dictionary<int,ConfigDataInstruments> m_configDataInstruments = new Dictionary<int,ConfigDataInstruments>();
-	    private Dictionary<int,ConfigDataPosition> m_configDataPosition = new Dictionary<int,ConfigDataPosition>();
-	    private Dictionary<int,ConfigDataPositionGroup> m_configDataPositionGroup = new Dictionary<int,ConfigDataPositionGroup>();
+	    private Dictionary<int,ConfigDataInstrumentsSlot> m_configDataInstrumentsSlot = new Dictionary<int,ConfigDataInstrumentsSlot>();
 	    private Dictionary<int,ConfigDataSound> m_configDataSound = new Dictionary<int,ConfigDataSound>();
 		#endregion
 		
@@ -27,8 +26,7 @@ namespace bluebean.UGFramework.ConfigData
 			m_allConfigTableNames.Add("Endoscope");
 			m_allConfigTableNames.Add("InsertCourse");
 			m_allConfigTableNames.Add("Instruments");
-			m_allConfigTableNames.Add("Position");
-			m_allConfigTableNames.Add("PositionGroup");
+			m_allConfigTableNames.Add("InstrumentsSlot");
 			m_allConfigTableNames.Add("Sound");
 		}
 		
@@ -48,11 +46,8 @@ namespace bluebean.UGFramework.ConfigData
 	    public Dictionary<int,ConfigDataInstruments> GetAllConfigDataInstruments () {
 			return m_configDataInstruments;
 		}
-	    public Dictionary<int,ConfigDataPosition> GetAllConfigDataPosition () {
-			return m_configDataPosition;
-		}
-	    public Dictionary<int,ConfigDataPositionGroup> GetAllConfigDataPositionGroup () {
-			return m_configDataPositionGroup;
+	    public Dictionary<int,ConfigDataInstrumentsSlot> GetAllConfigDataInstrumentsSlot () {
+			return m_configDataInstrumentsSlot;
 		}
 	    public Dictionary<int,ConfigDataSound> GetAllConfigDataSound () {
 			return m_configDataSound;
@@ -83,14 +78,9 @@ namespace bluebean.UGFramework.ConfigData
 			(m_configDataInstruments).TryGetValue(id, out data);
 			return data;
 		}
-	    public ConfigDataPosition GetConfigDataPosition (int id) {
-			ConfigDataPosition data;
-			(m_configDataPosition).TryGetValue(id, out data);
-			return data;
-		}
-	    public ConfigDataPositionGroup GetConfigDataPositionGroup (int id) {
-			ConfigDataPositionGroup data;
-			(m_configDataPositionGroup).TryGetValue(id, out data);
+	    public ConfigDataInstrumentsSlot GetConfigDataInstrumentsSlot (int id) {
+			ConfigDataInstrumentsSlot data;
+			(m_configDataInstrumentsSlot).TryGetValue(id, out data);
 			return data;
 		}
 	    public ConfigDataSound GetConfigDataSound (int id) {
@@ -161,28 +151,16 @@ namespace bluebean.UGFramework.ConfigData
 				(m_configDataInstruments).Add(configData.ID, configData);
 			}
 	    }
-	    private void DeserializeConfigDataPosition (AssetObject scriptableObj) {
+	    private void DeserializeConfigDataInstrumentsSlot (AssetObject scriptableObj) {
 		    var data = scriptableObj.m_bytes;
 		    MemoryStream stream = new MemoryStream();
             stream.Write(data, 0, data.Length);
             stream.Position = 0;
             BinaryFormatter bf = new BinaryFormatter();
             object obj = bf.Deserialize(stream);
-			List<ConfigDataPosition> list = (List<ConfigDataPosition>) obj;
+			List<ConfigDataInstrumentsSlot> list = (List<ConfigDataInstrumentsSlot>) obj;
 			foreach(var configData in list){
-				(m_configDataPosition).Add(configData.ID, configData);
-			}
-	    }
-	    private void DeserializeConfigDataPositionGroup (AssetObject scriptableObj) {
-		    var data = scriptableObj.m_bytes;
-		    MemoryStream stream = new MemoryStream();
-            stream.Write(data, 0, data.Length);
-            stream.Position = 0;
-            BinaryFormatter bf = new BinaryFormatter();
-            object obj = bf.Deserialize(stream);
-			List<ConfigDataPositionGroup> list = (List<ConfigDataPositionGroup>) obj;
-			foreach(var configData in list){
-				(m_configDataPositionGroup).Add(configData.ID, configData);
+				(m_configDataInstrumentsSlot).Add(configData.ID, configData);
 			}
 	    }
 	    private void DeserializeConfigDataSound (AssetObject scriptableObj) {
@@ -205,8 +183,7 @@ namespace bluebean.UGFramework.ConfigData
 		    m_deserializeFuncDics.Add("ConfigDataEndoscope", DeserializeConfigDataEndoscope);
 		    m_deserializeFuncDics.Add("ConfigDataInsertCourse", DeserializeConfigDataInsertCourse);
 		    m_deserializeFuncDics.Add("ConfigDataInstruments", DeserializeConfigDataInstruments);
-		    m_deserializeFuncDics.Add("ConfigDataPosition", DeserializeConfigDataPosition);
-		    m_deserializeFuncDics.Add("ConfigDataPositionGroup", DeserializeConfigDataPositionGroup);
+		    m_deserializeFuncDics.Add("ConfigDataInstrumentsSlot", DeserializeConfigDataInstrumentsSlot);
 		    m_deserializeFuncDics.Add("ConfigDataSound", DeserializeConfigDataSound);
 	    }
 		

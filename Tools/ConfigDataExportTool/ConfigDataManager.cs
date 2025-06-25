@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.CodeDom;
 using bluebean.ConfigDataExportTool.Config;
+using System.Diagnostics;
 
 namespace bluebean.ConfigDataExportTool
 {
@@ -223,7 +224,7 @@ namespace bluebean.ConfigDataExportTool
 
         public Type GetSubType(string subTypeName)
         {
-            var type = m_codeDefineAssembly.GetType(m_cfg.NameSpace +"."+ subTypeName);
+            var type = m_codeDefineAssembly.GetType(m_cfg.NameSpace + "." + subTypeName);
             return type;
         }
 
@@ -269,13 +270,13 @@ namespace bluebean.ConfigDataExportTool
             codeGenerater.GenerateCode();
             Console.WriteLine("产生代码文件成功");
             Assembly assembly;
-            if(!codeGenerater.GetAeeembly(out assembly))
+            if (!codeGenerater.GetAeeembly(out assembly))
             {
                 throw new ConfigDataException(null, null, 0, "动态产生assembly失败!");
             }
             m_codeDefineAssembly = assembly;
             Console.WriteLine("动态产生assembly成功");
-            
+
         }
 
         #endregion
@@ -305,6 +306,14 @@ namespace bluebean.ConfigDataExportTool
             var fileInfos = directoryInfo.GetFiles("*.csv", SearchOption.AllDirectories);
             foreach (var file in fileInfos)
             {
+                var fileName = Path.GetFileNameWithoutExtension(file.FullName);
+                if (fileName.StartsWith("_") || fileName.EndsWith("_")
+                    || fileName.StartsWith("-") || fileName.EndsWith("-"))
+                {
+                    Console.WriteLine(string.Format("skip：{0}", file.FullName));
+
+                    continue;
+                }
                 LoadConfigDataAtPath(file.FullName);
             }
         }
@@ -333,7 +342,7 @@ namespace bluebean.ConfigDataExportTool
             bool isEnum = configData.HeadInfo.TableType == ConfigDataType.ENUM;
             int startRow = !isEnum ? ConfigDataTableConst.DataStartRow : ConfigDataTableConst.EnumStartRow;
             //bool isInt = int.TryParse(value, out var _);
-            
+
             var data = configData.Data;
             for (int i = startRow; i < data.Row; i++)
             {
@@ -345,12 +354,12 @@ namespace bluebean.ConfigDataExportTool
             return false;
         }
 
-        public void FindMainColumnInfo(string tableName,string columnName,int row, string foreignKey,out ConfigDataTableColumnInfo mainColumnInfo)
+        public void FindMainColumnInfo(string tableName, string columnName, int row, string foreignKey, out ConfigDataTableColumnInfo mainColumnInfo)
         {
             string[] splits = foreignKey.Split(new char[] { '.' });
             if (splits.Length != 2)
             {
-                ConfigDataException except = new ConfigDataException(tableName,columnName,row,string.Format("外键{0}定义错误",foreignKey));
+                ConfigDataException except = new ConfigDataException(tableName, columnName, row, string.Format("外键{0}定义错误", foreignKey));
                 throw except;
             }
             var mainTableName = splits[0];
@@ -369,8 +378,8 @@ namespace bluebean.ConfigDataExportTool
             mainColumnInfo = mainConfigData.HeadInfo.GetColumnInfo(mainColumnName);
             //if (!IsContainValueInMainConfigData(mainColumnInfo, value))
             //{
-           //     error = string.Format("无法找到值{0}在主表{1}.{2},来源{3}.{4} 行号:{5}", value, mainConfigData.Name, mainColumnInfo.m_name, m_checking.m_columnInfo.m_configData.Name, m_checking.m_columnInfo.m_name, m_checking.m_row); ;
-           //     return false;
+            //     error = string.Format("无法找到值{0}在主表{1}.{2},来源{3}.{4} 行号:{5}", value, mainConfigData.Name, mainColumnInfo.m_name, m_checking.m_columnInfo.m_configData.Name, m_checking.m_columnInfo.m_name, m_checking.m_row); ;
+            //     return false;
             //}
         }
 
@@ -394,17 +403,24 @@ namespace bluebean.ConfigDataExportTool
                 {
                     m_curProcessEnv.m_curRowIndex = i;
 
+                    //过滤空行
+                    string idStrValue = data.ReadCell(i, 0);
+                    if (string.IsNullOrEmpty(idStrValue))
+                    {
+                        continue;
+                    }
+
                     string value = data.ReadCell(i, columnInfo.m_index);
                     if (!IsContainValueInMainConfigData(mainColumnInfo, value))
                     {
-                        throw new ForeignKeyCheckException(value,configData.TableName,mainColumnInfo.m_name);
+                        throw new ForeignKeyCheckException(value, configData.TableName, mainColumnInfo.m_name);
                     }
                 }
             }
             else
             {
-                
-                for (int i =0;i< columnInfo.m_mainColumnInfoArray.Length;i++)
+
+                for (int i = 0; i < columnInfo.m_mainColumnInfoArray.Length; i++)
                 {
                     m_curProcessEnv.m_curRowIndex = i;
 
@@ -413,8 +429,16 @@ namespace bluebean.ConfigDataExportTool
                     {
                         for (int j = startRow; j < data.Row; j++)
                         {
+                            //过滤空行
+                            string idStrValue = data.ReadCell(j, 0);
+                            if (string.IsNullOrEmpty(idStrValue))
+                            {
+                                continue;
+                            }
+
                             string cellValue = data.ReadCell(j, columnInfo.m_index);
-                            if (!string.IsNullOrEmpty(cellValue)) {
+                            if (!string.IsNullOrEmpty(cellValue))
+                            {
                                 string[] listElemArray = cellValue.Split(new char[] { ConfigDataTableConst.ListElemSplit });
                                 string value = listElemArray[i];
                                 if (!IsContainValueInMainConfigData(mainColumnInfo, value))
@@ -428,7 +452,7 @@ namespace bluebean.ConfigDataExportTool
                 }
             }
         }
-        
+
         private void CheckForeignKey()
         {
             Console.WriteLine(string.Format("检查外检约束"));
@@ -446,7 +470,7 @@ namespace bluebean.ConfigDataExportTool
                     m_curProcessEnv.m_curColumnName = columnPair.Value.m_name;
                     m_curProcessEnv.m_curColumnIndex = columnPair.Value.m_index;
 
-                    CheckForeignKey(columnPair.Value); 
+                    CheckForeignKey(columnPair.Value);
                 }
             }
         }
@@ -469,14 +493,15 @@ namespace bluebean.ConfigDataExportTool
                 {
                     return m_valueParserDic[type](value);
                 }
-            }catch(Exception e)
+            }
+            catch (Exception e)
             {
                 throw new StringParseException(value, type);
             }
             return null;
         }
 
-        public void SetObjectField(object obj,string fieldTypeStr, string fieldName,string valueStr)
+        public void SetObjectField(object obj, string fieldTypeStr, string fieldName, string valueStr)
         {
             var type = obj.GetType();
             var filedInfo = type.GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -504,7 +529,7 @@ namespace bluebean.ConfigDataExportTool
                     {
                         string paramValue = paramList[j];
                         string typeStr = columnInfo.m_subTypeParamTypes[j];
-                        string typeName = "m_"+columnInfo.m_subTypeParamNames[j];
+                        string typeName = "m_" + columnInfo.m_subTypeParamNames[j];
                         SetObjectField(listElem, typeStr, typeName, paramValue);
                     }
                     addMethod.Invoke((object)list, new object[] { listElem });
@@ -534,7 +559,7 @@ namespace bluebean.ConfigDataExportTool
             }
         }
 
-        public object GetValueByStrForColumn(ConfigDataTableColumnInfo columnInfo,string value)
+        public object GetValueByStrForColumn(ConfigDataTableColumnInfo columnInfo, string value)
         {
             if (!columnInfo.IsListType())
             {
@@ -565,10 +590,18 @@ namespace bluebean.ConfigDataExportTool
                 {
                     m_curProcessEnv.m_curRowIndex = i;
 
-                   var data = Activator.CreateInstance(configDataType);
+                    //过滤空行
+                    string idStrValue = dataGrid.ReadCell(i, 0);
+                    //Console.WriteLine($"{configData.TableName} 填充第{idStrValue}行数据");
+                    if (string.IsNullOrEmpty(idStrValue))
+                    {
+                        continue;
+                    }
+
+                    var data = Activator.CreateInstance(configDataType);
                     foreach (var pair in configData.HeadInfo.ColumnInfoDic)
                     {
-                       
+
                         var columnIndex = pair.Key;
                         var columnInfo = pair.Value;
 
@@ -627,7 +660,7 @@ namespace bluebean.ConfigDataExportTool
             fs.Close();
         }
 
-        public void SerializeConfigDatas(string path,string format)
+        public void SerializeConfigDatas(string path, string format)
         {
             foreach (var pair in m_configDataDic)
             {

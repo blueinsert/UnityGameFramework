@@ -10,4 +10,5 @@ NULL,NULL,NULL,NULL,INT32,INT32,INT32,INT32
 NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
 NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-1,default,default,Courses/Course_Common_AB/Endoscope/EndoscopeInstancePrefab_Test001.prefab,0/-100/0,90000/0/0,-200/-150/-200,90000/0/0
+1,default,default,Courses/Course_Common_AB/Endoscope/EndoscopePrefab.prefab,0/-100/0,90000/0/0,-200/-150/-200,90000/0/0
+2,default,default,Courses/Course_Common_AB/Endoscope/EndoscopePrefab2.prefab,0/-100/0,90000/0/0,-200/-150/-200,90000/0/0

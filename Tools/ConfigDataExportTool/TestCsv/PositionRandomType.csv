@@ -1,7 +1,0 @@
-备注：位置随机类型,,
-ENUM,PositionRandomType,
-BOTH,BOTH,NONE
-ID,NAME,DESC
-编号,枚举名,说明
-1,FromList,
-2,SphereRange,参数是圆心世界坐标以及半径

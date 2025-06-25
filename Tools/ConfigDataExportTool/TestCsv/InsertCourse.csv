@@ -1,18 +1,18 @@
-注射扎点课程配置,,,,,,,,,,,
-DATA,InsertCourse,,,,,,,,,,
-BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH
-ID,Name,Desc,BubbleUIPrefab,BubbleSpeed,ScoreWeight4Time,ScoreWeight4Accuracy,ScoreRankRange,Params4TimeScore,Plane1BubbleNodeNames,Plane2BubbleNodeNames,Plane3BubbleNodeNames
-ID,名字,描述,气泡UIPrefab资源,气泡充气速度,计算成绩时的时间权重,计算成绩时的准确度权重,成绩评级,时间转成绩的有关参数 0：max 1:min 2:rate,气泡节点名,气泡节点名,气泡节点名
-INT32,STRING,STRING,STRING,INT32,INT32,INT32,LIST,LIST,LIST,LIST,LIST
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,INT32,INT32,STRING,STRING,STRING
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
-1,注射扎点课程1,注射扎点课程1 直道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,Bubble1_0,Bubble2_2,Bubble3_3
-2,注射扎点课程2,注射扎点课程2 C型弯道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,,,
-3,注射扎点课程3,注射扎点课程3 S型弯道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,,,
-4,注射扎点课程4,注射扎点课程4 直道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,Bubble1_0/Bubble1_1/Bubble1_2/Bubble1_3/Bubble1_4/Bubble1_5,Bubble2_0/Bubble2_1/Bubble2_2/Bubble2_3/Bubble2_4/Bubble2_5,Bubble3_0/Bubble3_1/Bubble3_2/Bubble3_3/Bubble3_4/Bubble3_5
-5,注射扎点课程5,注射扎点课程5 C型弯道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,,,
-6,注射扎点课程6,注射扎点课程6 S型弯道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1,,,
+注射扎点课程配置,,,,,,,,
+DATA,InsertCourse,,,,,,,
+BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH
+ID,Name,Desc,BubbleUIPrefab,BubbleSpeed,ScoreWeight4Time,ScoreWeight4Accuracy,ScoreRankRange,Params4TimeScore
+ID,名字,描述,气泡UIPrefab资源,气泡充气速度,计算成绩时的时间权重,计算成绩时的准确度权重,成绩评级,时间转成绩的有关参数 0：max 1:min 2:rate
+INT32,STRING,STRING,STRING,INT32,INT32,INT32,LIST,LIST
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,INT32,INT32
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+1,注射扎点课程1,注射扎点课程1 直道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1
+2,注射扎点课程2,注射扎点课程2 C型弯道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1
+3,注射扎点课程3,注射扎点课程3 S型弯道,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1
+4,注射扎点课程4,注射扎点课程4 直道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1
+5,注射扎点课程5,注射扎点课程5 C型弯道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1
+6,注射扎点课程6,注射扎点课程6 S型弯道 位置随机,UI/Course/Insert_AB/BubbleUIPrefab.prefab,400,1,70,70/80/90,80/10/1

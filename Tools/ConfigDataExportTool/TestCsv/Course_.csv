@@ -1,0 +1,27 @@
+课程表表,,,,,,,,,,,
+DATA,Course,,,,,,,,,,
+BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH,BOTH
+ID,Name,Desc,CourseType,Param1,Param2,Param3,EndoscopeConfigID,ScenePrefab,LevelPrefab,InitLoadedInstruments,InputManagerPrefab
+ID,名字,描述,课程类型,参数1,参数2,参数3,内镜配置ID,场景预制体,关卡预制体,初始装载器械列表,输入控制器预制体
+INT32,STRING,STRING,INT32,INT32,INT32,INT32,INT32,STRING,STRING,LIST,STRING
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,INT32,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,CourseType.ID,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL
+1,注射扎点课程1,注射扎点课程1 直道,1,1,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel1_Stright.prefab,1/2,Prefabs/AppInputManagerPrefab
+2,注射扎点课程2,注射扎点课程2 C型弯道,1,2,,,1,Courses/Course_Common_AB/Scene/SceneCPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel2_C.prefab,1/2,Prefabs/AppInputManagerPrefab
+3,注射扎点课程3,注射扎点课程3 S型弯道,1,3,,,1,Courses/Course_Common_AB/Scene/SceneSPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel3_S.prefab,1/2,Prefabs/AppInputManagerPrefab
+4,注射扎点课程4,注射扎点课程4 直道 位置随机,1,4,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel4_StrightRandom.prefab,1/2,Prefabs/AppInputManagerPrefab
+5,注射扎点课程5,注射扎点课程5 C型弯道 位置随机,1,5,,,1,Courses/Course_Common_AB/Scene/SceneCPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel5_CRandom.prefab,1/2,Prefabs/AppInputManagerPrefab
+6,注射扎点课程6,注射扎点课程6 S型弯道 位置随机,1,6,,,1,Courses/Course_Common_AB/Scene/SceneSPrefab.prefab,Courses/Course_Inject_AB/Level/InsertCourseLevel6_SRandom.prefab,1/2,Prefabs/AppInputManagerPrefab
+51,寻腔进镜 食管胃,寻腔进镜 食管胃,5,,,,2,Courses/Course_Inserting_AB/SceneStomachPrefab.prefab,,2,Prefabs/AppInputManagerPrefab
+52,寻腔进镜 大肠,寻腔进镜 大肠,5,,,,2,Courses/Course_Inserting_AB/SceneLargeIntestinePrefab.prefab,,2,Prefabs/AppInputManagerPrefab
+11,活检抓取,活检抓取,2,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Course_Biopsy_AB/Level/BiopsyLevel1.prefab,2/3,Prefabs/AppInputManagerPrefab
+20,画弧描边1,画弧描边1,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel1.prefab,2/4,Prefabs/AppInputManagerPrefab
+21,画弧描边2,画弧描边2,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel2.prefab,2/4,Prefabs/AppInputManagerPrefab
+22,画弧描边3,画弧描边3,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel3.prefab,2/4,Prefabs/AppInputManagerPrefab
+23,画弧描边4,画弧描边4,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel4.prefab,2/4,Prefabs/AppInputManagerPrefab
+24,画弧描边5,画弧描边5,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel5.prefab,2/4,Prefabs/AppInputManagerPrefab
+26,画弧描边6,画弧描边6,3,,,,1,Courses/Course_Common_AB/Scene/SceneStraightPrefab.prefab,Courses/Cutting_AB/Level/CuttingLevel6.prefab,2/4,Prefabs/AppInputManagerPrefab

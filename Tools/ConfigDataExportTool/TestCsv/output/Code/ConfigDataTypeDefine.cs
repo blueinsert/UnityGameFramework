@@ -87,41 +87,11 @@ FourdirJointCount = 3,
         
         private string m_ScenePrefab;
         
-        private int m_ScenePosX;
+        private string m_LevelPrefab;
         
-        private int m_ScenePosY;
+        private System.Collections.Generic.List<System.Int32> m_InitLoadedInstruments;
         
-        private int m_ScenePosZ;
-        
-        private int m_SceneScaleX;
-        
-        private int m_SceneScaleY;
-        
-        private int m_SceneScaleZ;
-        
-        private int m_EndoscopeInitPosX;
-        
-        private int m_EndoscopeInitPosY;
-        
-        private int m_EndoscopeInitPosZ;
-        
-        private int m_EndoscopeInitAngleX;
-        
-        private int m_EndoscopeInitAngleY;
-        
-        private int m_EndoscopeInitAngleZ;
-        
-        private int m_EndoscopeScaleX;
-        
-        private int m_EndoscopeScaleY;
-        
-        private int m_EndoscopeScaleZ;
-        
-        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyPos;
-        
-        private System.Collections.Generic.List<System.Int32> m_OperateDeviceDummyRotation;
-        
-        private string m_OperateDevicePrefab;
+        private string m_InputManagerPrefab;
         
         public int ID {
             get {
@@ -204,165 +174,30 @@ FourdirJointCount = 3,
             }
         }
         
-        public int ScenePosX {
+        public string LevelPrefab {
             get {
-                return this.m_ScenePosX;
+                return this.m_LevelPrefab;
             }
             set {
-                this.m_ScenePosX = value;
+                this.m_LevelPrefab = value;
             }
         }
         
-        public int ScenePosY {
+        public System.Collections.Generic.List<System.Int32> InitLoadedInstruments {
             get {
-                return this.m_ScenePosY;
+                return this.m_InitLoadedInstruments;
             }
             set {
-                this.m_ScenePosY = value;
+                this.m_InitLoadedInstruments = value;
             }
         }
         
-        public int ScenePosZ {
+        public string InputManagerPrefab {
             get {
-                return this.m_ScenePosZ;
+                return this.m_InputManagerPrefab;
             }
             set {
-                this.m_ScenePosZ = value;
-            }
-        }
-        
-        public int SceneScaleX {
-            get {
-                return this.m_SceneScaleX;
-            }
-            set {
-                this.m_SceneScaleX = value;
-            }
-        }
-        
-        public int SceneScaleY {
-            get {
-                return this.m_SceneScaleY;
-            }
-            set {
-                this.m_SceneScaleY = value;
-            }
-        }
-        
-        public int SceneScaleZ {
-            get {
-                return this.m_SceneScaleZ;
-            }
-            set {
-                this.m_SceneScaleZ = value;
-            }
-        }
-        
-        public int EndoscopeInitPosX {
-            get {
-                return this.m_EndoscopeInitPosX;
-            }
-            set {
-                this.m_EndoscopeInitPosX = value;
-            }
-        }
-        
-        public int EndoscopeInitPosY {
-            get {
-                return this.m_EndoscopeInitPosY;
-            }
-            set {
-                this.m_EndoscopeInitPosY = value;
-            }
-        }
-        
-        public int EndoscopeInitPosZ {
-            get {
-                return this.m_EndoscopeInitPosZ;
-            }
-            set {
-                this.m_EndoscopeInitPosZ = value;
-            }
-        }
-        
-        public int EndoscopeInitAngleX {
-            get {
-                return this.m_EndoscopeInitAngleX;
-            }
-            set {
-                this.m_EndoscopeInitAngleX = value;
-            }
-        }
-        
-        public int EndoscopeInitAngleY {
-            get {
-                return this.m_EndoscopeInitAngleY;
-            }
-            set {
-                this.m_EndoscopeInitAngleY = value;
-            }
-        }
-        
-        public int EndoscopeInitAngleZ {
-            get {
-                return this.m_EndoscopeInitAngleZ;
-            }
-            set {
-                this.m_EndoscopeInitAngleZ = value;
-            }
-        }
-        
-        public int EndoscopeScaleX {
-            get {
-                return this.m_EndoscopeScaleX;
-            }
-            set {
-                this.m_EndoscopeScaleX = value;
-            }
-        }
-        
-        public int EndoscopeScaleY {
-            get {
-                return this.m_EndoscopeScaleY;
-            }
-            set {
-                this.m_EndoscopeScaleY = value;
-            }
-        }
-        
-        public int EndoscopeScaleZ {
-            get {
-                return this.m_EndoscopeScaleZ;
-            }
-            set {
-                this.m_EndoscopeScaleZ = value;
-            }
-        }
-        
-        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyPos {
-            get {
-                return this.m_OperateDeviceDummyPos;
-            }
-            set {
-                this.m_OperateDeviceDummyPos = value;
-            }
-        }
-        
-        public System.Collections.Generic.List<System.Int32> OperateDeviceDummyRotation {
-            get {
-                return this.m_OperateDeviceDummyRotation;
-            }
-            set {
-                this.m_OperateDeviceDummyRotation = value;
-            }
-        }
-        
-        public string OperateDevicePrefab {
-            get {
-                return this.m_OperateDevicePrefab;
-            }
-            set {
-                this.m_OperateDevicePrefab = value;
+                this.m_InputManagerPrefab = value;
             }
         }
     }
@@ -489,12 +324,6 @@ Inserting = 5,
         
         private System.Collections.Generic.List<System.Int32> m_Params4TimeScore;
         
-        private System.Collections.Generic.List<System.String> m_Plane1BubbleNodeNames;
-        
-        private System.Collections.Generic.List<System.String> m_Plane2BubbleNodeNames;
-        
-        private System.Collections.Generic.List<System.String> m_Plane3BubbleNodeNames;
-        
         public int ID {
             get {
                 return this.m_ID;
@@ -575,33 +404,6 @@ Inserting = 5,
                 this.m_Params4TimeScore = value;
             }
         }
-        
-        public System.Collections.Generic.List<System.String> Plane1BubbleNodeNames {
-            get {
-                return this.m_Plane1BubbleNodeNames;
-            }
-            set {
-                this.m_Plane1BubbleNodeNames = value;
-            }
-        }
-        
-        public System.Collections.Generic.List<System.String> Plane2BubbleNodeNames {
-            get {
-                return this.m_Plane2BubbleNodeNames;
-            }
-            set {
-                this.m_Plane2BubbleNodeNames = value;
-            }
-        }
-        
-        public System.Collections.Generic.List<System.String> Plane3BubbleNodeNames {
-            get {
-                return this.m_Plane3BubbleNodeNames;
-            }
-            set {
-                this.m_Plane3BubbleNodeNames = value;
-            }
-        }
     }
     
     [System.SerializableAttribute()]
@@ -616,6 +418,8 @@ Inserting = 5,
         private string m_Desc;
         
         private string m_Prefab;
+        
+        private int m_SlotID;
         
         public int ID {
             get {
@@ -661,146 +465,82 @@ Inserting = 5,
                 this.m_Prefab = value;
             }
         }
+        
+        public int SlotID {
+            get {
+                return this.m_SlotID;
+            }
+            set {
+                this.m_SlotID = value;
+            }
+        }
+    }
+    
+    [System.SerializableAttribute()]
+    public class ConfigDataInstrumentsSlot {
+        
+        private int m_ID;
+        
+        private string m_Name;
+        
+        private string m_Desc;
+        
+        private int m_OffsetX;
+        
+        private int m_OffsetY;
+        
+        public int ID {
+            get {
+                return this.m_ID;
+            }
+            set {
+                this.m_ID = value;
+            }
+        }
+        
+        public string Name {
+            get {
+                return this.m_Name;
+            }
+            set {
+                this.m_Name = value;
+            }
+        }
+        
+        public string Desc {
+            get {
+                return this.m_Desc;
+            }
+            set {
+                this.m_Desc = value;
+            }
+        }
+        
+        public int OffsetX {
+            get {
+                return this.m_OffsetX;
+            }
+            set {
+                this.m_OffsetX = value;
+            }
+        }
+        
+        public int OffsetY {
+            get {
+                return this.m_OffsetY;
+            }
+            set {
+                this.m_OffsetY = value;
+            }
+        }
     }
     
     public enum ConfigDataInstrumentsType {
         
 InjectionNeedle = 1,
-    }
-    
-    [System.SerializableAttribute()]
-    public class ConfigDataPosition {
-        
-        private int m_ID;
-        
-        private int m_X;
-        
-        private int m_Y;
-        
-        private int m_Z;
-        
-        public int ID {
-            get {
-                return this.m_ID;
-            }
-            set {
-                this.m_ID = value;
-            }
-        }
-        
-        public int X {
-            get {
-                return this.m_X;
-            }
-            set {
-                this.m_X = value;
-            }
-        }
-        
-        public int Y {
-            get {
-                return this.m_Y;
-            }
-            set {
-                this.m_Y = value;
-            }
-        }
-        
-        public int Z {
-            get {
-                return this.m_Z;
-            }
-            set {
-                this.m_Z = value;
-            }
-        }
-    }
-    
-    [System.SerializableAttribute()]
-    public class ConfigDataPositionGroup {
-        
-        private int m_ID;
-        
-        private System.Collections.Generic.List<System.Int32> m_GroupIds;
-        
-        private int m_RandomType;
-        
-        private int m_Param1;
-        
-        private int m_Param2;
-        
-        private int m_Param3;
-        
-        private int m_Param4;
-        
-        public int ID {
-            get {
-                return this.m_ID;
-            }
-            set {
-                this.m_ID = value;
-            }
-        }
-        
-        public System.Collections.Generic.List<System.Int32> GroupIds {
-            get {
-                return this.m_GroupIds;
-            }
-            set {
-                this.m_GroupIds = value;
-            }
-        }
-        
-        public int RandomType {
-            get {
-                return this.m_RandomType;
-            }
-            set {
-                this.m_RandomType = value;
-            }
-        }
-        
-        public int Param1 {
-            get {
-                return this.m_Param1;
-            }
-            set {
-                this.m_Param1 = value;
-            }
-        }
-        
-        public int Param2 {
-            get {
-                return this.m_Param2;
-            }
-            set {
-                this.m_Param2 = value;
-            }
-        }
-        
-        public int Param3 {
-            get {
-                return this.m_Param3;
-            }
-            set {
-                this.m_Param3 = value;
-            }
-        }
-        
-        public int Param4 {
-            get {
-                return this.m_Param4;
-            }
-            set {
-                this.m_Param4 = value;
-            }
-        }
-    }
-    
-    public enum ConfigDataPositionRandomType {
-        
-FromList = 1,
-SphereRange = 2,
+Light = 2,
+BiopsyForceps = 3,
+ElectrosurgicalKnife = 4,
     }
     
     [System.SerializableAttribute()]

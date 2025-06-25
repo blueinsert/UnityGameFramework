@@ -4,3 +4,6 @@ BOTH,BOTH,
 ID,Name,
 编号,枚举名,说明
 1,InjectionNeedle,注射针
+2,Light,探照灯
+3,BiopsyForceps,活检钳
+4,ElectrosurgicalKnife,电刀

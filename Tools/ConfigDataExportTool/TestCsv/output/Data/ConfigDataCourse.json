@@ -1,0 +1,28 @@
+[{
+        "ID": 1,
+        "Name": "\u5BFB\u8154\u8FDB\u955C \u98DF\u7BA1\u80C3",
+        "Desc": "\u5BFB\u8154\u8FDB\u955C \u98DF\u7BA1\u80C3",
+        "CourseType": 5,
+        "Param1": 0,
+        "Param2": 0,
+        "Param3": 0,
+        "EndoscopeConfigID": 2,
+        "ScenePrefab": "Courses/Course_Inserting_AB/SceneStomachPrefab.prefab",
+        "LevelPrefab": "",
+        "InitLoadedInstruments": [2],
+        "InputManagerPrefab": "Prefabs/AppInputManagerPrefab"
+    }, {
+        "ID": 2,
+        "Name": "\u5BFB\u8154\u8FDB\u955C \u5927\u80A0",
+        "Desc": "\u5BFB\u8154\u8FDB\u955C \u5927\u80A0",
+        "CourseType": 5,
+        "Param1": 0,
+        "Param2": 0,
+        "Param3": 0,
+        "EndoscopeConfigID": 2,
+        "ScenePrefab": "Courses/Course_Inserting_AB/SceneLargeIntestinePrefab.prefab",
+        "LevelPrefab": "",
+        "InitLoadedInstruments": [2],
+        "InputManagerPrefab": "Prefabs/AppInputManagerPrefab"
+    }
+]
