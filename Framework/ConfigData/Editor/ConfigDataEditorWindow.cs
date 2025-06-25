@@ -68,6 +68,10 @@ namespace bluebean.UGFramework.ConfigData
 
         private void OnGUI()
         {
+            if (GUILayout.Button("配置导出"))
+            {
+                ConfigDataExport();
+            }
             if (GUILayout.Button("BuildAll"))
             {
                 m_coroutineManager.StartCorcoutine(BuildAll());
@@ -76,6 +80,15 @@ namespace bluebean.UGFramework.ConfigData
             {
                 RunTest();
             }
+        }
+
+        private void ConfigDataExport()
+        {
+            string path = "../../../Tools/配置导出工具/一键导出.bat";
+            path = Path.GetFullPath("../../Tools/配置导出工具/");
+            Debug.Log(path);
+            var fileName = Path.Combine(path, "一键导出.bat");
+            Utility.ExecuteProcess(fileName, path, true);
         }
 
         private IEnumerator BuildAll()
