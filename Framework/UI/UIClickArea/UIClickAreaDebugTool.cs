@@ -9,7 +9,7 @@ namespace bluebean.UGFramework.Tools
     [ExecuteInEditMode]
     public class UIClickAreaDebugTool : MonoBehaviour
     {
-        const string TexturePath = "Assets/Framework/Tools/UIClickArea/Texture/ClickAreaTex.png";
+        const string TexturePath = "Assets/Framework/UI/UIClickArea/Texture/ClickAreaTex.png";
         private static readonly Vector3[] m_corners = new Vector3[4];
         private static readonly List<Rect> m_rects = new List<Rect>();
         private static readonly List<Graphic> m_graphics = new List<Graphic>();

@@ -231,11 +231,12 @@ namespace bluebean.UGFramework.Build
         }
 
         /// <summary>
-        /// 生成资源包描述数据
+        /// 生成资源包描述数据,放置在runtimeAsset本身
         /// </summary>
         [MenuItem("Framework/Build/Step2_GenerateBundleData")]
         public static void GenerateBundleData()
         {
+            //Assets/GameProject/RuntimeAssets/BundleData_AB/BundleData.asset
             var bundleDataPath = BundleDataPath;
             var obj = AssetDatabase.LoadAssetAtPath<BundleData>(bundleDataPath);
             var bundleData = obj as BundleData;
@@ -324,11 +325,12 @@ namespace bluebean.UGFramework.Build
         }
 
         /// <summary>
-        /// build所有的bundle
+        /// build所有的bundle,导出在外边目录
         /// </summary>
         [MenuItem("Framework/Build/Step3_BuildAssetBundles")]
         public static bool BuildAssetBundles()
         {
+            //Build/AssetBundles/
             var dir = AssetBundleDir;
             if (!EditorUtility.PrepareDirectory(dir))
             {
@@ -351,6 +353,9 @@ namespace bluebean.UGFramework.Build
 
             UnityEngine.Debug.Log("BuildAssetBundles complete");
 
+            AssetBundleCycleReferenceDetector.DetectBundleCycles();
+            if (AssetBundleCycleReferenceDetector.cycles.Count != 0)
+                return false;
             return true;
         }
 
@@ -414,7 +419,8 @@ namespace bluebean.UGFramework.Build
             {
                 UnityEditor.EditorUtility.SetDirty(bundleData);
                 AssetDatabase.SaveAssets();
-                // 为了BundleData本身build一次bundle todo remove
+                // 为了BundleData本身build一次bundle
+                // todo remove
                 if (!BuildAssetBundles())
                 {
                     UnityEngine.Debug.LogError("UpdateBundleData4BundleVersion() Failed to build asset bundle.");
@@ -426,6 +432,9 @@ namespace bluebean.UGFramework.Build
             return true;
         }
 
+        /// <summary>
+        /// 将asset bundles从外部目录复制回StreamingAssets目录
+        /// </summary>
         [MenuItem("Framework/Build/Step5_CopyAssetBundels2StreamingAssets")]
         static void CopyAssetBundels2StreamingAssets()
         {
@@ -482,7 +491,11 @@ namespace bluebean.UGFramework.Build
         {
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows);
             Debug.Log(string.Format("Start BuildWindowsExe,{0}", EditorUserBuildSettings.activeBuildTarget));
-            BuildAllAssets();
+            if(!BuildAllAssets())
+            {
+                Debug.LogError("Build Failed");
+                return;
+            }
             CopyAssetBundels2StreamingAssets();
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.WinExeName);
@@ -503,7 +516,11 @@ namespace bluebean.UGFramework.Build
         {
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
             Debug.Log(string.Format("Start BuildAndroidApk,{0}", EditorUserBuildSettings.activeBuildTarget));
-            BuildAllAssets();
+            if (!BuildAllAssets())
+            {
+                Debug.LogError("Build Failed");
+                return;
+            }
             CopyAssetBundels2StreamingAssets();
             var buildSetting = BuildSetting.Instance;
             var outputDir = string.Format("{0}/{1}/{2}", buildSetting.WinExeDir, EditorUserBuildSettings.activeBuildTarget, buildSetting.AndroidApkName);
