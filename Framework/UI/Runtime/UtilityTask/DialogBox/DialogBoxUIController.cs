@@ -13,6 +13,7 @@ namespace bluebean.UGFramework.UI
             base.OnBindFieldsComplete();
             m_dialogBoxOkButton.onClick.AddListener(OnDialogBoxOkButtonClick);
             m_dialogBoxCancelButton.onClick.AddListener(OnDialogBoxCancelButtonClick);
+            this.gameObject.SetActive(false);
         }
 
         public void ShowDialogBox(string tip)

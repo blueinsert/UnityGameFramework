@@ -168,6 +168,6 @@ namespace bluebean.UGFramework.UI
 
 
         public const string ParamKey_Msg = "ParamKey_Msg";
-        public const string ParamKey_CB = "ParamKey_Msg";
+        public const string ParamKey_CB = "ParamKey_CB";
     }
 }
