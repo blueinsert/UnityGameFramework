@@ -115,5 +115,40 @@ namespace bluebean.UGFramework
             }
             return "";
         }
+
+        /// <summary>
+        /// 手动解析16进制颜色字符串（支持#RRGGBB或#RRGGBBAA格式）
+        /// </summary>
+        public static Color HexToColor(string hex)
+        {
+            hex = hex.Trim().Replace("#", "");
+
+            switch (hex.Length)
+            {
+                case 6: // RRGGBB
+                    return new Color(
+                        HexToInt(hex.Substring(0, 2)) / 255f,
+                        HexToInt(hex.Substring(2, 2)) / 255f,
+                        HexToInt(hex.Substring(4, 2)) / 255f
+                    );
+
+                case 8: // RRGGBBAA
+                    return new Color(
+                        HexToInt(hex.Substring(0, 2)) / 255f,
+                        HexToInt(hex.Substring(2, 2)) / 255f,
+                        HexToInt(hex.Substring(4, 2)) / 255f,
+                        HexToInt(hex.Substring(6, 2)) / 255f
+                    );
+
+                default:
+                    Debug.LogError($"不支持的格式: {hex}");
+                    return Color.magenta;
+            }
+        }
+
+        private static int HexToInt(string hex)
+        {
+            return System.Convert.ToInt32(hex, 16);
+        }
     }
 }
