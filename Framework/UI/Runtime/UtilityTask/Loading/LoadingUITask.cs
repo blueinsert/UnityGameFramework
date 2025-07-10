@@ -9,33 +9,15 @@ namespace bluebean.UGFramework.UI
 
     public class LoadingUITask : UITaskBase
     {
-        public LoadingUITask(string name) : base(typeof(LoadingUITask).Name)
+        public LoadingUITask(string name) : base(name)
         {
         }
 
-        //public static void StartUITask()
-        //{
-        //    UIIntent intent = new UIIntent(typeof(FadeInOutUITask).Name, false, false, false);
-        //    UIManager.Instance.StartUITask(intent);
-        //}
-
-        private static void PostTaskAction(Action<FadeInOutUITask> action)
+        public static void StartUITask()
         {
-            var target = UIManager.Instance.FindUITask(typeof(FadeInOutUITask).Name) as FadeInOutUITask;
-            if (target != null)
-            {
-                action(target);
-            }
-            else
-            {
-                UIIntent intent = new UIIntent(typeof(FadeInOutUITask).Name, false, false, false);
-                UIManager.Instance.StartUITask(intent, onViewUpdateComplete: () => {
-                    target = UIManager.Instance.FindUITask(typeof(FadeInOutUITask).Name) as FadeInOutUITask;
-                    action(target);
-                });
-            }
+            UIIntent intent = new UIIntent(typeof(LoadingUITask).Name, false, false, false);
+            UIManager.Instance.StartUITask(intent);
         }
-
 
         #region UITask生命周期
 
@@ -85,7 +67,7 @@ namespace bluebean.UGFramework.UI
         protected override void OnAllViewControllerCreateCompleted()
         {
             base.OnAllViewControllerCreateCompleted();
-            m_uiCtrl = m_viewControllerArray[0] as FadeInOutUIController;
+            m_uiCtrl = m_viewControllerArray[0] as LoadingUIController;
             if (m_uiCtrl != null)
             {
                
@@ -116,17 +98,22 @@ namespace bluebean.UGFramework.UI
         protected override void UpdateView()
         {
             PushAllLayer();
+            m_uiCtrl.Show();
         }
 
         protected override void OnTick()
         {
-
+            if (m_uiCtrl != null)
+            {
+                m_uiCtrl.Tick();
+            }
         }
 
 
 
         #endregion
 
+        
 
 
         #region 资源描述
@@ -141,8 +128,8 @@ namespace bluebean.UGFramework.UI
 
         private LayerDesc[] m_layerDescs = new LayerDesc[] {
             new LayerDesc(){
-                LayerName = "FadeInOutUILayer",
-                AssetPath = "Assets/Framework/UI/Resources/FadeInOutUIPrefab.prefab",
+                LayerName = "LoadingUILayer",
+                AssetPath = "Assets/Framework/UI/Resources/LoadingUIPrefab.prefab",
             },
         };
 
@@ -154,18 +141,16 @@ namespace bluebean.UGFramework.UI
         private ViewControllerDesc[] m_viewControllerDescs = new ViewControllerDesc[]{
             new ViewControllerDesc()
             {
-                AtachLayerName = "FadeInOutUILayer",
+                AtachLayerName = "LoadingUILayer",
                 AtachPath = "./",
-                TypeFullName = "bluebean.UGFramework.UI.FadeInOutUIController",
+                TypeFullName = "bluebean.UGFramework.UI.LoadingUIController",
             },
         };
         #endregion
 
-        private FadeInOutUIController m_uiCtrl = null;
+        private LoadingUIController m_uiCtrl = null;
 
-        public FadeInOutUIController FadeInOutUIController { get { return m_uiCtrl; } }
-        //private string m_msg;
+        public LoadingUIController FadeInOutUIController { get { return m_uiCtrl; } }
 
-        //public const string ParamKey_Msg = "ParamKey_Msg";
     }
 }

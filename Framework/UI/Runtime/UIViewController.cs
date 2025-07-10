@@ -6,7 +6,7 @@ namespace bluebean.UGFramework.UI
 {
     public class UIViewController : MonoViewController
     {
-        UITaskBase m_owner = null; 
+        protected UITaskBase m_ownerTask = null; 
 
         protected override void OnBindFieldsComplete()
         {
@@ -15,7 +15,7 @@ namespace bluebean.UGFramework.UI
 
         public void RegisterOwner(UITaskBase owner)
         {
-            m_owner = owner;
+            m_ownerTask = owner;
         }
     }
 }
