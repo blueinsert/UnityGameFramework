@@ -30,6 +30,16 @@ namespace bluebean.UGFramework.UI
 
         #endregion
 
+        protected override void OnAllViewControllerCreateCompleted()
+        {
+            base.OnAllViewControllerCreateCompleted();
+            foreach(var viewCtrl in m_viewControllerArray)
+            {
+                var uiCtrl = viewCtrl as UIViewController;
+                uiCtrl.RegisterOwner(this);
+            }
+        }
+
         #region 更新流程
         protected virtual bool OnStart(UIIntent uiIntent)
         {
