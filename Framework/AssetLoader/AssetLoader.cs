@@ -105,8 +105,9 @@ namespace bluebean.UGFramework.Asset
             {
                 mainAssetPath = path;
             }
-            if((clientSetting.m_useAssetBundleInEditor && Application.isEditor)
-                || !Application.isEditor)
+            bool isUseResources = path.Contains("Resources/");
+            if(((clientSetting.m_useAssetBundleInEditor && Application.isEditor)
+                || !Application.isEditor) && !isUseResources)
             {
                 var iter = LoadAssetFromBundle(mainAssetPath, (lassets) => { assets = lassets; });
                 while (iter.MoveNext())
@@ -120,7 +121,7 @@ namespace bluebean.UGFramework.Asset
                 LoadAssetByAssetDatabase(mainAssetPath, hasSubAsset, (loadAssets) => { assets = loadAssets; });
             }
             //4.使用resource加载
-            if (assets == null)
+            if (isUseResources || assets == null)
             {
                 yield return LoadAssetByResourceLoad(mainAssetPath, hasSubAsset, (loadAssets) => { assets = loadAssets; });
             }
