@@ -81,6 +81,8 @@ namespace bluebean.UGFramework
             GameObject target = FindChild(path);
             if(target == null)
             {
+                Debug.LogError(string.Format("BindFiledImpl no such node,path:{0}", path));
+
                 return null;
             }
             if (espectType == typeof(GameObject)){
@@ -90,6 +92,9 @@ namespace bluebean.UGFramework
                 var component = target.GetComponent(espectType);
                 return component as UnityEngine.Object;
             }
+
+            Debug.LogError(string.Format("BindFiledImpl no such type:{0}", espectType.Name.ToString()));
+
             return null;
         }
 
