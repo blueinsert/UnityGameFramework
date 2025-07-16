@@ -10,7 +10,7 @@ namespace bluebean.UGFramework.UI
         public UITaskBase(string name) : base(name)
         { }
 
-        #region SceneTaskBase重载方法
+        #region SceneTaskBase鐩稿叧鍑芥暟
         protected sealed override bool OnStart(SceneIntent intent)
         {
             var ok = OnStart(intent as UIIntent);
@@ -40,7 +40,7 @@ namespace bluebean.UGFramework.UI
             }
         }
 
-        #region 更新流程
+        #region UI浠诲姟鐩稿叧
         protected virtual bool OnStart(UIIntent uiIntent)
         {
             StartUIUpdatePipeline(uiIntent);
@@ -82,7 +82,7 @@ namespace bluebean.UGFramework.UI
         }
 
         /// <summary>
-        /// 存放内容数据
+        /// 褰撳墠UI鎰忓浘
         /// </summary>
         protected UIIntent m_curUIIntent;
 
