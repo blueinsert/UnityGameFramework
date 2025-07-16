@@ -21,6 +21,7 @@ namespace bluebean.UGFramework
         private string batchStatus = "";
         private int batchIndex = 0;
         private string originalScenePath = null;
+        private string searchText = "";
 
          #region 单例模式
         private static SceneGalleryWindow m_instance;
@@ -74,6 +75,16 @@ namespace bluebean.UGFramework
         private void OnGUI()
         {
             EditorGUILayout.Space();
+            // 搜索框
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.Label("搜索", GUILayout.Width(40));
+            string newSearch = EditorGUILayout.TextField(searchText, GUILayout.Width(200));
+            if (newSearch != searchText)
+            {
+                searchText = newSearch;
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.Space();
             // 缩略图大小滑杆
             EditorGUILayout.BeginHorizontal();
             GUILayout.Label("缩略图大小", GUILayout.Width(60));
@@ -101,12 +112,23 @@ namespace bluebean.UGFramework
             {
                 EditorGUILayout.HelpBox(batchStatus, MessageType.Info);
             }
+            // 过滤场景
+            List<int> filteredIdx = new List<int>();
+            for (int i = 0; i < scenePaths.Count; i++)
+            {
+                string sceneName = Path.GetFileNameWithoutExtension(scenePaths[i]);
+                if (string.IsNullOrEmpty(searchText) || sceneName.ToLower().Contains(searchText.ToLower()))
+                {
+                    filteredIdx.Add(i);
+                }
+            }
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
             if (iconSize <= 48)
             {
                 // 列表模式
-                for (int idx = 0; idx < scenePaths.Count; idx++)
+                for (int f = 0; f < filteredIdx.Count; f++)
                 {
+                    int idx = filteredIdx[f];
                     EditorGUILayout.BeginHorizontal();
                     if (GUILayout.Button(sceneIcons[idx], GUILayout.Width(iconSize), GUILayout.Height(iconSize)))
                     {
@@ -127,26 +149,27 @@ namespace bluebean.UGFramework
             {
                 // 网格模式
                 int columns = Mathf.Max(1, (int)((position.width - padding) / (iconSize + padding)));
-                int rows = Mathf.CeilToInt((float)scenePaths.Count / columns);
+                int rows = Mathf.CeilToInt((float)filteredIdx.Count / columns);
                 int idx = 0;
                 for (int row = 0; row < rows; row++)
                 {
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Space(padding);
-                    for (int col = 0; col < columns && idx < scenePaths.Count; col++, idx++)
+                    for (int col = 0; col < columns && idx < filteredIdx.Count; col++, idx++)
                     {
+                        int realIdx = filteredIdx[idx];
                         GUILayout.BeginVertical(GUILayout.Width(iconSize));
-                        if (GUILayout.Button(sceneIcons[idx], GUILayout.Width(iconSize), GUILayout.Height(iconSize)))
+                        if (GUILayout.Button(sceneIcons[realIdx], GUILayout.Width(iconSize), GUILayout.Height(iconSize)))
                         {
-                            if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[idx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
+                            if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[realIdx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
                             {
                                 if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
                                 {
-                                    EditorSceneManager.OpenScene(scenePaths[idx]);
+                                    EditorSceneManager.OpenScene(scenePaths[realIdx]);
                                 }
                             }
                         }
-                        string sceneName = Path.GetFileNameWithoutExtension(scenePaths[idx]);
+                        string sceneName = Path.GetFileNameWithoutExtension(scenePaths[realIdx]);
                         GUILayout.Label(sceneName, EditorStyles.miniLabel, GUILayout.Width(iconSize), GUILayout.Height(labelHeight));
                         GUILayout.EndVertical();
                         GUILayout.Space(padding);
