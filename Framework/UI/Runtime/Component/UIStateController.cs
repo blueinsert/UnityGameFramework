@@ -38,6 +38,10 @@ namespace bluebean.UGFramework.UI
         /// 播放指定的Tweener
         /// </summary>
         public List<TweenMain> m_tweeners = new List<TweenMain>();
+        /// <summary>
+        /// 播放指定的Timeline
+        /// </summary>
+        public List<UnityEngine.Playables.PlayableDirector> m_timelineDirectors = new List<UnityEngine.Playables.PlayableDirector>();
     }
 
     /// <summary>
@@ -66,6 +70,10 @@ namespace bluebean.UGFramework.UI
         /// 所有tweener
         /// </summary>
         private readonly List<TweenMain> m_allTweeners = new List<TweenMain>();
+        /// <summary>
+        /// 所有timeline director
+        /// </summary>
+        private readonly List<UnityEngine.Playables.PlayableDirector> m_allTimelineDirectors = new List<UnityEngine.Playables.PlayableDirector>();
 
         #endregion
 
@@ -88,6 +96,16 @@ namespace bluebean.UGFramework.UI
                 {
                     if(tweener != null)
                         m_allTweeners.Add(tweener);
+                }
+            }
+            //收集所有timeline director
+            m_allTimelineDirectors.Clear();
+            foreach (var uiStateDesc in m_uiStateDescs)
+            {
+                foreach (var director in uiStateDesc.m_timelineDirectors)
+                {
+                    if(director != null)
+                        m_allTimelineDirectors.Add(director);
                 }
             }
             m_hasCollect = true;
@@ -131,6 +149,14 @@ namespace bluebean.UGFramework.UI
                     tweener.enabled = false;
                 } 
             }
+            //停止所有timeline
+            foreach (var director in m_allTimelineDirectors)
+            {
+                if (director != null)
+                {
+                    director.Stop();
+                }
+            }
             //显示当前state的物体
             foreach (var go in uiStateDesc.m_activeObjects)
             {
@@ -156,67 +182,63 @@ namespace bluebean.UGFramework.UI
             bool hasTweeners = uiStateDesc.m_tweeners != null && uiStateDesc.m_tweeners.Count != 0;
             var lastState = m_curState;
             m_curState = stateName;
-            if (!hasTweeners)
-            {
-                if (onEnd != null)
-                {
-                    onEnd();
-                }
-            }
-            else
-            {
-                if (lastState == m_curState && !refreshTheSameState)
+           
+            //播放当前state的timeline和tweener，联合完成回调
+            int timelineCount = (uiStateDesc.m_timelineDirectors != null) ? uiStateDesc.m_timelineDirectors.Count : 0;
+            int timelineFinished = 0;
+            int tweenerCount = (uiStateDesc.m_tweeners != null) ? uiStateDesc.m_tweeners.Count : 0;
+            int tweenerFinished = 0;
+            System.Action tryInvokeEnd = () => {
+                if ((timelineCount == 0 || timelineFinished >= timelineCount) && (tweenerCount == 0 || tweenerFinished >= tweenerCount))
                 {
                     if (onEnd != null)
-                    {
                         onEnd();
-                    }
                 }
-                else
+            };
+            // timeline
+            if(timelineCount > 0)
+            {
+                foreach(var director in uiStateDesc.m_timelineDirectors)
                 {
-                    var tweeners = uiStateDesc.m_tweeners;
-                    foreach (var tweener in tweeners)
+                    if(director != null)
                     {
-                        if (tweener != null)
-                        {
-                            //重置到起点
-                            tweener.ResetToBeginning();
-                            //移除所有事件
-                            tweener.OnFinished.RemoveAllListeners();
-                        }  
-                    }
-                    //找到最长的tweener
-                    TweenMain longestTweener = null;
-                    float longestDuration = 0;
-                    foreach (var tweener in tweeners)
-                    {
-                        if (tweener != null)
-                        {
-                            if (tweener.delay + tweener.duration > longestDuration)
-                            {
-                                longestDuration = tweener.delay + tweener.duration;
-                                longestTweener = tweener;
-                            }
-                        }  
-                    }
-                    //设置回调事件
-                    longestTweener.OnFinished.AddListener(() =>
-                    {
-                        if (onEnd != null)
-                        {
-                            onEnd();
-                        }
-                    });
-                    //播放所有tweener
-                    foreach (var tweener in tweeners)
-                    {
-                        if (tweener != null)
-                        {
-                            tweener.enabled = true;
-                            tweener.PlayForward();
-                        }   
+                        director.time = 0;
+                        director.stopped -= OnTimelineStopped;
+                        director.stopped += OnTimelineStopped;
+                        director.Play();
                     }
                 }
+            }
+            // tweener
+            if(tweenerCount > 0)
+            {
+                foreach (var tweener in uiStateDesc.m_tweeners)
+                {
+                    if (tweener != null)
+                    {
+                        if(tweener.delay <= 0)
+                        {
+                            tweener.ResetToBeginning();
+                        }
+                        tweener.OnFinished.RemoveAllListeners();
+                        tweener.OnFinished.AddListener(() => {
+                            tweenerFinished++;
+                            tryInvokeEnd();
+                        });
+                        tweener.enabled = true;
+                        tweener.PlayForward();
+                    }
+                }
+            }
+            // 如果都没有，直接回调
+            if (timelineCount == 0 && tweenerCount == 0 && onEnd != null)
+            {
+                onEnd();
+            }
+            void OnTimelineStopped(UnityEngine.Playables.PlayableDirector d)
+            {
+                timelineFinished++;
+                tryInvokeEnd();
             }
         }
 
