@@ -136,12 +136,14 @@ MonoBehaviour:
     m_tweeners:
     - {fileID: 2079103112865745857}
     - {fileID: 2078652405673741967}
+    m_timelineDirectors: []
   - m_stateName: Close
     m_activeObjects: []
     m_uiColorDescs: []
     m_tweeners:
     - {fileID: 2077689776364818355}
     - {fileID: 2079367663064471875}
+    m_timelineDirectors: []
 --- !u!1 &2110227086197005399
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,7 +328,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5471698, g: 0.5471698, b: 0.5471698, a: 1}
+  m_Color: {r: 0.7169812, g: 0.7169812, b: 0.7169812, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -778,7 +780,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.8396226, g: 0.8396226, b: 0.8396226, a: 0.497}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.497}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
