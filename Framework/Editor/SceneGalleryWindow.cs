@@ -22,6 +22,10 @@ namespace bluebean.UGFramework
         private int batchIndex = 0;
         private string originalScenePath = null;
         private string searchText = "";
+        private int selectedIndex = -1;
+        private double lastClickTime = 0;
+        private int lastClickedIndex = -1;
+        private const float doubleClickTime = 0.3f;
 
          #region 单例模式
         private static SceneGalleryWindow m_instance;
@@ -130,14 +134,30 @@ namespace bluebean.UGFramework
                 {
                     int idx = filteredIdx[f];
                     EditorGUILayout.BeginHorizontal();
-                    if (GUILayout.Button(sceneIcons[idx], GUILayout.Width(iconSize), GUILayout.Height(iconSize)))
+                    Rect iconRect = GUILayoutUtility.GetRect(iconSize, iconSize, GUILayout.Width(iconSize), GUILayout.Height(iconSize));
+                    bool isSelected = (idx == selectedIndex);
+                    if (isSelected)
                     {
-                        if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[idx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
+                        EditorGUI.DrawRect(new Rect(iconRect.x - 2, iconRect.y - 2, iconRect.width + 4, iconRect.height + 4), new Color(0.3f, 0.6f, 1f, 0.5f));
+                    }
+                    if (GUI.Button(iconRect, sceneIcons[idx]))
+                    {
+                        if (selectedIndex == idx && lastClickedIndex == idx && (EditorApplication.timeSinceStartup - lastClickTime) < doubleClickTime)
                         {
-                            if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                            // 双击打开场景
+                            //if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[idx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
                             {
-                                EditorSceneManager.OpenScene(scenePaths[idx]);
+                                if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                                {
+                                    EditorSceneManager.OpenScene(scenePaths[idx]);
+                                }
                             }
+                        }
+                        else
+                        {
+                            selectedIndex = idx;
+                            lastClickTime = EditorApplication.timeSinceStartup;
+                            lastClickedIndex = idx;
                         }
                     }
                     GUILayout.Label(Path.GetFileName(scenePaths[idx]), GUILayout.Height(iconSize), GUILayout.ExpandWidth(true));
@@ -159,14 +179,30 @@ namespace bluebean.UGFramework
                     {
                         int realIdx = filteredIdx[idx];
                         GUILayout.BeginVertical(GUILayout.Width(iconSize));
-                        if (GUILayout.Button(sceneIcons[realIdx], GUILayout.Width(iconSize), GUILayout.Height(iconSize)))
+                        Rect iconRect = GUILayoutUtility.GetRect(iconSize, iconSize, GUILayout.Width(iconSize), GUILayout.Height(iconSize));
+                        bool isSelected = (realIdx == selectedIndex);
+                        if (isSelected)
                         {
-                            if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[realIdx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
+                            EditorGUI.DrawRect(new Rect(iconRect.x - 2, iconRect.y - 2, iconRect.width + 4, iconRect.height + 4), new Color(0.3f, 0.6f, 1f, 0.5f));
+                        }
+                        if (GUI.Button(iconRect, sceneIcons[realIdx]))
+                        {
+                            if (selectedIndex == realIdx && lastClickedIndex == realIdx && (EditorApplication.timeSinceStartup - lastClickTime) < doubleClickTime)
                             {
-                                if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                                // 双击打开场景
+                                //if (UnityEditor.EditorUtility.DisplayDialog("打开场景", $"确定要打开场景：{Path.GetFileNameWithoutExtension(scenePaths[realIdx])} 吗？\n当前场景如有未保存内容将提示保存。", "确定", "取消"))
                                 {
-                                    EditorSceneManager.OpenScene(scenePaths[realIdx]);
+                                    if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                                    {
+                                        EditorSceneManager.OpenScene(scenePaths[realIdx]);
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                selectedIndex = realIdx;
+                                lastClickTime = EditorApplication.timeSinceStartup;
+                                lastClickedIndex = realIdx;
                             }
                         }
                         string sceneName = Path.GetFileNameWithoutExtension(scenePaths[realIdx]);
@@ -179,6 +215,9 @@ namespace bluebean.UGFramework
                 }
             }
             EditorGUILayout.EndScrollView();
+
+            // 右下角显示详细信息
+            DrawSceneDetailInfo();
         }
 
         void BatchGenerateThumbnails()
@@ -232,6 +271,31 @@ namespace bluebean.UGFramework
             File.WriteAllBytes(filePath, screenShot.EncodeToPNG());
             AssetDatabase.ImportAsset(filePath);
             batchStatus = $"{sceneName} 缩略图已生成";
+        }
+
+        void DrawSceneDetailInfo()
+        {
+            if (selectedIndex < 0 || selectedIndex >= scenePaths.Count)
+                return;
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.BeginVertical(GUI.skin.box);
+            string path = scenePaths[selectedIndex];
+            string sceneName = Path.GetFileNameWithoutExtension(path);
+            string thumbPath = $"Assets/SceneThumbnails/{sceneName}.png";
+            bool hasThumb = File.Exists(thumbPath);
+            string thumbInfo = hasThumb ? "有缩略图" : "无缩略图";
+            // 检查主摄像机
+            bool hasMainCamera = false;
+            if (UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().path == path)
+            {
+                var cam = Camera.main;
+                hasMainCamera = cam != null;
+            }
+            EditorGUILayout.LabelField($"场景名: {sceneName}");
+            EditorGUILayout.LabelField($"路径: {path}");
+            EditorGUILayout.LabelField($"缩略图: {thumbInfo}");
+            EditorGUILayout.LabelField($"主摄像机: {(hasMainCamera ? "有" : "无/未知 (需打开场景)")}");
+            EditorGUILayout.EndVertical();
         }
     }
 }
