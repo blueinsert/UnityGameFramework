@@ -7,6 +7,7 @@ namespace bluebean.Framework.CurveEditor
     public class CurveSegment
     {
         public List<Vector3> points = new List<Vector3>();
+        public bool isHidden = false;
     }
 
     [CreateAssetMenu(fileName = "CurveData", menuName = "Custom/CurveData", order = 1)]

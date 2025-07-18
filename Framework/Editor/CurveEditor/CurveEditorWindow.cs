@@ -28,6 +28,14 @@ namespace bluebean.Framework.CurveEditor
         private int currentCurveIndex = 0;
         private const float curveLineWidth = 4f;
         private HashSet<int> selectedPoints = new HashSet<int>();
+        private double lastClickTime = 0;
+        private int lastClickedPoint = -1;
+        private const float doubleClickInterval = 0.3f;
+        private double lastSegmentClickTime = 0;
+        private int lastClickedSegment = -1;
+        // 移除 isBoxSelecting, boxStart, boxEnd, boxSelectThreshold 相关字段和所有框选相关逻辑
+        private bool mouseDownOnEmpty = false;
+        private bool isEnable = true;
 
         // EditorPrefs缓存Key
         private const string PrefKey_CurveData = "CurveEditorWindow_CurveData";
@@ -35,7 +43,7 @@ namespace bluebean.Framework.CurveEditor
         private const string PrefKey_InterpolationType = "CurveEditorWindow_InterpolationType";
         private const string PrefKey_DiscretizeSpacing = "CurveEditorWindow_DiscretizeSpacing";
 
-        [MenuItem("Tools/Curve Editor")]
+        [MenuItem("Framework/Tools/Curve Editor")]
         public static void ShowWindow()
         {
             GetWindow<CurveEditorWindow>("Curve Editor");
@@ -69,6 +77,14 @@ namespace bluebean.Framework.CurveEditor
 
         private void OnGUI()
         {
+            EditorGUILayout.BeginHorizontal();
+            isEnable = EditorGUILayout.ToggleLeft("启用曲线编辑", isEnable, GUILayout.Width(120));
+            EditorGUILayout.EndHorizontal();
+            if (!isEnable)
+            {
+                EditorGUILayout.HelpBox("CurveEditorWindow已禁用。", MessageType.Info);
+                return;
+            }
             curveData = (CurveData)EditorGUILayout.ObjectField("Curve Data", curveData, typeof(CurveData), false);
             if (curveData != null)
             {
@@ -98,7 +114,10 @@ namespace bluebean.Framework.CurveEditor
                 if (GUILayout.Button("添加曲线", GUILayout.Width(80)))
                 {
                     Undo.RecordObject(curveData, "Add Curve");
-                    curveData.curves.Add(new CurveSegment());
+                    var newCurve = new CurveSegment();
+                    newCurve.points.Add(Vector3.zero);
+                    newCurve.points.Add(Vector3.right);
+                    curveData.curves.Add(newCurve);
                     currentCurveIndex = curveData.curves.Count - 1;
                     EditorUtility.SetDirty(curveData);
                     GUI.FocusControl(null);
@@ -115,6 +134,9 @@ namespace bluebean.Framework.CurveEditor
                         newCurve.points.AddRange(src);
                         curveData.curves.Add(newCurve);
                         currentCurveIndex = curveData.curves.Count - 1;
+                        selectedPoints.Clear();
+                        for (int i = 0; i < newCurve.points.Count; i++)
+                            selectedPoints.Add(i);
                         EditorUtility.SetDirty(curveData);
                         GUI.FocusControl(null);
                         SceneView.RepaintAll();
@@ -138,6 +160,20 @@ namespace bluebean.Framework.CurveEditor
                         selectedPoints.Clear();
                         EditorUtility.SetDirty(curveData);
                         GUI.FocusControl(null);
+                        SceneView.RepaintAll();
+                        Repaint();
+                    }
+                }
+                // 当前曲线隐藏toggle
+                if (curveData.curves.Count > 0)
+                {
+                    bool isHidden = curveData.curves[currentCurveIndex].isHidden;
+                    bool newHidden = EditorGUILayout.ToggleLeft("隐藏当前曲线", isHidden, GUILayout.Width(100));
+                    if (newHidden != isHidden)
+                    {
+                        Undo.RecordObject(curveData, "Toggle Curve Hidden");
+                        curveData.curves[currentCurveIndex].isHidden = newHidden;
+                        EditorUtility.SetDirty(curveData);
                         SceneView.RepaintAll();
                         Repaint();
                     }
@@ -181,6 +217,8 @@ namespace bluebean.Framework.CurveEditor
                         newPoint = last + tangent * 0.1f;
                     }
                     curveData.curves[currentCurveIndex].points.Add(newPoint);
+                    selectedPoints.Clear();
+                    selectedPoints.Add(curveData.curves[currentCurveIndex].points.Count - 1);
                     EditorUtility.SetDirty(curveData);
                 }
                 if (GUILayout.Button("Clear Points"))
@@ -189,30 +227,66 @@ namespace bluebean.Framework.CurveEditor
                     curveData.curves[currentCurveIndex].points.Clear();
                     EditorUtility.SetDirty(curveData);
                 }
+                if (GUILayout.Button("删除选中控制点", GUILayout.Width(120)))
+                {
+                    var points = curveData.curves[currentCurveIndex].points;
+                    if (selectedPoints.Count > 0 && points.Count > 0)
+                    {
+                        Undo.RecordObject(curveData, "Delete Selected Points");
+                        // 倒序删除，避免索引错乱
+                        var toDelete = new List<int>(selectedPoints);
+                        toDelete.Sort((a, b) => b.CompareTo(a));
+                        foreach (var idx in toDelete)
+                        {
+                            if (idx >= 0 && idx < points.Count)
+                                points.RemoveAt(idx);
+                        }
+                        selectedPoints.Clear();
+                        EditorUtility.SetDirty(curveData);
+                        SceneView.RepaintAll();
+                        Repaint();
+                    }
+                }
+                if (GUILayout.Button("全选控制点", GUILayout.Width(100)))
+                {
+                    selectedPoints.Clear();
+                    var points = curveData.curves[currentCurveIndex].points;
+                    for (int i = 0; i < points.Count; i++)
+                        selectedPoints.Add(i);
+                    SceneView.RepaintAll();
+                    Repaint();
+                }
             }
         }
 
         private void OnSceneGUI(SceneView sceneView)
         {
+            if (!isEnable) return;
             if (curveData == null || curveData.curves.Count == 0) return;
             Event e = Event.current;
+            // 保证Unity原生Alt视图操作不被拦截
+            //if ((e.modifiers & EventModifiers.Alt) != 0)
+            //    return;
             hoveredPoint = -1;
             hoveredSegment = -1;
             var points = curveData.curves[currentCurveIndex].points;
 
             // 1. 先画所有非当前曲线（灰色，不可交互）
-            Handles.color = Color.gray;
+            Handles.color = Color.blue;
             for (int c = 0; c < curveData.curves.Count; c++)
             {
                 if (c == currentCurveIndex) continue;
+                if (curveData.curves[c].isHidden) continue;
                 var curve = curveData.curves[c].points;
                 if (curve.Count < 2) continue;
+                Handles.color = Color.blue;
                 for (int i = 0; i < curve.Count; i++)
                 {
                     Vector3 pos = curve[i];
-                    float size = HandleUtility.GetHandleSize(pos) * pointPickSize;
-                    Handles.DrawWireCube(pos, Vector3.one * size * 1.5f);
+                    float size = HandleUtility.GetHandleSize(pos) * pointPickSize * 1.2f;
+                    Handles.SphereHandleCap(0, pos, Quaternion.identity, size, EventType.Repaint);
                 }
+                Handles.color = Color.gray;
                 if (interpolationType == CurveInterpolationType.Linear)
                 {
                     for (int i = 0; i < curve.Count - 1; i++)
@@ -229,43 +303,54 @@ namespace bluebean.Framework.CurveEditor
             }
 
             // 2. 画当前曲线点和拖拽
-            Handles.color = Color.green;
-            for (int i = 0; i < points.Count; i++)
+            if (!curveData.curves[currentCurveIndex].isHidden)
             {
-                Vector3 pos = points[i];
-                float size = HandleUtility.GetHandleSize(pos) * pointPickSize;
-                bool isSelected = selectedPoints.Contains(i);
-                Handles.color = isSelected ? Color.red : Color.green;
-                if (Handles.Button(pos, Quaternion.identity, size, size, Handles.SphereHandleCap))
+                Handles.color = Color.green;
+                for (int i = 0; i < points.Count; i++)
                 {
-                    if (e.control || e.shift)
+                    Vector3 pos = points[i];
+                    float size = HandleUtility.GetHandleSize(pos) * pointPickSize;
+                    bool isSelected = selectedPoints.Contains(i);
+                    Handles.color = isSelected ? Color.red : Color.green;
+                    if (Handles.Button(pos, Quaternion.identity, size, size, Handles.SphereHandleCap))
                     {
-                        if (isSelected) selectedPoints.Remove(i);
-                        else selectedPoints.Add(i);
+                        // 双击检测
+                        if (lastClickedPoint == i && EditorApplication.timeSinceStartup - lastClickTime < doubleClickInterval)
+                        {
+                            SceneView.lastActiveSceneView.LookAt(pos);
+                        }
+                        lastClickTime = EditorApplication.timeSinceStartup;
+                        lastClickedPoint = i;
+                        if (e.control || e.shift)
+                        {
+                            if (isSelected) selectedPoints.Remove(i);
+                            else selectedPoints.Add(i);
+                        }
+                        else
+                        {
+                            selectedPoints.Clear();
+                            selectedPoints.Add(i);
+                        }
+                        GUI.FocusControl(null);
+                        SceneView.RepaintAll();
                     }
-                    else
+                    // 单点拖拽
+                    if (isSelected && selectedPoints.Count == 1)
                     {
-                        selectedPoints.Clear();
-                        selectedPoints.Add(i);
+                        EditorGUI.BeginChangeCheck();
+                        Vector3 newPos = Handles.PositionHandle(pos, Quaternion.identity);
+                        if (EditorGUI.EndChangeCheck())
+                        {
+                            Undo.RecordObject(curveData, "Move Point");
+                            points[i] = newPos;
+                            EditorUtility.SetDirty(curveData);
+                        }
                     }
-                    GUI.FocusControl(null);
-                    SceneView.RepaintAll();
-                }
-                // 单点拖拽
-                if (isSelected && selectedPoints.Count == 1)
-                {
-                    EditorGUI.BeginChangeCheck();
-                    Vector3 newPos = Handles.PositionHandle(pos, Quaternion.identity);
-                    if (EditorGUI.EndChangeCheck())
+                    if (HandleUtility.DistanceToCircle(pos, size) < 10f)
                     {
-                        Undo.RecordObject(curveData, "Move Point");
-                        points[i] = newPos;
-                        EditorUtility.SetDirty(curveData);
+                        hoveredPoint = i;
                     }
-                }
-                if (HandleUtility.DistanceToCircle(pos, size) < 10f)
-                {
-                    hoveredPoint = i;
+
                 }
             }
             Handles.color = Color.yellow;
@@ -305,19 +390,52 @@ namespace bluebean.Framework.CurveEditor
                     DrawCatmullRomCurve(points, true);
                 }
             }
-            // 检测段悬停、右键菜单等后续逻辑不变...
-
-            // 3. 检测段悬停
+            // 检测段悬停
             if (points.Count >= 2)
             {
+                int bestSeg = -1;
+                float bestDist = float.MaxValue;
+                Vector3 bestCurvePos = Vector3.zero;
+                int bestInsertIdx = -1;
+                Vector2 mousePos = Event.current.mousePosition;
+                // 对每个段采样，找最近点
                 for (int i = 0; i < points.Count - 1; i++)
                 {
-                    Vector3 p0 = points[i];
-                    Vector3 p1 = points[i + 1];
-                    float dist = HandleUtility.DistancePointLine(Event.current.mousePosition, HandleUtility.WorldToGUIPoint(p0), HandleUtility.WorldToGUIPoint(p1));
-                    if (dist < 10f)
+                    int sampleCount = 30;
+                    float tStart = i / (float)(points.Count - 1);
+                    float tEnd = (i + 1) / (float)(points.Count - 1);
+                    for (int s = 0; s <= sampleCount; s++)
                     {
-                        hoveredSegment = i;
+                        float t = Mathf.Lerp(tStart, tEnd, s / (float)sampleCount);
+                        Vector3 pt = SampleCurveAt(t, points, interpolationType);
+                        float dist = (HandleUtility.WorldToGUIPoint(pt) - mousePos).magnitude;
+                        if (dist < bestDist)
+                        {
+                            bestDist = dist;
+                            bestSeg = i;
+                            bestCurvePos = pt;
+                            bestInsertIdx = i + 1;
+                        }
+                    }
+                }
+                if (bestDist < 15f) // 鼠标足够靠近曲线
+                {
+                    hoveredSegment = bestSeg;
+                    // 双击曲线插入点
+                    if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+                    {
+                        if (lastClickedSegment == bestSeg && EditorApplication.timeSinceStartup - lastSegmentClickTime < doubleClickInterval)
+                        {
+                            Undo.RecordObject(curveData, "Insert Point By DoubleClick");
+                            points.Insert(bestInsertIdx, bestCurvePos);
+                            selectedPoints.Clear();
+                            selectedPoints.Add(bestInsertIdx);
+                            EditorUtility.SetDirty(curveData);
+                            SceneView.RepaintAll();
+                            Event.current.Use();
+                        }
+                        lastSegmentClickTime = EditorApplication.timeSinceStartup;
+                        lastClickedSegment = bestSeg;
                     }
                 }
             }
@@ -328,7 +446,8 @@ namespace bluebean.Framework.CurveEditor
                 GenericMenu menu = new GenericMenu();
                 if (hoveredPoint != -1)
                 {
-                    menu.AddItem(new GUIContent("删除点"), false, () => {
+                    menu.AddItem(new GUIContent("删除点"), false, () =>
+                    {
                         Undo.RecordObject(curveData, "Delete Point");
                         points.RemoveAt(hoveredPoint);
                         EditorUtility.SetDirty(curveData);
@@ -336,7 +455,8 @@ namespace bluebean.Framework.CurveEditor
                 }
                 if (hoveredSegment != -1)
                 {
-                    menu.AddItem(new GUIContent("插入点"), false, () => {
+                    menu.AddItem(new GUIContent("插入点"), false, () =>
+                    {
                         Undo.RecordObject(curveData, "Insert Point");
                         Vector3 p0 = points[hoveredSegment];
                         Vector3 p1 = points[hoveredSegment + 1];
@@ -347,6 +467,53 @@ namespace bluebean.Framework.CurveEditor
                 }
                 menu.ShowAsContext();
                 e.Use();
+            }
+            // 处理点击空白处取消选择（仅单击且无拖动/框选/点/段命中时）
+            if (e.type == EventType.MouseDown && e.button == 0)
+            {
+                if (hoveredPoint == -1 && hoveredSegment == -1 && !mouseDownOnEmpty)
+                    mouseDownOnEmpty = true;
+                else
+                    mouseDownOnEmpty = false;
+            }
+            if (e.type == EventType.MouseDrag && e.button == 0)
+            {
+                mouseDownOnEmpty = false;
+            }
+            if (e.type == EventType.MouseUp && e.button == 0)
+            {
+                if (mouseDownOnEmpty && hoveredPoint == -1 && hoveredSegment == -1)
+                {
+                    if (selectedPoints.Count > 0)
+                    {
+                        selectedPoints.Clear();
+                        GUI.FocusControl(null);
+                        SceneView.RepaintAll();
+                        Repaint();
+                    }
+                }
+                mouseDownOnEmpty = false;
+            }
+            // 处理Delete/Backspace快捷键删除选中控制点
+            if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Delete || Event.current.keyCode == KeyCode.Backspace))
+            {
+                var delPoints = curveData.curves[currentCurveIndex].points;
+                if (selectedPoints.Count > 0 && delPoints.Count > 0)
+                {
+                    Undo.RecordObject(curveData, "Delete Selected Points");
+                    var toDelete = new List<int>(selectedPoints);
+                    toDelete.Sort((a, b) => b.CompareTo(a));
+                    foreach (var idx in toDelete)
+                    {
+                        if (idx >= 0 && idx < delPoints.Count)
+                            delPoints.RemoveAt(idx);
+                    }
+                    selectedPoints.Clear();
+                    EditorUtility.SetDirty(curveData);
+                    SceneView.RepaintAll();
+                    Repaint();
+                    Event.current.Use();
+                }
             }
         }
 
@@ -649,6 +816,12 @@ namespace bluebean.Framework.CurveEditor
             }
             return points[0];
         }
+
+        // 工具函数：生成矩形
+        private static Rect MakeRect(Vector2 a, Vector2 b)
+        {
+            return new Rect(Mathf.Min(a.x, b.x), Mathf.Min(a.y, b.y), Mathf.Abs(a.x - b.x), Mathf.Abs(a.y - b.y));
+        }
     }
 
     [CustomEditor(typeof(CurveData))]
@@ -709,4 +882,4 @@ namespace bluebean.Framework.CurveEditor
             return new GUIContent("Curve Preview");
         }
     }
-} 
+}
