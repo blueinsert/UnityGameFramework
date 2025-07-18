@@ -29,6 +29,12 @@ namespace bluebean.Framework.CurveEditor
         private const float curveLineWidth = 4f;
         private HashSet<int> selectedPoints = new HashSet<int>();
 
+        // EditorPrefs缓存Key
+        private const string PrefKey_CurveData = "CurveEditorWindow_CurveData";
+        private const string PrefKey_ParticlePrefab = "CurveEditorWindow_ParticlePrefab";
+        private const string PrefKey_InterpolationType = "CurveEditorWindow_InterpolationType";
+        private const string PrefKey_DiscretizeSpacing = "CurveEditorWindow_DiscretizeSpacing";
+
         [MenuItem("Tools/Curve Editor")]
         public static void ShowWindow()
         {
@@ -38,11 +44,27 @@ namespace bluebean.Framework.CurveEditor
         private void OnEnable()
         {
             SceneView.duringSceneGui += OnSceneGUI;
+            // 恢复缓存
+            string curveDataPath = EditorPrefs.GetString(PrefKey_CurveData, "");
+            if (!string.IsNullOrEmpty(curveDataPath))
+                curveData = AssetDatabase.LoadAssetAtPath<CurveData>(curveDataPath);
+            string prefabPath = EditorPrefs.GetString(PrefKey_ParticlePrefab, "");
+            if (!string.IsNullOrEmpty(prefabPath))
+                particlePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            interpolationType = (CurveInterpolationType)EditorPrefs.GetInt(PrefKey_InterpolationType, (int)CurveInterpolationType.Bezier);
+            discretizeSpacing = EditorPrefs.GetFloat(PrefKey_DiscretizeSpacing, 1.0f);
         }
 
         private void OnDisable()
         {
             SceneView.duringSceneGui -= OnSceneGUI;
+            // 保存缓存
+            if (curveData != null)
+                EditorPrefs.SetString(PrefKey_CurveData, AssetDatabase.GetAssetPath(curveData));
+            if (particlePrefab != null)
+                EditorPrefs.SetString(PrefKey_ParticlePrefab, AssetDatabase.GetAssetPath(particlePrefab));
+            EditorPrefs.SetInt(PrefKey_InterpolationType, (int)interpolationType);
+            EditorPrefs.SetFloat(PrefKey_DiscretizeSpacing, discretizeSpacing);
         }
 
         private void OnGUI()
