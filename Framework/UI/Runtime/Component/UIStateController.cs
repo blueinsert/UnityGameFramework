@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
+using UnityEngine.Timeline;
 
 namespace bluebean.UGFramework.UI
 {
@@ -14,6 +16,22 @@ namespace bluebean.UGFramework.UI
     {
         public GameObject m_gameObject;
         public Color m_color;
+    }
+
+    /// <summary>
+    /// Timeline和状态名的组合
+    /// </summary>
+    [Serializable]
+    public class TimelineStateDesc
+    {
+        /// <summary>
+        /// Timeline组件
+        /// </summary>
+        public UnityEngine.Playables.PlayableDirector m_timelineDirector;
+        /// <summary>
+        /// 要播放的状态名（轨道组名）
+        /// </summary>
+        public string m_stateName;
     }
 
     /// <summary>
@@ -39,9 +57,9 @@ namespace bluebean.UGFramework.UI
         /// </summary>
         public List<TweenMain> m_tweeners = new List<TweenMain>();
         /// <summary>
-        /// 播放指定的Timeline
+        /// 播放指定的Timeline和状态组合
         /// </summary>
-        public List<UnityEngine.Playables.PlayableDirector> m_timelineDirectors = new List<UnityEngine.Playables.PlayableDirector>();
+        public List<TimelineStateDesc> m_timelineStates = new List<TimelineStateDesc>();
     }
 
     /// <summary>
@@ -77,6 +95,62 @@ namespace bluebean.UGFramework.UI
 
         #endregion
 
+        // 只启用指定GroupTrack及其子轨道，其它全部禁用
+        private void EnableOnlyGroupTrack(UnityEngine.Playables.PlayableDirector director, string groupName)
+        {
+            if (director == null || director.playableAsset == null)
+                return;
+            var timelineAsset = director.playableAsset as TimelineAsset;
+            if (timelineAsset == null)
+                return;
+            // 禁用所有轨道
+            foreach (var rootTrack in timelineAsset.GetRootTracks())
+                SetTrackMuteRecursive(rootTrack, true);
+            // 查找目标GroupTrack并启用
+            var targetGroup = FindGroupTrackByName(timelineAsset, groupName);
+            if (targetGroup != null)
+            {
+                SetTrackMuteRecursive(targetGroup, false);
+                // 重建Timeline图，确保生效
+                double t = director.time;
+                director.RebuildGraph();
+                director.time = t;
+                director.Play();
+            }
+            else
+            {
+                Debug.LogWarning($"未找到名为 {groupName} 的GroupTrack");
+            }
+        }
+        // 递归设置轨道及其子轨道的mute
+        private void SetTrackMuteRecursive(TrackAsset track, bool mute)
+        {
+            track.muted = mute;
+            foreach (var child in track.GetChildTracks())
+                SetTrackMuteRecursive(child, mute);
+        }
+        // 在TimelineAsset中查找指定名称的GroupTrack
+        private GroupTrack FindGroupTrackByName(TimelineAsset asset, string groupName)
+        {
+            foreach (var root in asset.GetRootTracks())
+            {
+                var found = FindGroupTrackRecursive(root, groupName);
+                if (found != null) return found;
+            }
+            return null;
+        }
+        private GroupTrack FindGroupTrackRecursive(TrackAsset track, string groupName)
+        {
+            if (track is GroupTrack group && group.name == groupName)
+                return group;
+            foreach (var child in track.GetChildTracks())
+            {
+                var found = FindGroupTrackRecursive(child, groupName);
+                if (found != null) return found;
+            }
+            return null;
+        }
+
         public void CollectResources()
         {
             //收集所有设置为Active的物体
@@ -102,10 +176,12 @@ namespace bluebean.UGFramework.UI
             m_allTimelineDirectors.Clear();
             foreach (var uiStateDesc in m_uiStateDescs)
             {
-                foreach (var director in uiStateDesc.m_timelineDirectors)
+                foreach (var timelineState in uiStateDesc.m_timelineStates)
                 {
-                    if(director != null)
-                        m_allTimelineDirectors.Add(director);
+                    if(timelineState != null && timelineState.m_timelineDirector != null)
+                    {
+                        m_allTimelineDirectors.Add(timelineState.m_timelineDirector);
+                    }
                 }
             }
             m_hasCollect = true;
@@ -184,7 +260,7 @@ namespace bluebean.UGFramework.UI
             m_curState = stateName;
            
             //播放当前state的timeline和tweener，联合完成回调
-            int timelineCount = (uiStateDesc.m_timelineDirectors != null) ? uiStateDesc.m_timelineDirectors.Count : 0;
+            int timelineCount = (uiStateDesc.m_timelineStates != null) ? uiStateDesc.m_timelineStates.Count : 0;
             int timelineFinished = 0;
             int tweenerCount = (uiStateDesc.m_tweeners != null) ? uiStateDesc.m_tweeners.Count : 0;
             int tweenerFinished = 0;
@@ -198,10 +274,13 @@ namespace bluebean.UGFramework.UI
             // timeline
             if(timelineCount > 0)
             {
-                foreach(var director in uiStateDesc.m_timelineDirectors)
+                foreach(var timelineState in uiStateDesc.m_timelineStates)
                 {
-                    if(director != null)
+                    if(timelineState != null && timelineState.m_timelineDirector != null)
                     {
+                        var director = timelineState.m_timelineDirector;
+                        // 只启用与状态名同名的GroupTrack
+                        EnableOnlyGroupTrack(director, timelineState.m_stateName);
                         director.time = 0;
                         director.stopped -= OnTimelineStopped;
                         director.stopped += OnTimelineStopped;
