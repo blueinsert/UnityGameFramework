@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace bluebean.Framework.UI
+namespace bluebean.UGFramework.UI
 {
     /// <summary>
     /// UIDocument管理器，负责管理UI文档的显示内容
