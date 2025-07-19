@@ -31,6 +31,10 @@ namespace bluebean.UGFramework.Asset
 
         public static string MakeAssetPath(string path)
         {
+            if (path.StartsWith(RuntimeAssetsPath))
+            {
+                return path;
+            }
             return string.Format("{0}{1}", RuntimeAssetsPath, path);
         }
 
