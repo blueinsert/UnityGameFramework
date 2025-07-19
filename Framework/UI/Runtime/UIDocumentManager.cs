@@ -48,6 +48,12 @@ namespace bluebean.UGFramework.UI
         #endregion
 
         #region Fields
+        public UIDocument MainUIDocument{
+            get{
+                return mainUIDocument;
+            }
+        }
+        
         [SerializeField] private UIDocument mainUIDocument;
         private bool isInitialized = false;
         #endregion
