@@ -4,17 +4,9 @@ using System.Collections.Generic;
 
 namespace bluebean.Framework.CurveEditor
 {
-    public enum CurveInterpolationType
-    {
-        Linear,
-        Bezier,
-        CatmullRom
-    }
-
     public class CurveEditorWindow : EditorWindow
     {
         private CurveData curveData;
-        private CurveInterpolationType interpolationType = CurveInterpolationType.Bezier;
         private int hoveredPoint = -1;
         private int hoveredSegment = -1;
         private const float pointPickSize = 0.15f;
@@ -36,11 +28,15 @@ namespace bluebean.Framework.CurveEditor
         // 移除 isBoxSelecting, boxStart, boxEnd, boxSelectThreshold 相关字段和所有框选相关逻辑
         private bool mouseDownOnEmpty = false;
         private bool isEnable = true;
+        private float scaleFactor = 1.0f;
+        private const float minScaleFactor = 0.1f;
+        private const float maxScaleFactor = 5.0f;
+        private Dictionary<int, Vector3> originalPositions = new Dictionary<int, Vector3>();
+        private bool isScalingMode = false;
 
         // EditorPrefs缓存Key
         private const string PrefKey_CurveData = "CurveEditorWindow_CurveData";
         private const string PrefKey_ParticlePrefab = "CurveEditorWindow_ParticlePrefab";
-        private const string PrefKey_InterpolationType = "CurveEditorWindow_InterpolationType";
         private const string PrefKey_DiscretizeSpacing = "CurveEditorWindow_DiscretizeSpacing";
 
         [MenuItem("Framework/Tools/Curve Editor")]
@@ -59,7 +55,6 @@ namespace bluebean.Framework.CurveEditor
             string prefabPath = EditorPrefs.GetString(PrefKey_ParticlePrefab, "");
             if (!string.IsNullOrEmpty(prefabPath))
                 particlePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            interpolationType = (CurveInterpolationType)EditorPrefs.GetInt(PrefKey_InterpolationType, (int)CurveInterpolationType.Bezier);
             discretizeSpacing = EditorPrefs.GetFloat(PrefKey_DiscretizeSpacing, 1.0f);
         }
 
@@ -71,7 +66,6 @@ namespace bluebean.Framework.CurveEditor
                 EditorPrefs.SetString(PrefKey_CurveData, AssetDatabase.GetAssetPath(curveData));
             if (particlePrefab != null)
                 EditorPrefs.SetString(PrefKey_ParticlePrefab, AssetDatabase.GetAssetPath(particlePrefab));
-            EditorPrefs.SetInt(PrefKey_InterpolationType, (int)interpolationType);
             EditorPrefs.SetFloat(PrefKey_DiscretizeSpacing, discretizeSpacing);
         }
 
@@ -85,7 +79,17 @@ namespace bluebean.Framework.CurveEditor
                 EditorGUILayout.HelpBox("CurveEditorWindow已禁用。", MessageType.Info);
                 return;
             }
-            curveData = (CurveData)EditorGUILayout.ObjectField("Curve Data", curveData, typeof(CurveData), false);
+            CurveData newCurveData = (CurveData)EditorGUILayout.ObjectField("Curve Data", curveData, typeof(CurveData), false);
+            if (newCurveData != curveData)
+            {
+                curveData = newCurveData;
+                // 切换CurveData后重置placedParticles引用和选择状态
+                placedParticles.Clear();
+                particlesRoot = null;
+                selectedPoints.Clear();
+                isScalingMode = false;
+                SceneView.RepaintAll();
+            }
             if (curveData != null)
             {
                 // 曲线选择与添加
@@ -185,8 +189,67 @@ namespace bluebean.Framework.CurveEditor
                     return;
                 }
             }
-            interpolationType = (CurveInterpolationType)EditorGUILayout.EnumPopup("插值类型", interpolationType);
+            // 当前曲线插值类型设置
+            if (curveData.curves.Count > 0)
+            {
+                var currentInterpolationType = curveData.curves[currentCurveIndex].interpolationType;
+                var newInterpolationType = (InterpolationType)EditorGUILayout.EnumPopup("当前曲线插值类型", currentInterpolationType);
+                if (newInterpolationType != currentInterpolationType)
+                {
+                    Undo.RecordObject(curveData, "Change Interpolation Type");
+                    curveData.curves[currentCurveIndex].interpolationType = newInterpolationType;
+                    EditorUtility.SetDirty(curveData);
+                    SceneView.RepaintAll();
+                    Repaint();
+                }
+            }
             showTangents = EditorGUILayout.Toggle("可视化切线", showTangents);
+            
+            // 缩放控制
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("缩放控制", EditorStyles.boldLabel);
+            
+            // 显示缩放模式状态
+            if (isScalingMode)
+            {
+                EditorGUILayout.HelpBox("缩放模式已激活", MessageType.Info);
+            }
+            
+            // 缩放模式控制
+            EditorGUILayout.BeginHorizontal();
+            if (!isScalingMode && selectedPoints.Count > 0 && GUILayout.Button("开始缩放"))
+            {
+                isScalingMode = true;
+                scaleFactor = 1.0f;
+                SaveOriginalPositions();
+                SceneView.RepaintAll();
+            }
+            if (isScalingMode && GUILayout.Button("结束缩放"))
+            {
+                isScalingMode = false;
+                SceneView.RepaintAll();
+            }
+            EditorGUILayout.EndHorizontal();
+            
+            // 缩放控制UI（仅在缩放模式下显示）
+            if (isScalingMode)
+            {
+                EditorGUI.indentLevel++;
+                float newScaleFactor = EditorGUILayout.Slider("缩放因子", scaleFactor, minScaleFactor, maxScaleFactor);
+                if (newScaleFactor != scaleFactor)
+                {
+                    scaleFactor = newScaleFactor;
+                    // 实时应用缩放（仅在缩放模式下）
+                    if (isScalingMode && selectedPoints.Count > 0)
+                    {
+                        ApplyScaleToSelectedPoints();
+                    }
+                    SceneView.RepaintAll();
+                }
+                EditorGUILayout.LabelField($"当前缩放: {scaleFactor:F2}x", EditorStyles.miniLabel);
+                EditorGUI.indentLevel--;
+            }
+            
             particlePrefab = (GameObject)EditorGUILayout.ObjectField("离散化粒子Prefab", particlePrefab, typeof(GameObject), false);
             discretizeSpacing = EditorGUILayout.FloatField("离散化间距", discretizeSpacing);
             if (GUILayout.Button("离散化曲线并放置粒子") && particlePrefab != null && curveData != null && curveData.curves.Count > 0 && discretizeSpacing > 0)
@@ -287,16 +350,17 @@ namespace bluebean.Framework.CurveEditor
                     Handles.SphereHandleCap(0, pos, Quaternion.identity, size, EventType.Repaint);
                 }
                 Handles.color = Color.gray;
-                if (interpolationType == CurveInterpolationType.Linear)
+                var curveInterpolationType = curveData.curves[c].interpolationType;
+                if (curveInterpolationType == InterpolationType.Linear)
                 {
                     for (int i = 0; i < curve.Count - 1; i++)
                         Handles.DrawAAPolyLine(curveLineWidth, curve[i], curve[i + 1]);
                 }
-                else if (interpolationType == CurveInterpolationType.Bezier)
+                else if (curveInterpolationType == InterpolationType.Bezier)
                 {
                     DrawBezierCurve(curve, false);
                 }
-                else if (interpolationType == CurveInterpolationType.CatmullRom)
+                else if (curveInterpolationType == InterpolationType.CatmullRom)
                 {
                     DrawCatmullRomCurve(curve, false);
                 }
@@ -324,12 +388,23 @@ namespace bluebean.Framework.CurveEditor
                         if (e.control || e.shift)
                         {
                             if (isSelected) selectedPoints.Remove(i);
-                            else selectedPoints.Add(i);
+                            else 
+                            {
+                                selectedPoints.Add(i);
+                                // 添加新点到多选时重置缩放因子并保存原始位置，退出缩放模式
+                                scaleFactor = 1.0f;
+                                isScalingMode = false;
+                                SaveOriginalPositions();
+                            }
                         }
                         else
                         {
                             selectedPoints.Clear();
                             selectedPoints.Add(i);
+                            // 选择新点时重置缩放因子并保存原始位置，退出缩放模式
+                            scaleFactor = 1.0f;
+                            isScalingMode = false;
+                            SaveOriginalPositions();
                         }
                         GUI.FocusControl(null);
                         SceneView.RepaintAll();
@@ -354,12 +429,15 @@ namespace bluebean.Framework.CurveEditor
                 }
             }
             Handles.color = Color.yellow;
-            // 整体拖动Handle
+            // 整体拖动Handle和缩放中心显示
             if (selectedPoints.Count > 1)
             {
                 Vector3 center = Vector3.zero;
                 foreach (var idx in selectedPoints) center += points[idx];
                 center /= selectedPoints.Count;
+                
+                // 整体拖动Handle（始终显示）
+                Handles.color = Color.yellow;
                 EditorGUI.BeginChangeCheck();
                 Vector3 newCenter = Handles.PositionHandle(center, Quaternion.identity);
                 if (EditorGUI.EndChangeCheck())
@@ -372,20 +450,49 @@ namespace bluebean.Framework.CurveEditor
                     }
                     EditorUtility.SetDirty(curveData);
                 }
+                
+                // 缩放模式下的额外显示
+                if (isScalingMode)
+                {
+                    // 显示缩放中心
+                    Handles.color = Color.cyan;
+                    float centerSize = HandleUtility.GetHandleSize(center) * 0.2f;
+                    Handles.SphereHandleCap(0, center, Quaternion.identity, centerSize, EventType.Repaint);
+                    
+                    // 绘制从中心到选中点的连线
+                    Handles.color = Color.cyan;
+                    foreach (var idx in selectedPoints)
+                    {
+                        if (idx >= 0 && idx < points.Count)
+                        {
+                            Handles.DrawDottedLine(center, points[idx], 2f);
+                        }
+                    }
+                    
+                    // 显示缩放信息
+                    if (scaleFactor != 1.0f)
+                    {
+                        Handles.BeginGUI();
+                        Vector2 screenPos = HandleUtility.WorldToGUIPoint(center);
+                        GUI.Label(new Rect(screenPos.x + 10, screenPos.y - 10, 100, 20), $"缩放: {scaleFactor:F2}x", EditorStyles.miniLabel);
+                        Handles.EndGUI();
+                    }
+                }
             }
             Handles.color = Color.yellow;
             if (points.Count >= 2)
             {
-                if (interpolationType == CurveInterpolationType.Linear)
+                var currentInterpolationType = curveData.curves[currentCurveIndex].interpolationType;
+                if (currentInterpolationType == InterpolationType.Linear)
                 {
                     for (int i = 0; i < points.Count - 1; i++)
                         Handles.DrawAAPolyLine(curveLineWidth, points[i], points[i + 1]);
                 }
-                else if (interpolationType == CurveInterpolationType.Bezier)
+                else if (currentInterpolationType == InterpolationType.Bezier)
                 {
                     DrawBezierCurve(points, true);
                 }
-                else if (interpolationType == CurveInterpolationType.CatmullRom)
+                else if (currentInterpolationType == InterpolationType.CatmullRom)
                 {
                     DrawCatmullRomCurve(points, true);
                 }
@@ -407,7 +514,7 @@ namespace bluebean.Framework.CurveEditor
                     for (int s = 0; s <= sampleCount; s++)
                     {
                         float t = Mathf.Lerp(tStart, tEnd, s / (float)sampleCount);
-                        Vector3 pt = SampleCurveAt(t, points, interpolationType);
+                        Vector3 pt = SampleCurveAt(t, points, curveData.curves[currentCurveIndex].interpolationType);
                         float dist = (HandleUtility.WorldToGUIPoint(pt) - mousePos).magnitude;
                         if (dist < bestDist)
                         {
@@ -487,6 +594,7 @@ namespace bluebean.Framework.CurveEditor
                     if (selectedPoints.Count > 0)
                     {
                         selectedPoints.Clear();
+                        isScalingMode = false;
                         GUI.FocusControl(null);
                         SceneView.RepaintAll();
                         Repaint();
@@ -611,13 +719,13 @@ namespace bluebean.Framework.CurveEditor
                 List<Vector3> denseSamples = new List<Vector3>();
                 List<float> cumulativeLengths = new List<float>();
                 float totalLen = 0f;
-                Vector3 prev = SampleCurveAt(0, curvePoints, interpolationType);
+                Vector3 prev = SampleCurveAt(0, curvePoints, curveData.curves[c].interpolationType);
                 denseSamples.Add(prev);
                 cumulativeLengths.Add(0f);
                 for (int i = 1; i <= highSampleCount; i++)
                 {
                     float t = i / (float)highSampleCount;
-                    Vector3 pt = SampleCurveAt(t, curvePoints, interpolationType);
+                    Vector3 pt = SampleCurveAt(t, curvePoints, curveData.curves[c].interpolationType);
                     totalLen += Vector3.Distance(prev, pt);
                     denseSamples.Add(pt);
                     cumulativeLengths.Add(totalLen);
@@ -722,10 +830,10 @@ namespace bluebean.Framework.CurveEditor
         }
 
         // 曲线采样函数
-        private Vector3 SampleCurveAt(float t, List<Vector3> points, CurveInterpolationType type)
+        private Vector3 SampleCurveAt(float t, List<Vector3> points, InterpolationType type)
         {
             int count = points.Count;
-            if (type == CurveInterpolationType.Linear)
+            if (type == InterpolationType.Linear)
             {
                 float totalLen = 0f;
                 List<float> segLens = new List<float>();
@@ -748,7 +856,7 @@ namespace bluebean.Framework.CurveEditor
                 }
                 return points[count - 1];
             }
-            else if (type == CurveInterpolationType.Bezier)
+            else if (type == InterpolationType.Bezier)
             {
                 // 采样到总段数
                 float totalLen = 0f;
@@ -783,7 +891,7 @@ namespace bluebean.Framework.CurveEditor
                 }
                 return points[count - 1];
             }
-            else if (type == CurveInterpolationType.CatmullRom)
+            else if (type == InterpolationType.CatmullRom)
             {
                 float totalLen = 0f;
                 List<float> segLens = new List<float>();
@@ -815,6 +923,56 @@ namespace bluebean.Framework.CurveEditor
                 return points[count - 1];
             }
             return points[0];
+        }
+
+        // 保存选中点的原始位置
+        private void SaveOriginalPositions()
+        {
+            originalPositions.Clear();
+            if (curveData == null || curveData.curves.Count == 0) return;
+            
+            var points = curveData.curves[currentCurveIndex].points;
+            foreach (int index in selectedPoints)
+            {
+                if (index >= 0 && index < points.Count)
+                {
+                    originalPositions[index] = points[index];
+                }
+            }
+        }
+
+        // 应用缩放到选中的控制点
+        private void ApplyScaleToSelectedPoints()
+        {
+            if (!isScalingMode || selectedPoints.Count == 0 || curveData == null || curveData.curves.Count == 0) return;
+            
+            var points = curveData.curves[currentCurveIndex].points;
+            if (points.Count == 0) return;
+            
+            // 计算选中点的几何中心
+            Vector3 center = Vector3.zero;
+            foreach (int index in selectedPoints)
+            {
+                if (index >= 0 && index < points.Count)
+                {
+                    center += points[index];
+                }
+            }
+            center /= selectedPoints.Count;
+            
+            // 应用缩放
+            Undo.RecordObject(curveData, "Scale Selected Points");
+            foreach (int index in selectedPoints)
+            {
+                if (index >= 0 && index < points.Count)
+                {
+                    Vector3 originalPos = originalPositions.ContainsKey(index) ? originalPositions[index] : points[index];
+                    Vector3 direction = originalPos - center;
+                    points[index] = center + direction * scaleFactor;
+                }
+            }
+            EditorUtility.SetDirty(curveData);
+            SceneView.RepaintAll();
         }
 
         // 工具函数：生成矩形
