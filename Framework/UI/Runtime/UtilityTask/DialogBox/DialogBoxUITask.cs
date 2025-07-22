@@ -14,7 +14,7 @@ namespace bluebean.UGFramework.UI
 
     public class DialogBoxUITask : UITaskBase
     {
-        public DialogBoxUITask(string name) : base(typeof(DialogBoxUITask).Name)
+        public DialogBoxUITask(string name) : base(name)
         {
         }
 
@@ -26,7 +26,7 @@ namespace bluebean.UGFramework.UI
             UIManager.Instance.StartUITask(intent);
         }
 
-        #region UITaskÉúÃüÖÜÆÚ
+        #region UITaskï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
         private void InitDataFromIntent(UIIntent curIntent)
         {
@@ -129,7 +129,7 @@ namespace bluebean.UGFramework.UI
         }
 
 
-        #region ×ÊÔ´ÃèÊö
+        #region ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½
 
         protected override LayerDesc[] LayerDescArray
         {
