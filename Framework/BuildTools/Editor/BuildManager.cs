@@ -96,6 +96,7 @@ namespace bluebean.UGFramework.Build
             }
             FileInfo fileResult = new FileInfo(LogPath + "BundleAssetCheckResult.txt");
             StreamWriter fileWr = fileResult.CreateText();
+            HashSet<string> assetPathHashSet = new HashSet<string>();
             foreach (var name in assetPathList)
             {
                 // 排除场景文件
@@ -119,6 +120,7 @@ namespace bluebean.UGFramework.Build
                     if (importer != null && string.IsNullOrEmpty(importer.assetBundleName))
                     {
                         errorList.Add(dependence);
+                        assetPathHashSet.Add(dependence);
                     }
                 }
 
@@ -131,7 +133,14 @@ namespace bluebean.UGFramework.Build
                         fileWr.WriteLine(string.Format("    {0} ", error));
                     }
                     fileWr.WriteLine("]");
-                }
+                }   
+            }
+            if(assetPathHashSet.Count > 0){
+                 fileWr.WriteLine("not int assetBundle assets,summary:");
+                 foreach (var assetPath in assetPathHashSet)
+                 {
+                    fileWr.WriteLine(string.Format("    {0} ", assetPath));
+                 }
             }
             fileWr.Close();
 
@@ -222,6 +231,40 @@ namespace bluebean.UGFramework.Build
                 }
             }
 
+            //刷新编辑器
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            AssetDatabase.RemoveUnusedAssetBundleNames();
+            UnityEngine.Debug.Log("ClearAllAssetBundleLabels completed");
+        }
+
+        [MenuItem("Assets/FrameworkUtil/清空选择文件夹下的所有资源标签", false, 1)]
+        [MenuItem("Framework/Build/清空选择文件夹下的所有资源标签", false)]
+        private static void ClearAllAssetLabelsInFolder(){
+           // 获取选中的文件夹路径
+            string folderPath = AssetDatabase.GetAssetPath(Selection.activeObject);
+            if (!AssetDatabase.IsValidFolder(folderPath))
+            {
+                Debug.LogError("请选择一个文件夹！");
+                return;
+            }
+            Debug.Log($"ClearAllAssetLabelsInFolder:{folderPath}");
+
+             var pathList = Directory.GetDirectories(folderPath, "*", SearchOption.AllDirectories);
+
+            foreach (var path in pathList)
+            {
+                UnityEngine.Debug.Log(string.Format("ClearAssetLabelsInFolder {0}", path));
+                foreach (string name in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+                {
+                    // .meta结尾,(DS_Store mac 下的系统文件),跳过
+                    if (name.EndsWith(".meta") || name.EndsWith("DS_Store"))
+                    {
+                        continue;
+                    }
+                    SetupAssetLabelInfo(name, "");
+                }
+            }
 
             //刷新编辑器
             AssetDatabase.SaveAssets();
