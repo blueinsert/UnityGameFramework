@@ -154,6 +154,7 @@ namespace bluebean.UGFramework
                 Debug.LogError("SceneTree Initialize Failed");
                 return false;
             }
+            ConstructComps();
             Debug.Log(BuildSystemInfoText(false));
             return true;
         }
@@ -191,6 +192,8 @@ namespace bluebean.UGFramework
             {
                 m_sceneTree.Tick();
             }
+            if(m_delayExecMgrComp!=null)
+                m_delayExecMgrComp.Tick();
         }
 
         protected virtual void ConstructComps()

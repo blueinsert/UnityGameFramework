@@ -7,30 +7,30 @@ namespace bluebean.UGFramework
 {
     public class DelayTimeExecItem
     {
-        public DateTime m_execTargetTime;  // ÔÚÄÄÒ»¸öÊ±¼äµã±»Ö´ĞĞ
-        public Action m_action;         // Ö´ĞĞÌå
+        public DateTime m_execTargetTime;  // åˆ°è¾¾è¯¥æ—¶é—´ç‚¹è¢«æ‰§è¡Œ
+        public Action m_action;         // æ‰§è¡ŒåŠ¨ä½œ
     }
 
     /// <summary>
-    /// ÓÃÀ´Ö§³Ödelayexec
+    /// ç”¨äºæ”¯æŒå»¶è¿Ÿæ‰§è¡Œ
     /// </summary>
     public class DelayExecItem
     {
-        public ulong m_execTargetTick;  // ÔÚÄÄÒ»Ö¡±»Ö´ĞĞ
-        public Action m_action;         // Ö´ĞĞÌå
+        public ulong m_execTargetTick;  // åˆ°è¾¾è¯¥å¸§æ—¶æ‰§è¡Œ
+        public Action m_action;         // æ‰§è¡ŒåŠ¨ä½œ
     }
 
     public interface IDelayExecMgr
     {
         /// <summary>
-        /// Í¶µİÑÓ³ÙÊÂ¼ş£¬°´Ãë½øĞĞdelay
+        /// æŠ•é€’å»¶è¿Ÿäº‹ä»¶ï¼ŒæŒ‰æ—¶é—´delay
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delaySeconds"></param>
         public void PostDelayTimeExecuteAction(Action action, float delaySeconds);
 
         /// <summary>
-        /// Í¶µİÑÓ³ÙÊÂ¼ş£¬°´tick½øĞĞdelay
+        /// æŠ•é€’å»¶è¿Ÿäº‹ä»¶ï¼ŒæŒ‰tickæ•°delay
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delayTickCount"></param>
@@ -41,60 +41,60 @@ namespace bluebean.UGFramework
     public class DelayExecMgrComp : ITickable, IDelayExecMgr
     {
         /// <summary>
-        /// ÑÓ³ÙÒ»¶¨Ê±¼äÖ´ĞĞµÄĞĞÎªÁĞ±í
+        /// å»¶è¿Ÿä¸€æ®µæ—¶é—´æ‰§è¡Œçš„åŠ¨ä½œåˆ—è¡¨
         /// </summary>
         private LinkedList<DelayTimeExecItem> m_delayTimeExecList = new LinkedList<DelayTimeExecItem>();
 
         /// <summary>
-        /// ÓÃÀ´Ö§³ÖÑÓÊ±Ö´ĞĞµÄÊı¾İ½á¹¹
+        /// ç”¨äºæ”¯æŒæŒ‰å¸§æ‰§è¡Œçš„æ•°æ®ç»“æ„
         /// </summary>
         private LinkedList<DelayExecItem> m_delayExecList = new LinkedList<DelayExecItem>();
 
-        #region ¶ÔÍâ·½·¨
+        #region å…¬å…±æ–¹æ³•
         /// <summary>
-        /// Í¶µİÑÓ³ÙÊÂ¼ş£¬°´Ãë½øĞĞdelay
+        /// æŠ•é€’å»¶è¿Ÿäº‹ä»¶ï¼ŒæŒ‰æ—¶é—´delay
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delaySeconds"></param>
         public void PostDelayTimeExecuteAction(Action action, float delaySeconds)
         {
-            // ²ÎÊıÈİ´í
+            // å‚æ•°æ ¡éªŒ
             if (delaySeconds < 0)
             {
                 delaySeconds = 0;
             }
 
-            // ¹¹ÔìÒ»¸öitem
+            // åˆ›å»ºä¸€ä¸ªitem
             var item = new DelayTimeExecItem
             {
                 m_execTargetTime = Timer.m_currTime.AddSeconds(delaySeconds),
                 m_action = action
             };
 
-            // °´ÕÕÖ´ĞĞÊ±¼äµÄÏÈºóË³Ğò½«item¼ÓÈëÁĞ±í
+            // æŒ‰æ‰§è¡Œæ—¶é—´ä»å°åˆ°å¤§itemæ’å…¥åˆ—è¡¨
             if (m_delayTimeExecList.Count == 0 || m_delayTimeExecList.Last.Value.m_execTargetTime <= item.m_execTargetTime)
             {
-                // Ê×ÏÈÅĞ¶ÏÒ»ÏÂitemÊÇ²»ÊÇ×îºóÒ»¸öÖ´ĞĞµÄ£¨¼´ÊÇ·ñÓ¦¸Ã¼ÓÈëÁĞ±íÄ©Î²£¬ÕâÖÖÇé¿öÊÇÊµ¼ÊÊ¹ÓÃ×î¶àµÄ£©
+                // å¦‚æœæœ€åä¸€ä¸ªitemä¹Ÿæ˜¯æœ€æ™šæ‰§è¡Œçš„ï¼Œåˆ™åº”ç›´æ¥æ’å…¥åˆ°åˆ—è¡¨æœ«å°¾ï¼Œæå‡æ•ˆç‡
                 m_delayTimeExecList.AddLast(item);
             }
             else
             {
-                // ·ñÔòµÄ»°£¬ËµÃ÷itemÓ¦¸Ã²åÈëµ½ÁĞ±íÖĞ¼äµÄÄ³¸öÎ»ÖÃ£¬ËùÒÔĞèÒª±éÀúÁĞ±íÕÒµ½Î»ÖÃ²åÈë
+                // å¦åˆ™è¯´æ˜itemåº”è¯¥æ’å…¥åˆ°åˆ—è¡¨ä¸­é—´çš„æŸä¸ªä½ç½®ï¼Œéœ€è¦éå†åˆ—è¡¨æ‰¾åˆ°ä½ç½®
                 var currExecItemNode = m_delayTimeExecList.First;
                 while (currExecItemNode.Value.m_execTargetTime <= item.m_execTargetTime)
                 {
-                    // ÕÒµ½ÁĞ±íÖĞ£¬¡°ËùÓĞÖ´ĞĞÊ±¼ä²»´óÓÚitemµÄ×îºóÒ»¸öNode¡±µÄÏÂÒ»¸öNode
+                    // æ‰¾åˆ°åˆ—è¡¨ä¸­ç¬¬ä¸€ä¸ªæ‰§è¡Œæ—¶é—´å¤§äºitemçš„Nodeï¼Œæ’å…¥åˆ°è¯¥Nodeå‰é¢
                     currExecItemNode = currExecItemNode.Next;
                 }
 
-                // ½«item²åÈëµ½¡°ËùÓĞÖ´ĞĞÊ±¼ä²»´óÓÚitemµÄ×îºóÒ»¸öNode¡±µÄÏÂÒ»¸öNodeµÄÇ°Ãæ
+                // å°†itemæ’å…¥åˆ°æ‰¾åˆ°çš„Nodeå‰é¢
                 m_delayTimeExecList.AddBefore(currExecItemNode, item);
             }
         }
 
 
         /// <summary>
-        /// Í¶µİÑÓ³ÙÊÂ¼ş£¬°´tick½øĞĞdelay
+        /// æŠ•é€’å»¶è¿Ÿäº‹ä»¶ï¼ŒæŒ‰tickæ•°delay
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delayTickCount"></param>
@@ -111,46 +111,46 @@ namespace bluebean.UGFramework
             TickForDelayTickExecuteActionList();
         }
 
-        #region ÄÚ²¿·½·¨
+        #region å†…éƒ¨æ–¹æ³•
 
         /// <summary>
-        /// ÑÓÊ±Ö´ĞĞ
+        /// æŒ‰tickæ‰§è¡Œ
         /// </summary>
         /// <param name="action"></param>
         /// <param name="delayTickCount"></param>
         protected void ExecAfterTicks(Action action, ulong delayTickCount = 1)
         {
-            // ÑÓÊ±¹¹Ôìm_execDelayTicksList£¬·ÇÏß³Ì°²È«
+            // æŒ‰tickå­˜å…¥m_execDelayTicksListï¼Œçº¿ç¨‹å®‰å…¨
             if (m_delayExecList == null)
             {
                 m_delayExecList = new LinkedList<DelayExecItem>();
             }
 
-            // ¹¹ÔìÒ»¸öitem
+            // åˆ›å»ºä¸€ä¸ªitem
             DelayExecItem item = new DelayExecItem
             {
                 m_execTargetTick = Timer.m_currTick + delayTickCount,
                 m_action = action
             };
 
-            // °´ÕÕÖ´ĞĞÊ±¼äµÄÏÈºóË³Ğò½«item¼ÓÈëÁĞ±í
+            // æŒ‰æ‰§è¡Œæ—¶é—´ä»å°åˆ°å¤§itemæ’å…¥åˆ—è¡¨
 
             if (m_delayExecList.Count == 0 || m_delayExecList.Last.Value.m_execTargetTick <= item.m_execTargetTick)
             {
-                // Ê×ÏÈÅĞ¶ÏÒ»ÏÂitemÊÇ²»ÊÇ×îºóÒ»¸öÖ´ĞĞµÄ£¨¼´ÊÇ·ñÓ¦¸Ã¼ÓÈëÁĞ±íÄ©Î²£¬ÕâÖÖÇé¿öÊÇÊµ¼ÊÊ¹ÓÃ×î¶àµÄ£©
+                // å¦‚æœæœ€åä¸€ä¸ªitemä¹Ÿæ˜¯æœ€æ™šæ‰§è¡Œçš„ï¼Œåˆ™åº”ç›´æ¥æ’å…¥åˆ°åˆ—è¡¨æœ«å°¾ï¼Œæå‡æ•ˆç‡
                 m_delayExecList.AddLast(item);
             }
             else
             {
-                // ·ñÔòµÄ»°£¬ËµÃ÷itemÓ¦¸Ã²åÈëµ½ÁĞ±íÖĞ¼äµÄÄ³¸öÎ»ÖÃ£¬ËùÒÔĞèÒª±éÀúÁĞ±íÕÒµ½Î»ÖÃ²åÈë
+                // å¦åˆ™è¯´æ˜itemåº”è¯¥æ’å…¥åˆ°åˆ—è¡¨ä¸­é—´çš„æŸä¸ªä½ç½®ï¼Œéœ€è¦éå†åˆ—è¡¨æ‰¾åˆ°ä½ç½®
                 var currExecItemNode = m_delayExecList.First;
                 while (currExecItemNode != null && currExecItemNode.Value.m_execTargetTick <= item.m_execTargetTick)
                 {
-                    // ÕÒµ½ÁĞ±íÖĞ£¬¡°ËùÓĞÖ´ĞĞÊ±¼ä²»´óÓÚitemµÄ×îºóÒ»¸öNode¡±µÄÏÂÒ»¸öNode
+                    // æ‰¾åˆ°åˆ—è¡¨ä¸­ç¬¬ä¸€ä¸ªæ‰§è¡Œæ—¶é—´å¤§äºitemçš„Nodeï¼Œæ’å…¥åˆ°è¯¥Nodeå‰é¢
                     currExecItemNode = currExecItemNode.Next;
                 }
 
-                // ½«item²åÈëµ½¡°ËùÓĞÖ´ĞĞÊ±¼ä²»´óÓÚitemµÄ×îºóÒ»¸öNode¡±µÄÏÂÒ»¸öNodeµÄÇ°Ãæ
+                // å°†itemæ’å…¥åˆ°æ‰¾åˆ°çš„Nodeå‰é¢
                 if (currExecItemNode != null) m_delayExecList.AddBefore(currExecItemNode, item);
             }
         }
@@ -166,10 +166,10 @@ namespace bluebean.UGFramework
 
                     if (execItem.m_execTargetTime <= Timer.m_currTime)
                     {
-                        // Ö´ĞĞÊ±¼äµ½£¬ĞèÒªÖ´ĞĞ
+                        // æ‰§è¡Œæ—¶é—´åˆ°è¾¾ï¼Œéœ€è¦æ‰§è¡Œ
                         execItem.m_action();
 
-                        // Ö´ĞĞÍê±Ï£¬½«execItem´ÓÁĞ±íÖĞÒÆ³ı
+                        // æ‰§è¡Œå®Œæ¯•ï¼Œå°†execItemä»åˆ—è¡¨ç§»é™¤
                         m_delayTimeExecList.RemoveFirst();
                     }
                     else
@@ -182,7 +182,7 @@ namespace bluebean.UGFramework
 
         private void TickForDelayTickExecuteActionList()
         {
-            // Ö´ĞĞÑÓÊ±Ö´ĞĞÂß¼­
+            // æ‰§è¡ŒæŒ‰tickæ‰§è¡Œçš„é€»è¾‘
             if (m_delayExecList != null)
             {
                 DelayExecItem execItem;
@@ -192,10 +192,10 @@ namespace bluebean.UGFramework
 
                     if (execItem.m_execTargetTick <= Timer.m_currTick)
                     {
-                        // Ö´ĞĞÊ±¼äµ½£¬ĞèÒªÖ´ĞĞ
+                        // æ‰§è¡Œæ—¶é—´åˆ°è¾¾ï¼Œéœ€è¦æ‰§è¡Œ
                         execItem.m_action();
 
-                        // Ö´ĞĞÍê±Ï£¬½«execItem´ÓÁĞ±íÖĞÒÆ³ı
+                        // æ‰§è¡Œå®Œæ¯•ï¼Œå°†execItemä»åˆ—è¡¨ç§»é™¤
                         m_delayExecList.RemoveFirst();
                     }
                     else
