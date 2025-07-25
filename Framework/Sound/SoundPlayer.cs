@@ -33,10 +33,11 @@ namespace bluebean.UGFramework.Sound
         public enum SoundChannelType
         {
             Default = 0,
+            Bgm,
             Player,
             HitSnd,
             Env,
-            Bgm,
+          
             Reserve1,
             Reserve2,
             Reserve3,
@@ -63,17 +64,32 @@ namespace bluebean.UGFramework.Sound
 
         private void PlaySound(AudioClip clip, float volume)
         {
-             if(m_isPaused){
+            if (m_isPaused)
+            {
                 m_isPaused = false;
                 m_audioSource.UnPause();
             }
             if (m_volumeFadeCoroutine != null)
                 StopCoroutine(m_volumeFadeCoroutine);
-            m_volumeFadeCoroutine = StartCoroutine(FadeVolume(m_audioSource.volume, 1f, 0.2f, ()=>{
+            m_volumeFadeCoroutine = StartCoroutine(FadeVolume(m_audioSource.volume, 1f, 0.2f, () =>
+            {
                 //m_audioSource.Play();
             }));
-           
-            m_audioSource.PlayOneShot(clip, volume * m_lastSetVolume);
+            if (m_channelType == SoundChannelType.Bgm)
+            {
+                m_audioSource.loop = true;
+                m_audioSource.clip = clip;
+                m_audioSource.volume = volume * m_lastSetVolume;
+                m_audioSource.priority = 0;
+                m_audioSource.Play();
+            }
+            else
+            {
+                m_audioSource.loop = false;
+                 m_audioSource.priority = (int)m_channelType;
+                m_audioSource.PlayOneShot(clip, volume * m_lastSetVolume);
+            }
+
         }
 
         public void Stop(){  
