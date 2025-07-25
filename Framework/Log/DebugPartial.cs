@@ -9,6 +9,11 @@ using bluebean.UGFramework.Log;
 /// </summary>
 public static partial class Debug
 {
+     static public void LogException(Exception e, GameObject go)
+    {
+        Log(e.ToString(), go.name);
+    }
+
     static public void LogException(Exception e)
     {
         Log(e.ToString());
@@ -27,7 +32,7 @@ public static partial class Debug
             LogManager.Instance.FileLogger.WriteLog(str, "D");
         }
 
-        // ²»ÔÚÖ÷Ïß³Ì£¬Ö±½Ó·µ»Ø
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì£ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½
         if (System.Threading.Thread.CurrentThread != m_mainThread) return;
         
         if (LogManager.Instance.NeedEngineLog)
@@ -58,7 +63,7 @@ public static partial class Debug
             LogManager.Instance.FileLogger.WriteLog(str, "W");
         }
 
-        // ²»ÔÚÖ÷Ïß³Ì£¬Ö±½Ó·µ»Ø
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì£ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½
         if (System.Threading.Thread.CurrentThread != m_mainThread) return;
 
         if (LogManager.Instance.NeedEngineLog)
@@ -87,7 +92,7 @@ public static partial class Debug
             LogManager.Instance.FileLogger.WriteLog(str, "E");
         }
 
-        // ²»ÔÚÖ÷Ïß³Ì£¬Ö±½Ó·µ»Ø
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³Ì£ï¿½Ö±ï¿½Ó·ï¿½ï¿½ï¿½
         if (System.Threading.Thread.CurrentThread != m_mainThread) return;
 
         if (LogManager.Instance.NeedEngineLog)

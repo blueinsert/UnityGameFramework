@@ -270,8 +270,12 @@ namespace Slate
             StopAllCoroutines();
             isActive = false;
             allSceneCutscenes.Remove(this.name);
-            for ( var i = 0; i < directables.Count; i++ ) {
-                directables[i].RootDestroyed();
+            if(directables != null)
+            {
+                for (var i = 0; i < directables.Count; i++)
+                {
+                    directables[i].RootDestroyed();
+                }
             }
         }
 
