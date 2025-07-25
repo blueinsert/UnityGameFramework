@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.Timeline;
 
 namespace bluebean.UGFramework.UI
 {
@@ -76,6 +75,13 @@ namespace bluebean.UGFramework.UI
 
         private string m_curState;
 
+        // --- 新增成员变量用于 timeline 事件安全 ---
+        private int m_timelineCount = 0;
+        private int m_timelineFinished = 0;
+        private int m_tweenerCount = 0;
+        private int m_tweenerFinished = 0;
+        private System.Action m_onEndCallback = null;
+
         #region 收集信息
 
         private bool m_hasCollect = false;
@@ -100,11 +106,11 @@ namespace bluebean.UGFramework.UI
         {
             if (director == null || director.playableAsset == null)
                 return;
-            var timelineAsset = director.playableAsset as TimelineAsset;
+            var timelineAsset = director.playableAsset as UnityEngine.Timeline.TimelineAsset;
             if (timelineAsset == null)
                 return;
             // 禁用所有轨道
-            foreach (var rootTrack in timelineAsset.GetRootTracks())
+            foreach (UnityEngine.Timeline.TrackAsset rootTrack in timelineAsset.GetRootTracks())
                 SetTrackMuteRecursive(rootTrack, true);
             // 查找目标GroupTrack并启用
             var targetGroup = FindGroupTrackByName(timelineAsset, groupName);
@@ -112,10 +118,7 @@ namespace bluebean.UGFramework.UI
             {
                 SetTrackMuteRecursive(targetGroup, false);
                 // 重建Timeline图，确保生效
-                double t = director.time;
                 director.RebuildGraph();
-                director.time = t;
-                director.Play();
             }
             else
             {
@@ -123,27 +126,27 @@ namespace bluebean.UGFramework.UI
             }
         }
         // 递归设置轨道及其子轨道的mute
-        private void SetTrackMuteRecursive(TrackAsset track, bool mute)
+        private void SetTrackMuteRecursive(UnityEngine.Timeline.TrackAsset track, bool mute)
         {
             track.muted = mute;
-            foreach (var child in track.GetChildTracks())
+            foreach (UnityEngine.Timeline.TrackAsset child in track.GetChildTracks())
                 SetTrackMuteRecursive(child, mute);
         }
         // 在TimelineAsset中查找指定名称的GroupTrack
-        private GroupTrack FindGroupTrackByName(TimelineAsset asset, string groupName)
+        private UnityEngine.Timeline.GroupTrack FindGroupTrackByName(UnityEngine.Timeline.TimelineAsset asset, string groupName)
         {
-            foreach (var root in asset.GetRootTracks())
+            foreach (UnityEngine.Timeline.TrackAsset root in asset.GetRootTracks())
             {
                 var found = FindGroupTrackRecursive(root, groupName);
                 if (found != null) return found;
             }
             return null;
         }
-        private GroupTrack FindGroupTrackRecursive(TrackAsset track, string groupName)
+        private UnityEngine.Timeline.GroupTrack FindGroupTrackRecursive(UnityEngine.Timeline.TrackAsset track, string groupName)
         {
-            if (track is GroupTrack group && group.name == groupName)
+            if (track is UnityEngine.Timeline.GroupTrack group && group.name == groupName)
                 return group;
-            foreach (var child in track.GetChildTracks())
+            foreach (UnityEngine.Timeline.TrackAsset child in track.GetChildTracks())
             {
                 var found = FindGroupTrackRecursive(child, groupName);
                 if (found != null) return found;
@@ -225,11 +228,12 @@ namespace bluebean.UGFramework.UI
                     tweener.enabled = false;
                 } 
             }
-            //停止所有timeline
+            //停止所有timeline，并解绑事件
             foreach (var director in m_allTimelineDirectors)
             {
                 if (director != null)
                 {
+                    director.stopped -= OnTimelineStopped;
                     director.Stop();
                 }
             }
@@ -261,16 +265,15 @@ namespace bluebean.UGFramework.UI
            
             //播放当前state的timeline和tweener，联合完成回调
             int timelineCount = (uiStateDesc.m_timelineStates != null) ? uiStateDesc.m_timelineStates.Count : 0;
-            int timelineFinished = 0;
             int tweenerCount = (uiStateDesc.m_tweeners != null) ? uiStateDesc.m_tweeners.Count : 0;
-            int tweenerFinished = 0;
-            System.Action tryInvokeEnd = () => {
-                if ((timelineCount == 0 || timelineFinished >= timelineCount) && (tweenerCount == 0 || tweenerFinished >= tweenerCount))
-                {
-                    if (onEnd != null)
-                        onEnd();
-                }
-            };
+            // --- 记录当前回调和计数 ---
+            m_timelineCount = timelineCount;
+            m_timelineFinished = 0;
+            m_tweenerCount = tweenerCount;
+            m_tweenerFinished = 0;
+            m_onEndCallback = onEnd;
+            // 统一回调检查
+            System.Action tryInvokeEnd = tryInvokeEndInternal;
             // timeline
             if(timelineCount > 0)
             {
@@ -281,9 +284,15 @@ namespace bluebean.UGFramework.UI
                         var director = timelineState.m_timelineDirector;
                         // 只启用与状态名同名的GroupTrack
                         EnableOnlyGroupTrack(director, timelineState.m_stateName);
-                        director.time = 0;
+                        if (!director.playableGraph.IsValid())
+                        {
+                            director.RebuildGraph(); // 重建Graph
+                            director.Evaluate();     // 初始化第一帧
+                        }
+                        director.time = 0.01f;
                         director.stopped -= OnTimelineStopped;
                         director.stopped += OnTimelineStopped;
+                        Debug.Log($"Play timeline {timelineState.m_stateName}");
                         director.Play();
                     }
                 }
@@ -301,8 +310,8 @@ namespace bluebean.UGFramework.UI
                         }
                         tweener.OnFinished.RemoveAllListeners();
                         tweener.OnFinished.AddListener(() => {
-                            tweenerFinished++;
-                            tryInvokeEnd();
+                            m_tweenerFinished++;
+                            OnTweenStopped();
                         });
                         tweener.enabled = true;
                         tweener.PlayForward();
@@ -310,14 +319,36 @@ namespace bluebean.UGFramework.UI
                 }
             }
             // 如果都没有，直接回调
-            if (timelineCount == 0 && tweenerCount == 0 && onEnd != null)
+            if (timelineCount == 0 && tweenerCount == 0 && m_onEndCallback != null)
             {
-                onEnd();
+                var cb = m_onEndCallback;
+                m_onEndCallback = null;
+                cb();
             }
-            void OnTimelineStopped(UnityEngine.Playables.PlayableDirector d)
+        }
+
+        private void OnTweenStopped()
+        {
+            m_tweenerFinished++;
+            tryInvokeEndInternal();
+        }
+
+        // --- 新增成员方法，安全解绑 ---
+        private void OnTimelineStopped(UnityEngine.Playables.PlayableDirector d)
+        {
+            m_timelineFinished++;
+            tryInvokeEndInternal();
+        }
+        // --- 内部统一回调检查 ---
+        private void tryInvokeEndInternal()
+        {
+            if ((m_timelineCount == 0 || m_timelineFinished >= m_timelineCount)
+                && (m_tweenerCount == 0 || m_tweenerFinished >= m_tweenerCount)
+                && m_onEndCallback != null)
             {
-                timelineFinished++;
-                tryInvokeEnd();
+                var cb = m_onEndCallback;
+                m_onEndCallback = null;
+                cb();
             }
         }
 
@@ -333,7 +364,9 @@ namespace bluebean.UGFramework.UI
                 index = 0;
             }
             uiStateDesc = m_uiStateDescs[index];
-            SetUIState(uiStateDesc.m_stateName);
+            SetUIState(uiStateDesc.m_stateName,()=>{
+                Debug.Log($"SwichToNextState {uiStateDesc.m_stateName} finish");
+             });
         }
 
     }
