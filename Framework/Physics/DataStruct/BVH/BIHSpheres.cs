@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace bluebean.UGFramework.DataStruct
@@ -9,6 +10,7 @@ namespace bluebean.UGFramework.DataStruct
         public BIHNode[] nodes = null;
         public Sphere[] spheres = null;
 
+        public static bool s_showLog = true;
         public BIHSpheres()
         {
 
@@ -22,6 +24,12 @@ namespace bluebean.UGFramework.DataStruct
             this.spheres = spheres;
         }
 
+
+        private static void Log(string s)
+        {
+            Debug.Log($"BIHSpheres: {s}");
+        }
+
         /// <summary>
         /// node是叶子节点
         /// </summary>
@@ -31,14 +39,36 @@ namespace bluebean.UGFramework.DataStruct
         /// <param name="node"></param>
         /// <param name="point"></param>
         /// <returns></returns>
-        private static float DistanceToSpheresInLeaf(Sphere[] spheres,
+        private static float DistanceToSpheresInLeaf(BIHNode[] nodes, Sphere[] spheres,
                                               in BIHNode node,
                                               in Vector3 point, ref float minDist, ref int minIndex)
         {
+           
             float minDistance = float.MaxValue;
+            if (s_showLog)
+            {
+                StringBuilder sb = new StringBuilder();
+                StringBuilder pathSb = new StringBuilder();
+                pathSb.Append("[");
+                for (int j = node.start; j < node.start + node.count; j++)
+                {
+                    pathSb.Append(spheres[j].index).Append(",");
+                }
+                pathSb.Append("]");
+                int parentIndex = node.parent;
+                while (parentIndex != -1)
+                {
+                    pathSb.Insert(0, $"{parentIndex}-->");
+                    parentIndex = nodes[parentIndex].parent;
+                }
+                sb.AppendLine(pathSb.ToString());
+                Log($"traverse: {sb.ToString()}");
+            }
             for (int i = node.start; i < node.start + node.count; ++i)
             {
+                
                 Sphere s = spheres[i];
+            
                 var dist = (point - s.c).magnitude - s.r;
                 if(dist < minDistance)
                 {
@@ -132,7 +162,7 @@ namespace bluebean.UGFramework.DataStruct
                 return si;
             }
             else
-                return DistanceToSpheresInLeaf(spheres, in node, point,ref minDist, ref minIndex);
+                return DistanceToSpheresInLeaf(nodes, spheres, in node, point,ref minDist, ref minIndex);
         }
 
         public static float DistanceToSurface(BIHNode[] nodes,

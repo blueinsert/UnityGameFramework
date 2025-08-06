@@ -2,6 +2,7 @@
 using bluebean.UGFramework.Physics;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace bluebean.UGFramework.DataStruct
@@ -71,6 +72,8 @@ namespace bluebean.UGFramework.DataStruct
                         queue.Enqueue(nodes.Count);
                         queue.Enqueue(nodes.Count + 1);
 
+                        minChild.parent = index;
+                        maxChild.parent = index;
                         // append child nodes to list:
                         nodes.Add(minChild);
                         nodes.Add(maxChild);
@@ -129,5 +132,33 @@ namespace bluebean.UGFramework.DataStruct
             return j;
         }
 
+
+        public static string BuildPartionLog(BIHNode[] nodes)
+        {
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < nodes.Length; i++)
+            {
+                var node = nodes[i];
+                //leaf node
+                if (node.firstChild == -1)
+                {
+                    StringBuilder pathSb = new StringBuilder();
+                    pathSb.Append("[");
+                    for (int j = node.start; j < node.start + node.count; j++)
+                    {
+                        pathSb.Append(j).Append(",");
+                    }
+                    pathSb.Append("]");
+                    int parentIndex = node.parent;
+                    while (parentIndex != -1)
+                    {
+                        pathSb.Insert(0, $"{parentIndex}-->");
+                        parentIndex = nodes[parentIndex].parent;
+                    }
+                    sb.AppendLine(pathSb.ToString());
+                }
+            }
+            return sb.ToString();
+        }
     }
 }

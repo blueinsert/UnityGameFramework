@@ -4,6 +4,8 @@ namespace bluebean.UGFramework.DataStruct
 {
     public struct BIHNode
     {
+        //父节点索引
+        public int parent;
         public int firstChild;     /**< index of the first child node. The second one is right after the first.*/
         public int start;          /**< index of the first element in this node.*/
         public int count;          /**< amount of elements in this node.*/
@@ -20,6 +22,7 @@ namespace bluebean.UGFramework.DataStruct
 
         public BIHNode(int start, int count)
         {
+            parent = -1;
             firstChild = -1;
             this.start = start;
             this.count = count;

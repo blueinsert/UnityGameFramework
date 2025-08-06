@@ -511,12 +511,19 @@ namespace bluebean.UGFramework.Geometry
             }
 
             var center = sphere.WorldPosition;
-
-            var minDist = BIHSpheres.DistanceToSurface(spheres.nodes, spheres.spheres, center, out overlapIndex);
+            int minDistIndex = -1;
+            var minDist = BIHSpheres.DistanceToSurface(spheres.nodes, spheres.spheres, center, out minDistIndex);
             if (minDist < 0)
+            {
+                overlapIndex = minDistIndex;// spheres.spheres[minDistIndex].index;
                 return true;
+            }
+
             if (minDist < sphere.Radius)
+            {
+                overlapIndex = minDistIndex;
                 return true;
+            }
             return false;
         }
         #endregion

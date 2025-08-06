@@ -1,44 +1,112 @@
 using bluebean.UGFramework.DataStruct;
+using bluebean.UGFramework.GamePlay;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
     public class SpheresBIHShapeDesc : MonoBehaviour
     {
-        public BIHSpheres spheres = null;
+        public BIHSpheres m_spheres = null;
 
         public bool m_isDrawGizmons = false;
         [Range(0, 10)]
         public int m_drawDepth = 3;
+
+        public void Build()
+        {
+            var sphereShapeDescs = this.gameObject.GetComponentsInChildren<SphereShapeDesc>();
+            Build(sphereShapeDescs);
+        }
+
+
+        public void Build(SphereShapeDesc[] sphereShapeDescs)
+        {
+            var count = sphereShapeDescs.Length;
+            if (count == 0)
+            {
+                m_spheres = null;
+                return;
+            }
+            //构建BIHSpheres
+            IBounded[] ts = new IBounded[count];
+            Sphere[] spheres = new Sphere[count];
+            for (int i = 0; i < count; i++)
+            {
+                var shpereShape = sphereShapeDescs[i].Shape;
+
+                Sphere sphere = new Sphere(shpereShape.WorldPosition, shpereShape.Radius);
+                sphere.SetIndex(i);
+                ts[i] = sphere;
+            }
+            var bihNodes = BIH.Build(ref ts);
+            for(int i = 0; i < ts.Length; i++)
+            {
+                spheres[i] = (Sphere)ts[i];
+            }
+            m_spheres = new BIHSpheres(bihNodes, spheres);
+
+            //Debug.Log(BIH.BuildPartionLog(bihNodes));
+            Debug.Log(BuildPartionLog(bihNodes, spheres));
+        }
+
+
+        private static string BuildPartionLog(BIHNode[] nodes, Sphere[] spheres)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                var node = nodes[i];
+                //leaf node
+                if (node.firstChild == -1)
+                {
+                    StringBuilder pathSb = new StringBuilder();
+                    pathSb.Append("[");
+                    for (int j = node.start; j < node.start + node.count; j++)
+                    {
+                        pathSb.Append(spheres[j].index).Append(",");
+                    }
+                    pathSb.Append("]");
+                    int parentIndex = node.parent;
+                    while (parentIndex != -1)
+                    {
+                        pathSb.Insert(0, $"{parentIndex}-->");
+                        parentIndex = nodes[parentIndex].parent;
+                    }
+                    sb.AppendLine(pathSb.ToString());
+                }
+            }
+            return sb.ToString();
+        }
 
         #region Gizmos
 
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
+            if (m_spheres == null || m_spheres.nodes.Length == 0)
+                return;
+            GizmonsUtil.DrawAabb(m_spheres.AABB, Color.green);
 
-            GizmonsUtil.DrawAabb(spheres.AABB, Color.green);
-
-            if (spheres != null)
+            if (m_spheres != null)
             {
                 int depth = 0;
                 if (m_drawDepth > 0)
-                    TraverseBIHNodeList(spheres.spheres, spheres.nodes, 0, ref depth);
+                    TraverseBIHNodeList(m_spheres.spheres, m_spheres.nodes, 0, depth);
             }
         }
 
-        void TraverseBIHNodeList(Sphere[] spheres, BIHNode[] nodes, int index, ref int depth)
+        void TraverseBIHNodeList(Sphere[] spheres, BIHNode[] nodes, int index, int depth)
         {
             var node = nodes[index];
             int start = node.start;
             int end = start + (node.count - 1);
 
             // calculate bounding box of all elements:
-            Aabb b = spheres[start].GetBounds();
-            for (int k = start + 1; k <= end; ++k)
-                b.Encapsulate(spheres[k].GetBounds());
+            Aabb b = node.m_aabb;
+
             if (node.firstChild != -1)
             {
                 int axis = node.axis;
@@ -46,11 +114,10 @@ namespace bluebean.UGFramework.Geometry
                 float right = node.rightSplitPlane;
                 DrawQuad(b, axis, left, Color.blue);
                 DrawQuad(b, axis, right, Color.red);
-                depth++;
                 if (depth < m_drawDepth)
                 {
-                    TraverseBIHNodeList(spheres, nodes, node.firstChild, ref depth);
-                    TraverseBIHNodeList(spheres, nodes, node.firstChild + 1, ref depth);
+                    TraverseBIHNodeList(spheres, nodes, node.firstChild,  depth+1);
+                    TraverseBIHNodeList(spheres, nodes, node.firstChild + 1,  depth+1);
                 }
             }
         }
@@ -82,6 +149,8 @@ namespace bluebean.UGFramework.Geometry
             }
             Mesh quad = CreateQuad(min, min + dir2, max, max - dir2);
             Gizmos.DrawMesh(quad);
+            // 立即销毁临时创建的网格
+            //DestroyImmediate(quad);
         }
 
         Mesh CreateQuad(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
@@ -89,7 +158,8 @@ namespace bluebean.UGFramework.Geometry
             Vector3[] vertices = {
             p1,p2,p3,p4
         };
-            int[] indices = new int[6] { 0, 1, 3, 1, 2, 3 };
+            int[] indices = new int[12] { 0, 1, 3, 1, 2, 3 ,
+                0,3,1,1,3,2};
             Mesh mesh = new Mesh();
             mesh.vertices = vertices;
             mesh.triangles = indices;
