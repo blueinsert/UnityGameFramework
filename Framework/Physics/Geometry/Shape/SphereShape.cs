@@ -30,6 +30,16 @@ namespace bluebean.UGFramework.Geometry
             } 
         }
 
+        public float Radius
+        {
+            get
+            {
+                var matrix = m_local2WorldTransform.ToMatrix();
+                var radius = matrix.lossyScale[0] * m_radius;
+                return radius;
+            }
+        }
+
         public Aabb WorldAabb
         {
             get

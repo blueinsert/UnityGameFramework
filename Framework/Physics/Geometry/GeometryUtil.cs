@@ -510,13 +510,12 @@ namespace bluebean.UGFramework.Geometry
                 return false;
             }
 
-            var matrix = sphere.m_local2WorldTransform.ToMatrix();
-            var center = matrix.MultiplyPoint3x4(sphere.m_position);
+            var center = sphere.WorldPosition;
 
             var minDist = BIHSpheres.DistanceToSurface(spheres.nodes, spheres.spheres, center, out overlapIndex);
             if (minDist < 0)
                 return true;
-            if (minDist < sphere.m_radius)
+            if (minDist < sphere.Radius)
                 return true;
             return false;
         }

@@ -33,11 +33,9 @@ namespace bluebean.UGFramework.DataStruct
         /// <returns></returns>
         private static float DistanceToSpheresInLeaf(Sphere[] spheres,
                                               in BIHNode node,
-                                              in Vector3 point, out int minIndex)
+                                              in Vector3 point, ref float minDist, ref int minIndex)
         {
-            minIndex = 0;
             float minDistance = float.MaxValue;
-
             for (int i = node.start; i < node.start + node.count; ++i)
             {
                 Sphere s = spheres[i];
@@ -45,6 +43,10 @@ namespace bluebean.UGFramework.DataStruct
                 if(dist < minDistance)
                 {
                     minDistance = dist;
+                }
+                if(dist < minDist)
+                {
+                    minDist = dist;
                     minIndex = i;
                 }
             }
@@ -54,12 +56,11 @@ namespace bluebean.UGFramework.DataStruct
         private static float DistanceToSurface(BIHNode[] nodes,
                                              Sphere[] spheres,
                                              in BIHNode node,
-                                             in Vector3 point, out int minIndex)
+                                             in Vector3 point,ref float minDist, ref int minIndex)
         {
-            minIndex = 0;
-            float MinSignedDistance(float d1, float d2)
+            float MinDistance(float d1, float d2)
             {
-                return (Mathf.Abs(d1) < Mathf.Abs(d2)) ? d1 : d2;
+                return (d1) < (d2) ? d1 : d2;
             }
 
             if (node.firstChild >= 0)
@@ -73,26 +74,26 @@ namespace bluebean.UGFramework.DataStruct
                     // CASE 1: we are in the overlapping zone: recurse down both.
                     if (p <= node.leftSplitPlane && p >= node.rightSplitPlane)
                     {
-                        si = MinSignedDistance(DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, out minIndex),
-                                               DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex));
+                        si = MinDistance(DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, ref minDist, ref minIndex),
+                                               DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex));
                     }
                     // CASE 2: to the right of left pivot, that is: in the right child only.
                     else if (p > node.leftSplitPlane)
                     {
-                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex);
+                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex);
 
                         // only recurse down left child if nearest surface in right child is furthest than left pivot.
-                        if (Mathf.Abs(si) > Mathf.Abs(p - node.leftSplitPlane))
-                            si = MinSignedDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, out minIndex));
+                        if (si > Mathf.Abs(p - node.leftSplitPlane))
+                            si = MinDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, ref minDist, ref minIndex));
                     }
                     // CASE 3: to the left of right pivot, that is: in the left child only.
                     else
                     {
-                        si = DistanceToSurface(nodes, spheres, nodes[node.firstChild], point, out minIndex);
+                        si = DistanceToSurface(nodes, spheres, nodes[node.firstChild], point, ref minDist, ref minIndex);
 
                         // only recurse down left child if nearest surface in right child is furthest than left pivot.
-                        if (Mathf.Abs(si) > Mathf.Abs(node.rightSplitPlane - p))
-                            si = MinSignedDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex));
+                        if (si > Mathf.Abs(node.rightSplitPlane - p))
+                            si = MinDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex));
                     }
                 }
                 // child nodes do not overlap
@@ -102,46 +103,50 @@ namespace bluebean.UGFramework.DataStruct
                     // Just like case 2.
                     if (p > node.leftSplitPlane && p < node.rightSplitPlane)
                     {
-                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex);
+                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex);
 
                         // only recurse down left child if nearest surface in right child is furthest than left pivot.
-                        if (Mathf.Abs(si) > Mathf.Abs(p - node.leftSplitPlane))
-                            si = MinSignedDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, out minIndex));
+                        if (si > Mathf.Abs(p - node.leftSplitPlane))
+                            si = MinDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, ref minDist, ref minIndex));
                     }
                     // CASE 5: in the left child. Just like case 3.
                     else if (p <= node.leftSplitPlane)
                     {
-                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, out minIndex);
+                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, ref minDist, ref minIndex);
 
                         // only recurse down left child if nearest surface in right child is furthest than left pivot.
-                        if (Mathf.Abs(si) > Mathf.Abs(node.rightSplitPlane - p))
-                            si = MinSignedDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex));
+                        if (si > Mathf.Abs(node.rightSplitPlane - p))
+                            si = MinDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex));
                     }
                     // CASE 6: in the right child. Just like case 2
                     else if (p >= node.rightSplitPlane)
                     {
-                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, out minIndex);
+                        si = DistanceToSurface(nodes, spheres, in nodes[node.firstChild + 1], in point, ref minDist, ref minIndex);
 
                         // only recurse down left child if nearest surface in right child is furthest than left pivot.
-                        if (Mathf.Abs(si) > Mathf.Abs(p - node.leftSplitPlane))
-                            si = MinSignedDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, out minIndex));
+                        if (si > Mathf.Abs(p - node.leftSplitPlane))
+                            si = MinDistance(si, DistanceToSurface(nodes, spheres, in nodes[node.firstChild], in point, ref minDist, ref minIndex));
                     }
                 }
 
                 return si;
             }
             else
-                return DistanceToSpheresInLeaf(spheres, in node, point,out minIndex);
+                return DistanceToSpheresInLeaf(spheres, in node, point,ref minDist, ref minIndex);
         }
 
         public static float DistanceToSurface(BIHNode[] nodes,
                                        Sphere[] spheres,
                                        in Vector3 point, out int minIndex)
         {
-            minIndex = 0;
+            minIndex = -1;
+            float minDist = float.MaxValue;
 
             if (nodes.Length > 0)
-                return DistanceToSurface(nodes, spheres, in nodes[0], in point,out minIndex);
+            {
+                var res = DistanceToSurface(nodes, spheres, in nodes[0], in point, ref minDist, ref minIndex);
+                return res;
+            }
 
             return float.MaxValue;
         }
