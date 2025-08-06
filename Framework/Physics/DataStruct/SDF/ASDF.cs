@@ -114,7 +114,7 @@ namespace bluebean.UGFramework.DataStruct
                 {
                     Vector4 point = node.center + corners[i] * node.center[3];
                     point[3] = 0;
-                    float distance = BIH.DistanceToSurface(bih, tris, vertexPositions,angleNormals,point);
+                    float distance = BIHMesh.DistanceToSurface(bih, tris, vertexPositions,angleNormals,point);
 
                     if (i < 4)
                         node.distancesA[i] = distance;
@@ -123,7 +123,7 @@ namespace bluebean.UGFramework.DataStruct
                 }
 
                 // only subdivide those nodes intersecting the surface:
-                if (depth < maxDepth && Mathf.Abs(BIH.DistanceToSurface(bih, tris, vertexPositions, angleNormals, node.center)) < node.center[3] * sqrt3)
+                if (depth < maxDepth && Mathf.Abs(BIHMesh.DistanceToSurface(bih, tris, vertexPositions, angleNormals, node.center)) < node.center[3] * sqrt3)
                 {
 
                     // calculate mean squared error between measured distances and interpolated ones:
@@ -131,7 +131,7 @@ namespace bluebean.UGFramework.DataStruct
                     for (int i = 0; i < samples.Length; ++i)
                     {
                         Vector4 point = node.center + samples[i] * node.center[3];
-                        float groundTruth = BIH.DistanceToSurface(bih, tris, vertexPositions, angleNormals, point);
+                        float groundTruth = BIHMesh.DistanceToSurface(bih, tris, vertexPositions, angleNormals, point);
                         float estimation = node.Sample(point);
                         float d = groundTruth - estimation;
                         mse += d * d;

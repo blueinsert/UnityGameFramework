@@ -21,6 +21,15 @@ namespace bluebean.UGFramework.Geometry
             }
         }
 
+        public Vector3 WorldPosition { 
+            get
+            {
+                var matrix = m_local2WorldTransform.ToMatrix();
+                var center = matrix.MultiplyPoint3x4(m_position);
+                return center;
+            } 
+        }
+
         public Aabb WorldAabb
         {
             get

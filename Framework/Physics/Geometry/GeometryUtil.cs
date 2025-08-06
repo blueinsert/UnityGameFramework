@@ -472,7 +472,7 @@ namespace bluebean.UGFramework.Geometry
         /// <param name="sphere"></param>
         /// <param name="meshShape"></param>
         /// <returns></returns>
-        public static bool IsSphereMeshOverlap(SphereShape sphere,MeshShape meshShape)
+        public static bool IsSphereMeshOverlap(SphereShape sphere, MeshShape meshShape)
         {
             var aabbSphere = sphere.WorldAabb;
             var aabbMesh = meshShape.WorldAabb;
@@ -484,11 +484,40 @@ namespace bluebean.UGFramework.Geometry
             var s2m = meshShape.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
             var center = s2m.MultiplyPoint3x4(sphere.m_position);
             var radius = s2m.lossyScale[0] * sphere.m_radius;
-            var dist = BIH.DistanceToSurface(meshShape.m_bihNodes, meshShape.m_triangles, meshShape.m_vertices, meshShape.m_normals, center);
+            var dist = BIHMesh.DistanceToSurface(meshShape.m_bihNodes, meshShape.m_triangles, meshShape.m_vertices, meshShape.m_normals, center);
             if (dist <= radius - Epsilon)
             {
                 return true;
             }
+            return false;
+        }
+
+        /// <summary>
+        /// 检测sphere和BIHSpheres是否相交
+        /// </summary>
+        /// <param name="sphere"></param>
+        /// <param name="spheres"></param>
+        /// <returns></returns>
+        public static bool IsSphereBIHSpheresOverlap(SphereShape sphere, BIHSpheres spheres,out int overlapIndex) {
+
+            overlapIndex = -1;
+            if (spheres.nodes.Length <= 0)
+                return false;
+            var aabbSphere = sphere.WorldAabb;
+            var aabb = spheres.AABB;
+            if (!aabbSphere.IntersectsAabb(aabb))
+            {
+                return false;
+            }
+
+            var matrix = sphere.m_local2WorldTransform.ToMatrix();
+            var center = matrix.MultiplyPoint3x4(sphere.m_position);
+
+            var minDist = BIHSpheres.DistanceToSurface(spheres.nodes, spheres.spheres, center, out overlapIndex);
+            if (minDist < 0)
+                return true;
+            if (minDist < sphere.m_radius)
+                return true;
             return false;
         }
         #endregion
