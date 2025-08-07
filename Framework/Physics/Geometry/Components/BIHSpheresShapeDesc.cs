@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public class SpheresBIHShapeDesc : MonoBehaviour
+    public class BIHSpheresShapeDesc : MonoBehaviour
     {
         public BIHSpheres m_spheres = null;
 

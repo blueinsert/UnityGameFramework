@@ -7,15 +7,15 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    [CustomEditor(typeof(SpheresBIHShapeDesc))]
-    public class SpheresBIHShapeDescInspector : Editor
+    [CustomEditor(typeof(BIHSpheresShapeDesc))]
+    public class BIHSpheresShapeDescInspector : Editor
     {
         private SerializedObject m_editTarget;
-        private SpheresBIHShapeDesc m_bih;
+        private BIHSpheresShapeDesc m_bih;
 
         public virtual void OnEnable()
         {
-            m_bih = target as SpheresBIHShapeDesc;
+            m_bih = target as BIHSpheresShapeDesc;
             m_editTarget = new SerializedObject(m_bih);
         }
 
