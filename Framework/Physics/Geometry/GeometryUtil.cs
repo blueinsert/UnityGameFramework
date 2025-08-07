@@ -409,8 +409,8 @@ namespace bluebean.UGFramework.Geometry
             }
             //转为到box的本地坐标系进行计算
             var s2b = box.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
-            var center = s2b.MultiplyPoint3x4(sphere.m_position);
-            var radius = s2b.lossyScale[0] * sphere.m_radius;
+            var center = s2b.MultiplyPoint3x4(sphere.m_localPosition);
+            var radius = s2b.lossyScale[0] * sphere.m_localRadius;
 
             //获取点到box的最小距离
             var halfSize = new Vector3(0.5f, 0.5f, 0.5f);
@@ -456,12 +456,12 @@ namespace bluebean.UGFramework.Geometry
         {
             //转换到世界坐标系进行计算
             var l2w1 = sphere1.m_local2WorldTransform.ToMatrix();
-            var center1 = l2w1.MultiplyPoint3x4(sphere1.m_position);
-            var radius1 = l2w1.lossyScale[0] * sphere1.m_radius;
+            var center1 = l2w1.MultiplyPoint3x4(sphere1.m_localPosition);
+            var radius1 = l2w1.lossyScale[0] * sphere1.m_localRadius;
 
             var l2w2 = sphere2.m_local2WorldTransform.ToMatrix();
-            var center2 = l2w2.MultiplyPoint3x4(sphere2.m_position);
-            var radius2 = l2w2.lossyScale[0] * sphere2.m_radius;
+            var center2 = l2w2.MultiplyPoint3x4(sphere2.m_localPosition);
+            var radius2 = l2w2.lossyScale[0] * sphere2.m_localRadius;
 
             return (center1 - center2).magnitude < radius1 + radius2;
         }
@@ -482,8 +482,8 @@ namespace bluebean.UGFramework.Geometry
             }
 
             var s2m = meshShape.m_local2WorldTransform.ToMatrix().inverse * sphere.m_local2WorldTransform.ToMatrix();
-            var center = s2m.MultiplyPoint3x4(sphere.m_position);
-            var radius = s2m.lossyScale[0] * sphere.m_radius;
+            var center = s2m.MultiplyPoint3x4(sphere.m_localPosition);
+            var radius = s2m.lossyScale[0] * sphere.m_localRadius;
             var dist = BIHMesh.DistanceToSurface(meshShape.m_bihNodes, meshShape.m_triangles, meshShape.m_vertices, meshShape.m_normals, center);
             if (dist <= radius - Epsilon)
             {

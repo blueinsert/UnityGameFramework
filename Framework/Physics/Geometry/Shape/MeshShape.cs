@@ -9,12 +9,13 @@ namespace bluebean.UGFramework.Geometry
     public struct MeshShape
     {
         public BIHNode[] m_bihNodes;
+        //都是模型local coordinate
         public Triangle[] m_triangles;
         public Vector3[] m_vertices;
         public Vector3[] m_normals;
 
         public AffineTransform m_local2WorldTransform;
-        public Aabb Aabb { 
+        public Aabb LocalAabb { 
             get {
                 if (m_bihNodes.Length > 0)
                 {
@@ -35,7 +36,7 @@ namespace bluebean.UGFramework.Geometry
                 {
                     m_temp = new Vector3[8];
                 }
-                this.Aabb.GetCorners(m_temp);
+                this.LocalAabb.GetCorners(m_temp);
                 int count = 0;
                 var matrix = m_local2WorldTransform.ToMatrix();
                 foreach (var p in m_temp)

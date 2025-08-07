@@ -7,10 +7,10 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public struct BoxShape : IEnumerable<Vector3>
+    public struct BoxShape
     {
 
-        public static Vector4[] s_localPoints = new Vector4[8] {
+        public static readonly Vector4[] s_localCorners = new Vector4[8] {
             new Vector4(-0.5f, -0.5f, -0.5f, 1),
             new Vector4(-0.5f, -0.5f, 0.5f, 1),
             new Vector4(0.5f, -0.5f, 0.5f, 1),
@@ -23,14 +23,15 @@ namespace bluebean.UGFramework.Geometry
 
         public AffineTransform m_local2WorldTransform;
 
-        public Aabb m_worldAabb;
+        private Aabb m_worldAabb;
 
-        public Aabb WorldAabb { 
+        public Aabb WorldAabb
+        {
             get
             {
                 int count = 0;
                 var matrix = m_local2WorldTransform.ToMatrix();
-                foreach(var lp in this)
+                foreach (var lp in s_localCorners)
                 {
                     var wp = matrix.MultiplyPoint3x4(lp);
                     if (count == 0)
@@ -43,55 +44,38 @@ namespace bluebean.UGFramework.Geometry
                     count++;
                 }
                 return m_worldAabb;
-            } 
-        }
-
-        //public CuboidShape() { }
-
-        public Vector3 this[int index]
-        {
-            get
-            {
-                // 检查索引是否越界  
-                if (index < 0 || index > 7)
-                {
-                    throw new IndexOutOfRangeException("Index was out of range.");
-                }
-                switch (index)
-                {
-                    case 0: return s_localPoints[0];
-                    case 1: return s_localPoints[1];
-                    case 2: return s_localPoints[2];
-                    case 3: return s_localPoints[3];
-                    case 4: return s_localPoints[4];
-                    case 5: return s_localPoints[5];
-                    case 6: return s_localPoints[6];
-                    case 7: return s_localPoints[7];
-                }
-                return Vector3.zero;
             }
         }
 
-
-        public IEnumerator<Vector3> GetEnumerator()
+        public Vector3 GetLocalCornerByIndex(int index)
         {
-            for(int i=0;i< s_localPoints.Length; i++)
+            // 检查索引是否越界  
+            if (index < 0 || index > 7)
             {
-                yield return s_localPoints[i];
+                throw new IndexOutOfRangeException("Index was out of range.");
             }
+            switch (index)
+            {
+                case 0: return s_localCorners[0];
+                case 1: return s_localCorners[1];
+                case 2: return s_localCorners[2];
+                case 3: return s_localCorners[3];
+                case 4: return s_localCorners[4];
+                case 5: return s_localCorners[5];
+                case 6: return s_localCorners[6];
+                case 7: return s_localCorners[7];
+            }
+            return Vector3.zero;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
 
         public void GetWorldCorners(List<Vector3> worldCorners)
         {
             worldCorners.Clear();
-            foreach(var c in this)
+            var l2w = m_local2WorldTransform.ToMatrix();
+            foreach (var c in s_localCorners)
             {
-                var wc = m_local2WorldTransform.ToMatrix().MultiplyPoint3x4(c);
+                var wc = l2w.MultiplyPoint3x4(c);
                 worldCorners.Add(wc);
             }
         }

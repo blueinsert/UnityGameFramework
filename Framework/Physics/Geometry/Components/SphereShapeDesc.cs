@@ -30,8 +30,8 @@ namespace bluebean.UGFramework.Geometry
 
         public override void UpdateShapeImpl()
         {
-            m_shape.m_position = m_position;
-            m_shape.m_radius = m_radius;
+            m_shape.m_localPosition = m_position;
+            m_shape.m_localRadius = m_radius;
             m_shape.m_local2WorldTransform.FromTransform(this.transform);
             m_shape.UpdateAabb();
         }
@@ -47,9 +47,9 @@ namespace bluebean.UGFramework.Geometry
             var local2WorldMatrix = Matrix4x4.TRS(shape.m_local2WorldTransform.translation, shape.m_local2WorldTransform.rotation, shape.m_local2WorldTransform.scale);
             //local2WorldMatrix *= Matrix4x4.Translate(shape.m_position);
             Gizmos.matrix = local2WorldMatrix;
-            GizmonsUtil.DrawAabb(shape.Aabb,Color.blue);
+            GizmonsUtil.DrawAabb(shape.LocalAabb,Color.blue);
             Gizmos.color = m_gizmonsColor;
-            Gizmos.DrawSphere(m_position, shape.m_radius);
+            Gizmos.DrawSphere(m_position, shape.m_localRadius);
             Gizmos.matrix = prev;
 
             

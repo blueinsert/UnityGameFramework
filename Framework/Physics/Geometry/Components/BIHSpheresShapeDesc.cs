@@ -3,6 +3,7 @@ using bluebean.UGFramework.GamePlay;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using UnityEditor;
 using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
@@ -11,9 +12,15 @@ namespace bluebean.UGFramework.Geometry
     {
         public BIHSpheres m_spheres = null;
 
+        private MeshPool m_meshPool = new MeshPool();
+
         public bool m_isDrawGizmons = false;
         [Range(0, 10)]
         public int m_drawDepth = 3;
+
+        private static Material _gizmoMaterial;
+        private static Mesh _currentMesh;
+        private static Color _currentColor;
 
         public void Build()
         {
@@ -88,11 +95,12 @@ namespace bluebean.UGFramework.Geometry
             if (!m_isDrawGizmons) return;
             if (m_spheres == null || m_spheres.nodes.Length == 0)
                 return;
+            m_meshPool.BackAll();
             GizmonsUtil.DrawAabb(m_spheres.AABB, Color.green);
 
             if (m_spheres != null)
             {
-                int depth = 0;
+                int depth = 1;
                 if (m_drawDepth > 0)
                     TraverseBIHNodeList(m_spheres.spheres, m_spheres.nodes, 0, depth);
             }
@@ -114,10 +122,11 @@ namespace bluebean.UGFramework.Geometry
                 float right = node.rightSplitPlane;
                 DrawQuad(b, axis, left, Color.blue);
                 DrawQuad(b, axis, right, Color.red);
-                if (depth < m_drawDepth)
+                depth++;
+                if (depth <= m_drawDepth)
                 {
-                    TraverseBIHNodeList(spheres, nodes, node.firstChild,  depth+1);
-                    TraverseBIHNodeList(spheres, nodes, node.firstChild + 1,  depth+1);
+                    TraverseBIHNodeList(spheres, nodes, node.firstChild, depth);
+                    TraverseBIHNodeList(spheres, nodes, node.firstChild + 1, depth);
                 }
             }
         }
@@ -148,19 +157,101 @@ namespace bluebean.UGFramework.Geometry
                     break;
             }
             Mesh quad = CreateQuad(min, min + dir2, max, max - dir2);
-            Gizmos.DrawMesh(quad);
+            GizmoRenderer.DrawMesh(quad, color);
+            //Gizmos.DrawMesh(quad);
+            //Graphics.DrawMeshNow(quad, Matrix4x4.identity);
+
+            //DrawWithGraphicsAPI(quad, color);
             // 立即销毁临时创建的网格
             //DestroyImmediate(quad);
+        }
+
+        void DrawWithGraphicsAPI(Mesh mesh, Color color)
+        {
+            // 存储当前绘制状态
+            _currentMesh = mesh;
+            _currentColor = color;
+
+            // 确保在渲染时调用
+            SceneView.duringSceneGui -= RenderMeshInScene;
+            SceneView.duringSceneGui += RenderMeshInScene;
+        }
+
+        void RenderMeshInScene(SceneView sceneView)
+        {
+            if (Event.current.type != EventType.Repaint) return;
+            if (_currentMesh == null) return;
+
+            // 获取材质
+            Material material = GetDepthAwareMaterial(_currentColor);
+            if (material == null) return;
+
+            // 应用材质并绘制
+            material.SetPass(0);
+            Graphics.DrawMeshNow(_currentMesh, Matrix4x4.identity);
+
+            // 清理状态
+            _currentMesh = null;
+        }
+
+        Material GetDepthAwareMaterial(Color color)
+        {
+            if (_gizmoMaterial == null)
+            {
+                // 创建支持深度测试的自定义着色器
+                var shader = Shader.Find("Hidden/DepthAwareGizmo");
+                if (shader == null)
+                {
+                    // 如果找不到，使用内置着色器
+                    shader = Shader.Find("Standard");
+                }
+
+                _gizmoMaterial = new Material(shader);
+                _gizmoMaterial.hideFlags = HideFlags.HideAndDontSave;
+            }
+
+            // 配置材质属性
+            _gizmoMaterial.color = color;
+            _gizmoMaterial.SetInt("_ZWrite", 1); // 启用深度写入
+            _gizmoMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.LessEqual);
+
+            // 透明材质特殊处理
+            if (color.a < 0.99f)
+            {
+                _gizmoMaterial.SetInt("_ZWrite", 0); // 透明部分禁用深度写入
+                _gizmoMaterial.SetOverrideTag("RenderType", "Transparent");
+                _gizmoMaterial.EnableKeyword("_ALPHABLEND_ON");
+                _gizmoMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+            }
+            else
+            {
+                _gizmoMaterial.DisableKeyword("_ALPHABLEND_ON");
+                _gizmoMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
+            }
+
+            return _gizmoMaterial;
+        }
+
+        void OnDisable()
+        {
+#if UNITY_EDITOR
+            SceneView.duringSceneGui -= RenderMeshInScene;
+#endif
         }
 
         Mesh CreateQuad(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
         {
             Vector3[] vertices = {
-            p1,p2,p3,p4
+            p1,p2,p3,p4,
+             p1,p2,p3,p4
         };
-            int[] indices = new int[12] { 0, 1, 3, 1, 2, 3 ,
-                0,3,1,1,3,2};
-            Mesh mesh = new Mesh();
+            int[] indices = new int[12] { 
+                0, 1, 3,
+                1, 2, 3 ,
+                4,7,5,
+                5,7,6
+            };
+            Mesh mesh = m_meshPool.Allocate().m_mesh;// new Mesh();
             mesh.vertices = vertices;
             mesh.triangles = indices;
             mesh.RecalculateNormals();

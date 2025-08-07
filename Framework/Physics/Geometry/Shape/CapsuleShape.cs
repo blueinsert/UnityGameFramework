@@ -4,18 +4,8 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public class CapsuleShape : MonoBehaviour
+    public struct CapsuleShape
     {
-        // Start is called before the first frame update
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
+        //todo
     }
 }

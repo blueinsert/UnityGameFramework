@@ -76,23 +76,24 @@ namespace bluebean.UGFramework.Geometry
 
         void DrawCuboid(BoxShape box)
         {
+            var corners = BoxShape.s_localCorners;
             //下表面
-            Mesh quad = CreateQuad(box[3], box[2], box[1], box[0]);
+            Mesh quad = CreateQuad(corners[3], corners[2], corners[1], corners[0]);
             Gizmos.DrawMesh(quad);
             //上表面
-            quad = CreateQuad(box[4], box[5], box[6], box[7]);
+            quad = CreateQuad(corners[4], corners[5], corners[6], corners[7]);
             Gizmos.DrawMesh(quad);
             //左表面
-            quad = CreateQuad(box[5], box[4], box[0], box[1]);
+            quad = CreateQuad(corners[5], corners[4], corners[0], corners[1]);
             Gizmos.DrawMesh(quad);
             //右表面
-            quad = CreateQuad(box[7], box[6], box[2], box[3]);
+            quad = CreateQuad(corners[7], corners[6], corners[2], corners[3]);
             Gizmos.DrawMesh(quad);
             //前表面
-            quad = CreateQuad(box[4], box[7], box[3], box[0]);
+            quad = CreateQuad(corners[4], corners[7], corners[3], corners[0]);
             Gizmos.DrawMesh(quad);
             //后表面
-            quad = CreateQuad(box[6], box[5], box[1], box[2]);
+            quad = CreateQuad(corners[6], corners[5], corners[1], corners[2]);
             Gizmos.DrawMesh(quad);
         }
 

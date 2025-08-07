@@ -7,17 +7,17 @@ namespace bluebean.UGFramework.Geometry
 {
     public struct SphereShape
     {
-        public float m_radius;
-        public Vector3 m_position;
+        public float m_localRadius;
+        public Vector3 m_localPosition;
         public AffineTransform m_local2WorldTransform;
 
-        public Aabb m_aabb;
+        public Aabb m_localAabb;
 
-        public Aabb Aabb
+        public Aabb LocalAabb
         {
             get
             {
-                return m_aabb;
+                return m_localAabb;
             }
         }
 
@@ -25,7 +25,7 @@ namespace bluebean.UGFramework.Geometry
             get
             {
                 var matrix = m_local2WorldTransform.ToMatrix();
-                var center = matrix.MultiplyPoint3x4(m_position);
+                var center = matrix.MultiplyPoint3x4(m_localPosition);
                 return center;
             } 
         }
@@ -35,7 +35,7 @@ namespace bluebean.UGFramework.Geometry
             get
             {
                 var matrix = m_local2WorldTransform.ToMatrix();
-                var radius = matrix.lossyScale[0] * m_radius;
+                var radius = matrix.lossyScale[0] * m_localRadius;
                 return radius;
             }
         }
@@ -45,8 +45,8 @@ namespace bluebean.UGFramework.Geometry
             get
             {
                 var matrix = m_local2WorldTransform.ToMatrix();
-                var center = matrix.MultiplyPoint3x4(m_position);
-                var radius = matrix.lossyScale[0] * m_radius;
+                var center = matrix.MultiplyPoint3x4(m_localPosition);
+                var radius = matrix.lossyScale[0] * m_localRadius;
                 Aabb b = new Aabb();
                 var min = center - new Vector3(radius, radius, radius);
                 var max = center + new Vector3(radius, radius, radius);
@@ -58,10 +58,10 @@ namespace bluebean.UGFramework.Geometry
 
         public void UpdateAabb()
         {
-            var min = m_position - new Vector3(m_radius, m_radius, m_radius);
-            var max = m_position + new Vector3(m_radius, m_radius, m_radius);
-            m_aabb.min = min;
-            m_aabb.max = max;
+            var min = m_localPosition - new Vector3(m_localRadius, m_localRadius, m_localRadius);
+            var max = m_localPosition + new Vector3(m_localRadius, m_localRadius, m_localRadius);
+            m_localAabb.min = min;
+            m_localAabb.max = max;
         }
     }
 }

@@ -14,6 +14,7 @@ namespace bluebean.UGFramework.Geometry
         }
 
         private MeshShape m_shape = new MeshShape();
+        private MeshPool m_meshPool = new MeshPool();
         public bool m_isDrawGizmons = false;
         [Range(0,10)]
         public int m_drawDepth = 3;
@@ -42,23 +43,24 @@ namespace bluebean.UGFramework.Geometry
         void OnDrawGizmos()
         {
             if (!m_isDrawGizmons) return;
-           
-            var shape = m_shape;
+            m_meshPool.BackAll();
+
+             var shape = m_shape;
             GizmonsUtil.DrawAabb(shape.WorldAabb, Color.green);
             var prev = Gizmos.matrix;
             var local2WorldMatrix = Matrix4x4.TRS(shape.m_local2WorldTransform.translation, shape.m_local2WorldTransform.rotation, shape.m_local2WorldTransform.scale);
             Gizmos.matrix = local2WorldMatrix;
             if (shape.m_bihNodes!=null)
             {
-                int depth = 0;
+                int depth = 1;
                 if(m_drawDepth > 0)
-                    TraverseBIHNodeList(shape.m_triangles, shape.m_bihNodes, 0, ref depth);
+                    TraverseBIHNodeList(shape.m_triangles, shape.m_bihNodes, 0, depth);
             }
-            GizmonsUtil.DrawAabb(shape.Aabb, Color.blue);
+            GizmonsUtil.DrawAabb(shape.LocalAabb, Color.blue);
             Gizmos.matrix = prev;
         }
 
-        void TraverseBIHNodeList(Triangle[] tris, BIHNode[] nodes, int index,ref int depth)
+        void TraverseBIHNodeList(Triangle[] tris, BIHNode[] nodes, int index, int depth)
         {
             var node = nodes[index];
             int start = node.start;
@@ -76,10 +78,10 @@ namespace bluebean.UGFramework.Geometry
                 DrawQuad(b, axis, left, Color.blue);
                 DrawQuad(b, axis, right, Color.red);
                 depth++;
-                if(depth < m_drawDepth)
+                if(depth <= m_drawDepth)
                 {
-                    TraverseBIHNodeList(tris, nodes, node.firstChild, ref depth);
-                    TraverseBIHNodeList(tris, nodes, node.firstChild + 1, ref depth);
+                    TraverseBIHNodeList(tris, nodes, node.firstChild,  depth);
+                    TraverseBIHNodeList(tris, nodes, node.firstChild + 1,depth);
                 }
             }
         }
@@ -118,8 +120,9 @@ namespace bluebean.UGFramework.Geometry
             Vector3[] vertices = {
             p1,p2,p3,p4
         };
-            int[] indices = new int[6] { 0, 1, 3, 1, 2, 3 };
-            Mesh mesh = new Mesh();
+            int[] indices = new int[12] { 0, 1, 3, 1, 2, 3,
+            0,3,1,1,3,2};
+            Mesh mesh = m_meshPool.Allocate().m_mesh;
             mesh.vertices = vertices;
             mesh.triangles = indices;
             mesh.RecalculateNormals();

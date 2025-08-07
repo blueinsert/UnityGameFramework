@@ -4,18 +4,12 @@ using UnityEngine;
 
 namespace bluebean.UGFramework.Geometry
 {
-    public class CapsuleShapeDesc : MonoBehaviour
+    //todo
+    public class CapsuleShapeDesc : ShapeDescBase
     {
-        // Start is called before the first frame update
-        void Start()
+        public override void UpdateShapeImpl()
         {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
+            throw new System.NotImplementedException();
         }
     }
 }
