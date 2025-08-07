@@ -10,7 +10,9 @@ namespace bluebean.UGFramework.DataStruct
         public BIHNode[] nodes = null;
         public Sphere[] spheres = null;
 
-        public static bool s_showLog = true;
+        public static bool s_showLog = false;
+        public static StringBuilder s_sb = null;
+
         public BIHSpheres()
         {
 
@@ -47,7 +49,6 @@ namespace bluebean.UGFramework.DataStruct
             float minDistance = float.MaxValue;
             if (s_showLog)
             {
-                StringBuilder sb = new StringBuilder();
                 StringBuilder pathSb = new StringBuilder();
                 pathSb.Append("[");
                 for (int j = node.start; j < node.start + node.count; j++)
@@ -61,8 +62,7 @@ namespace bluebean.UGFramework.DataStruct
                     pathSb.Insert(0, $"{parentIndex}-->");
                     parentIndex = nodes[parentIndex].parent;
                 }
-                sb.AppendLine(pathSb.ToString());
-                Log($"traverse: {sb.ToString()}");
+                s_sb.AppendLine(pathSb.ToString());
             }
             for (int i = node.start; i < node.start + node.count; ++i)
             {
@@ -174,10 +174,23 @@ namespace bluebean.UGFramework.DataStruct
 
             if (nodes.Length > 0)
             {
+                if (s_showLog)
+                {
+                    s_sb = new StringBuilder();
+                }
+
                 var res = DistanceToSurface(nodes, spheres, in nodes[0], in point, ref minDist, ref minIndex);
+
+                if (s_showLog)
+                {
+                    Debug.Log($"minDist:{minDist} minIndex:{spheres[minIndex].index}");
+                    Debug.Log(s_sb.ToString());
+                }
+                s_sb = null;
                 return res;
             }
 
+            s_sb = null;
             return float.MaxValue;
         }
     }
