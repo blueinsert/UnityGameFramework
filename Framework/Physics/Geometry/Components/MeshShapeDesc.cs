@@ -38,6 +38,11 @@ namespace bluebean.UGFramework.Geometry
             m_shape.m_local2WorldTransform.FromTransform(this.transform);
         }
 
+        private void OnDestroy()
+        {
+            m_meshPool.Destroy();
+        }
+
         #region Gizmos
 
         void OnDrawGizmos()

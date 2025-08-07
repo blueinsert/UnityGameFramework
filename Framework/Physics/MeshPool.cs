@@ -42,5 +42,14 @@ namespace bluebean.UGFramework
                 item.m_isInUsing = false;
             }
         }
+
+        public void Destroy()
+        {
+            foreach(var item in m_pool)
+            {
+                GameObject.DestroyImmediate(item.m_mesh);
+            }
+            m_pool.Clear();
+        }
     }
 }

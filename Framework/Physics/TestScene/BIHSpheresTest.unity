@@ -4868,8 +4868,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63cb9536d517de446bfee5db1c9771c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_isDrawGizmons: 1
-  m_drawDepth: 2
+  m_isDrawGizmons: 0
+  m_drawDepth: 3
 --- !u!4 &8107134746059666767
 Transform:
   m_ObjectHideFlags: 0

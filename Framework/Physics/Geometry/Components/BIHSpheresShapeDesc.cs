@@ -88,6 +88,11 @@ namespace bluebean.UGFramework.Geometry
             return sb.ToString();
         }
 
+        private void OnDestroy()
+        {
+            m_meshPool.Destroy();
+        }
+
         #region Gizmos
 
         void OnDrawGizmos()
