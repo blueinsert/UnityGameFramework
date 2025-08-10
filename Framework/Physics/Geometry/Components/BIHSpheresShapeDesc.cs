@@ -93,6 +93,8 @@ namespace bluebean.UGFramework.Geometry
             m_meshPool.Destroy();
         }
 
+#if UNITY_EDITOR
+
         #region Gizmos
 
         void OnDrawGizmos()
@@ -171,79 +173,6 @@ namespace bluebean.UGFramework.Geometry
             //DestroyImmediate(quad);
         }
 
-        void DrawWithGraphicsAPI(Mesh mesh, Color color)
-        {
-            // 存储当前绘制状态
-            _currentMesh = mesh;
-            _currentColor = color;
-
-            // 确保在渲染时调用
-            SceneView.duringSceneGui -= RenderMeshInScene;
-            SceneView.duringSceneGui += RenderMeshInScene;
-        }
-
-        void RenderMeshInScene(SceneView sceneView)
-        {
-            if (Event.current.type != EventType.Repaint) return;
-            if (_currentMesh == null) return;
-
-            // 获取材质
-            Material material = GetDepthAwareMaterial(_currentColor);
-            if (material == null) return;
-
-            // 应用材质并绘制
-            material.SetPass(0);
-            Graphics.DrawMeshNow(_currentMesh, Matrix4x4.identity);
-
-            // 清理状态
-            _currentMesh = null;
-        }
-
-        Material GetDepthAwareMaterial(Color color)
-        {
-            if (_gizmoMaterial == null)
-            {
-                // 创建支持深度测试的自定义着色器
-                var shader = Shader.Find("Hidden/DepthAwareGizmo");
-                if (shader == null)
-                {
-                    // 如果找不到，使用内置着色器
-                    shader = Shader.Find("Standard");
-                }
-
-                _gizmoMaterial = new Material(shader);
-                _gizmoMaterial.hideFlags = HideFlags.HideAndDontSave;
-            }
-
-            // 配置材质属性
-            _gizmoMaterial.color = color;
-            _gizmoMaterial.SetInt("_ZWrite", 1); // 启用深度写入
-            _gizmoMaterial.SetInt("_ZTest", (int)UnityEngine.Rendering.CompareFunction.LessEqual);
-
-            // 透明材质特殊处理
-            if (color.a < 0.99f)
-            {
-                _gizmoMaterial.SetInt("_ZWrite", 0); // 透明部分禁用深度写入
-                _gizmoMaterial.SetOverrideTag("RenderType", "Transparent");
-                _gizmoMaterial.EnableKeyword("_ALPHABLEND_ON");
-                _gizmoMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
-            }
-            else
-            {
-                _gizmoMaterial.DisableKeyword("_ALPHABLEND_ON");
-                _gizmoMaterial.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Geometry;
-            }
-
-            return _gizmoMaterial;
-        }
-
-        void OnDisable()
-        {
-#if UNITY_EDITOR
-            SceneView.duringSceneGui -= RenderMeshInScene;
-#endif
-        }
-
         Mesh CreateQuad(Vector3 p1, Vector3 p2, Vector3 p3, Vector3 p4)
         {
             Vector3[] vertices = {
@@ -266,5 +195,11 @@ namespace bluebean.UGFramework.Geometry
 
 
         #endregion
+
+#endif
+
     }
+
+
+
 }
