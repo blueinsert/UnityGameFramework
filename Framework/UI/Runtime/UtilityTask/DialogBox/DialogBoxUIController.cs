@@ -64,8 +64,8 @@ namespace bluebean.UGFramework.UI
         [AutoBind("./Detail/DescText")]
         public Text m_dialogBoxText;
         [AutoBind("./Detail/ButtonOK")]
-        public Button m_dialogBoxOkButton;
+        public UnityEngine.UI.Button m_dialogBoxOkButton;
         [AutoBind("./Detail/ButtonCancel")]
-        public Button m_dialogBoxCancelButton;
+        public UnityEngine.UI.Button m_dialogBoxCancelButton;
     }
 }
