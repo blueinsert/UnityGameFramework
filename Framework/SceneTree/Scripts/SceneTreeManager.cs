@@ -87,16 +87,16 @@ namespace bluebean.UGFramework
                 Debug.LogError("Prefab of UISceneLayer is null");
                 return false;
             }
-            var clearCameraGo = GameObject.Find("ClearCamera");
-            if(clearCameraGo != null)
-            {
-                m_clearCamera = clearCameraGo.GetComponent<Camera>();
-            }
-            if(m_clearCamera == null)
-            {
-                Debug.LogError("the ClearCamera is not found");
-                return false;
-            }
+            //var clearCameraGo = GameObject.Find("ClearCamera");
+            //if(clearCameraGo != null)
+            //{
+            //    m_clearCamera = clearCameraGo.GetComponent<Camera>();
+            //}
+            //if(m_clearCamera == null)
+            //{
+            //    Debug.LogError("the ClearCamera is not found");
+            //    return false;
+            //}
             //AddOverlayerCamera(UILayerRoot2Canvas.worldCamera);
             //AddOverlayerCamera(UILayerRoot1Canvas.worldCamera);
             //SetOverlayerCameraStack4Base(m_clearCamera);

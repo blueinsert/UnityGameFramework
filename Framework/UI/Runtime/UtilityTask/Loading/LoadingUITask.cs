@@ -12,10 +12,15 @@ namespace bluebean.UGFramework.UI
         {
         }
 
-        public static void StartUITask()
+        public static void StartUITask(Action onEnd = null)
         {
             UIIntent intent = new UIIntent(typeof(LoadingUITask).Name, false, false, false);
-            UIManager.Instance.StartUITask(intent);
+            UIManager.Instance.StartUITask(intent, onViewUpdateComplete: () => {
+                var target = UIManager.Instance.FindUITask(typeof(LoadingUITask).Name) as LoadingUITask;
+                target.EventOnStop += () => {
+                    onEnd?.Invoke();
+                };
+            });
         }
 
         #region UITaskÉúÃüÖÜÆÚ
