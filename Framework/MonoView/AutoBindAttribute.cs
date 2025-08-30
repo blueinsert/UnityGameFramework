@@ -14,4 +14,14 @@ namespace bluebean.UGFramework
             this.path = path;
         }
     }
+
+    public class AutoBindDocumentAttribute : Attribute
+    {
+        public string path { get; private set; }
+
+        public AutoBindDocumentAttribute(string path)
+        {
+            this.path = path;
+        }
+    }
 }

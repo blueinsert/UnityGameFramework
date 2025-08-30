@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Text;
 using System.Collections.Generic;
+using UnityEngine.UIElements;
+using System.Reflection;
 
 namespace bluebean.UGFramework.UI
 {
@@ -34,6 +36,61 @@ namespace bluebean.UGFramework.UI
         public static string AddSizeTag(string txt, int size)
         {
             return string.Format("<size={0}>{1}</size>", size, txt);
+        }
+
+        private static VisualElement BindUIDocumentFieldImpl(VisualElement uiInstance, Type espectType, string name)
+        {
+            VisualElement res = null;
+            if (espectType == typeof(UnityEngine.UIElements.Button))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.Button>(name);
+            }
+            else if (espectType == typeof(UnityEngine.UIElements.Label))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.Label>(name);
+            }
+            else if (espectType == typeof(UnityEngine.UIElements.DropdownField))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.DropdownField>(name);
+            }
+            else if (espectType == typeof(UnityEngine.UIElements.TextField))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.TextField>(name);
+            }
+            else if (espectType == typeof(UnityEngine.UIElements.ListView))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.ListView>(name);
+            }
+            else if (espectType == typeof(UnityEngine.UIElements.VisualElement))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.VisualElement>(name);
+            }
+            else
+            {
+                Debug.LogError(string.Format("BindUIDocumentFieldImpl failed,type:{0} is not supported!", espectType.FullName));
+            }
+            return res;
+        }
+
+        public static void AttachUIController2UIDocument(UIViewController uiController, VisualElement uiDocumentRoot)
+        {
+            var type = uiController.GetType();
+            foreach (var fieldInfo in type.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance))
+            {
+                var autoBindAttribute = fieldInfo.GetCustomAttribute<AutoBindDocumentAttribute>();
+                if (autoBindAttribute != null)
+                {
+                    var obj = BindUIDocumentFieldImpl(uiDocumentRoot, fieldInfo.FieldType, autoBindAttribute.path);
+                    if (obj != null)
+                    {
+                        fieldInfo.SetValue(uiController, obj);
+                    }
+                    else
+                    {
+                        Debug.LogError(string.Format("AttachUIController2UIDocument:BindFiledImpl fail {0} name:{1}", type.Name, autoBindAttribute.path));
+                    }
+                }
+            }
         }
 
     }
