@@ -91,6 +91,7 @@ namespace bluebean.UGFramework.UI
                     }
                 }
             }
+            Debug.Log($"{uiController.GetType().Name} AttachUIController2UIDocument completed!");
         }
 
     }
