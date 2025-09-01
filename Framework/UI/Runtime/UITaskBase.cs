@@ -36,7 +36,10 @@ namespace bluebean.UGFramework.UI
             foreach(var viewCtrl in m_viewControllerArray)
             {
                 var uiCtrl = viewCtrl as UIViewController;
-                uiCtrl.RegisterOwner(this);
+                if (uiCtrl != null)
+                {
+                    uiCtrl.RegisterOwner(this);
+                } 
             }
         }
 

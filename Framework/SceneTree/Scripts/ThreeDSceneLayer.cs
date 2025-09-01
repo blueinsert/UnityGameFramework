@@ -13,6 +13,7 @@ namespace bluebean.UGFramework
                 var cameras = GetComponentsInChildren<Camera>();
                 if(cameras.Length == 0)
                 {
+                    Debug.LogError("ThreeDSceneLayer:LayerCamera is Null!");
                     return null;
                 }
                 return cameras[0];

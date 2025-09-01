@@ -37,9 +37,6 @@ namespace bluebean.UGFramework
 
         private CoroutineScheduler m_coroutineManager = new CoroutineScheduler();
 
-        private Camera m_clearCamera = null;
-        private List<Camera> m_overlayCameraStack = new List<Camera>();
-
         private bool m_isDirty = false;
 
         public bool Initialize()
@@ -218,7 +215,6 @@ namespace bluebean.UGFramework
             else if (layer is ThreeDSceneLayer)
             {
                 layer.transform.SetParent(ThreeDSceneRoot.transform, false);
-                //SetOverlayerCameraStack4Base(layer.LayerCamera);
             }
             layer.gameObject.SetActive(true);
             foreach (var viewCtrl in layer.gameObject.GetComponentsInChildren<MonoViewController>())
@@ -227,38 +223,6 @@ namespace bluebean.UGFramework
             }
             SetDirty();
         }
-
-        /*
-        private void AddOverlayerCamera(Camera camera)
-        {
-            var cameraData = camera.GetUniversalAdditionalCameraData();
-            if(cameraData.renderType == CameraRenderType.Overlay)
-            {
-                if (!m_overlayCameraStack.Contains(camera))
-                {
-                    m_overlayCameraStack.Add(camera);
-                }
-            }
-        }
-
-        private void SetOverlayerCameraStack4Base(Camera camera)
-        {
-            var cameraData = camera.GetUniversalAdditionalCameraData();
-            if (cameraData.renderType == CameraRenderType.Base)
-            {
-                //cameraData.cameraStack.Clear();
-                //cameraData.cameraStack.AddRange(m_overlayCameraStack);
-
-                foreach(var overCamera in m_overlayCameraStack)
-                {
-                    if (!cameraData.cameraStack.Contains(overCamera))
-                    {
-                        cameraData.cameraStack.Add(overCamera);
-                    }
-                }
-            }
-        }
-        */
 
         private void SetDirty()
         {
@@ -273,6 +237,7 @@ namespace bluebean.UGFramework
             }
             lock (m_usingLayerList)
             {
+                List<Camera> allCamera = new List<Camera>();
                 List<SceneLayer> thirdDLayers = new List<SceneLayer>();
                 List<SceneLayer> uiLayers = new List<SceneLayer>();
                 for (int i = 0; i < m_usingLayerList.Count; i++)
@@ -285,6 +250,7 @@ namespace bluebean.UGFramework
                     else
                     {
                         thirdDLayers.Add(layer);
+                        allCamera.Add(layer.LayerCamera);
                     }
                 }
                 int depth = 0;
@@ -298,11 +264,58 @@ namespace bluebean.UGFramework
                     if (!uiCameras.Contains(layer.LayerCamera))
                     {
                         uiCameras.Add(layer.LayerCamera);
+                        allCamera.Add(layer.LayerCamera);
                     }
                 }
                 foreach (var uiCamera in uiCameras)
                 {
                     uiCamera.depth = depth++;
+                }
+
+                SetCameraType(allCamera);
+            }
+        }
+
+        private void SetCameraType(List<Camera> allCamera)
+        {
+            Camera mainCamera = null;
+            int mainCameraIndex = -1;
+            for(int i = 0; i < allCamera.Count; i++)
+            {
+                var camera = allCamera[i];
+                if (camera != null)
+                {
+                    var cameraData = camera.GetUniversalAdditionalCameraData();
+                    if(cameraData.renderType == CameraRenderType.Base && camera.targetTexture==null)
+                    {
+                        mainCamera = camera;
+                        mainCameraIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (mainCamera == null)
+            {
+                Debug.LogError("SetCameraType mainCamera==null");
+                return;
+            }
+            var mainCameraData = mainCamera.GetUniversalAdditionalCameraData();
+            var stack = mainCameraData.cameraStack;
+            if (stack == null)
+            {
+                stack = new List<Camera>();
+            }
+            stack.Clear();
+            for(int i = mainCameraIndex+1; i < allCamera.Count; i++)
+            {
+                var camera = allCamera[i];
+                if (camera != null)
+                {
+                    //var cameraData = camera.GetUniversalAdditionalCameraData();
+                    if (camera.targetTexture == null)
+                    {
+                        stack.Add(allCamera[i]);
+                    }
                 }
             }
         }
