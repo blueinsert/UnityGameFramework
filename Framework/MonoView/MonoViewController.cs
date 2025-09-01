@@ -103,7 +103,10 @@ namespace bluebean.UGFramework
 
         }
 
-        
+        public virtual void OnHide() { }
 
+        public virtual void OnShow() { }
+
+        public virtual void OnDestry() { }
     }
 }

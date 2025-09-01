@@ -173,7 +173,10 @@ namespace bluebean.UGFramework
         {
             m_unusedLayerList.Remove(layer);
             m_usingLayerList.Remove(layer);
-
+            foreach (var viewCtrl in layer.gameObject.GetComponentsInChildren<MonoViewController>())
+            {
+                viewCtrl.OnDestry();
+            }
             GameObject.Destroy(layer.gameObject);
             SetDirty();
         }
@@ -188,6 +191,10 @@ namespace bluebean.UGFramework
             m_usingLayerList.Remove(layer);
             m_unusedLayerList.Add(layer);
             layer.m_state = SceneLayerState.Unused;
+            foreach (var viewCtrl in layer.gameObject.GetComponentsInChildren<MonoViewController>())
+            {
+                viewCtrl.OnHide();
+            }
             layer.transform.SetParent(UnusedLayerRoot.transform, false);
             layer.gameObject.SetActive(false);
             SetDirty();
@@ -214,7 +221,10 @@ namespace bluebean.UGFramework
                 //SetOverlayerCameraStack4Base(layer.LayerCamera);
             }
             layer.gameObject.SetActive(true);
-            
+            foreach (var viewCtrl in layer.gameObject.GetComponentsInChildren<MonoViewController>())
+            {
+                viewCtrl.OnShow();
+            }
             SetDirty();
         }
 
