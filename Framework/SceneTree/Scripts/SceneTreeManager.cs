@@ -303,6 +303,7 @@ namespace bluebean.UGFramework
             var stack = mainCameraData.cameraStack;
             if (stack == null)
             {
+                Debug.LogError("SetCameraType mainCamera's cameraStack == null");
                 stack = new List<Camera>();
             }
             stack.Clear();
@@ -311,7 +312,11 @@ namespace bluebean.UGFramework
                 var camera = allCamera[i];
                 if (camera != null)
                 {
-                    //var cameraData = camera.GetUniversalAdditionalCameraData();
+                    var cameraData = camera.GetUniversalAdditionalCameraData();
+                    if (cameraData.renderType == CameraRenderType.Base)
+                    {
+                        cameraData.renderType = CameraRenderType.Overlay;
+                    }
                     if (camera.targetTexture == null)
                     {
                         stack.Add(allCamera[i]);
