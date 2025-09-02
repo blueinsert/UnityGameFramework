@@ -300,7 +300,12 @@ namespace bluebean.UGFramework
                 Debug.LogError("SetCameraType mainCamera==null");
                 return;
             }
+            
             var mainCameraData = mainCamera.GetUniversalAdditionalCameraData();
+            if (mainCameraData.renderType == CameraRenderType.Overlay)
+            {
+                mainCameraData.renderType = CameraRenderType.Base;
+            }
             var stack = mainCameraData.cameraStack;
             if (stack == null)
             {
