@@ -286,7 +286,8 @@ namespace bluebean.UGFramework
                 if (camera != null)
                 {
                     var cameraData = camera.GetUniversalAdditionalCameraData();
-                    if(cameraData.renderType == CameraRenderType.Base && camera.targetTexture==null)
+                    //if(cameraData.renderType == CameraRenderType.Base && camera.targetTexture==null)
+                    if (camera.targetTexture == null)
                     {
                         mainCamera = camera;
                         mainCameraIndex = i;

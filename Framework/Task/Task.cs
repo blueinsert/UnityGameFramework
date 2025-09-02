@@ -30,6 +30,7 @@ namespace bluebean.UGFramework
         public Task(string name = "")
         {
             m_name = name;
+            ConstructComps();
         }
 
         public void Start(Object param)
