@@ -584,7 +584,7 @@ namespace bluebean.UGFramework
         }
 
         /// <summary>
-        /// 更新视图
+        /// 更新视图todo
         /// </summary>
         protected virtual void PostUpdateView()
         {
