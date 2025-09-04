@@ -65,6 +65,10 @@ namespace bluebean.UGFramework.UI
             {
                 res = uiInstance.Q<UnityEngine.UIElements.ScrollView>(name);
             }
+            else if (espectType == typeof(UnityEngine.UIElements.TemplateContainer))
+            {
+                res = uiInstance.Q<UnityEngine.UIElements.TemplateContainer>(name);
+            }
             else if (espectType == typeof(UnityEngine.UIElements.VisualElement))
             {
                 res = uiInstance.Q<UnityEngine.UIElements.VisualElement>(name);
