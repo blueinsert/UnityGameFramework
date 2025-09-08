@@ -48,7 +48,7 @@ namespace bluebean.UGFramework.Asset
                 assets[0] = UnityEditor.AssetDatabase.LoadAssetAtPath(path,typeof(UnityEngine.Object));
             }
             
-            if(assets != null && assets[0] != null)
+            if(assets != null && assets.Length>0 && assets[0] != null)
             {
                 Debug.Log("Load Asset Success by AssetDataBase AssetPath:" + path);
             }
