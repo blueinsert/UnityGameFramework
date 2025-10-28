@@ -116,6 +116,9 @@ namespace bluebean.UGFramework
                             else
                                 platform = "StandaloneWindows";
                             break;
+                        case RuntimePlatform.WebGLPlayer:
+                            platform = "WebGL";
+                            break;
                         default:
                             break;
                     }

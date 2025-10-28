@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Diagnostics;
+using UnityEngine.Networking;
 
 namespace bluebean.UGFramework.Asset
 {
@@ -90,21 +91,50 @@ namespace bluebean.UGFramework.Asset
             return SystemUtility.GetCurrentTargetPlatform();
         }
 
-        private bool LoadingBundleData()
+        private IEnumerator LoadingBundleData(Action<bool> onEnd)
         {
+            bool res = false;
             var path = AssetPathHelper.GetBundleDataBundlePathInStreamingAssets();
-            var bundle = AssetBundle.LoadFromFile(path);
+            Debug.Log($"LoadingBundleData path:{path}");
+            AssetBundle bundle = null;
+            if (path.StartsWith("http"))
+            {
+                UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(path);
+                yield return request.SendWebRequest();
+                while (request.result == UnityWebRequest.Result.InProgress)
+                {
+                    yield return null;
+                }
+                yield return new WaitUntil(() => {
+                    return request.isDone;
+                });
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError(string.Format("LoadingBundleData UnityWebRequest  fail {0} {1}", path,request.result));              
+                }
+                else
+                {
+                    bundle = (request.downloadHandler as DownloadHandlerAssetBundle).assetBundle;
+                }
+            }else
+            {
+                bundle = AssetBundle.LoadFromFile(path);
+            }
             var bundleData = bundle.LoadAsset<BundleData>("BundleData.asset");
             if (bundleData == null)
             {
                 Debug.LogError(string.Format("AssetLoader:LoadBundleData failed,path:{0}", path));
-                return false;
+                res = false;
             }
             Debug.Log("AssetLoader:LoadBundleData Success");
             bundle.Unload(false);
             m_bundleData = bundleData;
             m_bundleDataHelper = new BundleDataHelper(m_bundleData, true);
-            return true;
+            res = true;
+            if (onEnd != null)
+            {
+                onEnd(res);
+            }
         }
 
         protected IEnumerator AssetBundleManifestLoadingWorker(Action<bool> onEnd)
@@ -147,18 +177,43 @@ namespace bluebean.UGFramework.Asset
         {
             var bundleName = singleBundleData.m_bundleName;
             var path = AssetPathHelper.GetAssetBundlePath(bundleName);
-            var req = AssetBundle.LoadFromFileAsync(path);
-            while (!req.isDone)
+            Debug.Log($"LoadSingleBundleFromStreaming2 bundleName:{bundleName} path:{path}");
+            AssetBundle loadedBundle = null;
+            if (path.StartsWith("http"))
             {
-                yield return null;
-            }
-            if (req.assetBundle == null)
+                UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(path);
+                yield return request.SendWebRequest();
+                while (request.result == UnityWebRequest.Result.InProgress)
+                {
+                    yield return null;
+                }
+                yield return new WaitUntil(() => {
+                    return request.isDone;
+                });
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError(string.Format("LoadSingleBundleFromStreaming UnityWebRequest  fail {0} {1}", path, request.result));
+                }
+                else
+                {
+                    loadedBundle = (request.downloadHandler as DownloadHandlerAssetBundle).assetBundle;
+                }
+            }else
             {
-                Debug.LogError(string.Format("LoadBundleInStreaming LoadFromFileAsync  fail {0}", path));
-                onLoadComplete(null);
-                yield break;
+                var req = AssetBundle.LoadFromFileAsync(path);
+                while (!req.isDone)
+                {
+                    yield return null;
+                }
+                if (req.assetBundle == null)
+                {
+                    Debug.LogError(string.Format("LoadBundleInStreaming LoadFromFileAsync  fail {0}", path));
+                    onLoadComplete(null);
+                    yield break;
+                }
+                loadedBundle = req.assetBundle;
             }
-            var loadedBundle = req.assetBundle;
+            
             //Debug.Log(string.Format("LoadBundleInStreaming success! path: {0}", path));
             onLoadComplete(loadedBundle);
         }
@@ -166,19 +221,49 @@ namespace bluebean.UGFramework.Asset
         private IEnumerator LoadSingleBundleFromStreaming(string bundleName, Action<AssetBundle> onLoadComplete)
         {
             var path = AssetPathHelper.GetAssetBundlePath(bundleName);
-            var req = AssetBundle.LoadFromFileAsync(path);
-            while (!req.isDone)
+            AssetBundle loadedBundle = null;
+            Debug.Log($"LoadSingleBundleFromStreaming1 bundleName:{bundleName} path:{path}");
+            if (path.StartsWith("http"))
             {
-                yield return null;
+                UnityWebRequest request = UnityWebRequestAssetBundle.GetAssetBundle(path);
+                yield return request.SendWebRequest();
+                while(request.result == UnityWebRequest.Result.InProgress)
+                {
+                    yield return null;
+                }
+                yield return new WaitUntil(() => {
+                    return request.isDone;
+                });
+                if(request.result != UnityWebRequest.Result.Success)
+                {
+                    Debug.LogError(string.Format("LoadBundleInStreaming UnityWebRequestAssetBundle  fail {0}", path));
+                    Debug.LogError(GetType() + "/ERROR/" + request.error + " " + request.result);
+                    onLoadComplete(null);
+                    request.Dispose();
+                    yield break;
+                }
+                else{
+                    loadedBundle = (request.downloadHandler as DownloadHandlerAssetBundle).assetBundle;
+                    Debug.Log($"loadedBundle: {loadedBundle}");
+                    request.Dispose();
+                }
             }
-            if (req.assetBundle == null)
+            else
             {
-                Debug.LogError(string.Format("LoadBundleInStreaming LoadFromFileAsync  fail {0}", path));
-                onLoadComplete(null);
-                yield break;
+                var req = AssetBundle.LoadFromFileAsync(path);
+                while (!req.isDone)
+                {
+                    yield return null;
+                }
+                if (req.assetBundle == null)
+                {
+                    Debug.LogError(string.Format("LoadBundleInStreaming LoadFromFileAsync  fail {0}", path));
+                    onLoadComplete(null);
+                    yield break;
+                }
+                loadedBundle = req.assetBundle;
             }
-            var loadedBundle = req.assetBundle;
-            //Debug.Log(string.Format("LoadBundleInStreaming success! path: {0}", path));
+            Debug.Log(string.Format("LoadBundleInStreaming success! path: {0}", path));
             onLoadComplete(loadedBundle);
         }
 

@@ -25,6 +25,7 @@ namespace bluebean.UGFramework
         public string WinExeDir = "../Build/Win/";
         [SerializeField]
         public string WinExeName = "demo.exe";
+       
         [Header("Apk´ò°üÄ¿Â¼")]
         [SerializeField]
         public string AndroidApkDir = "../Build/Apk/";

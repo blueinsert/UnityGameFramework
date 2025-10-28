@@ -194,12 +194,14 @@ namespace bluebean.UGFramework.Asset
             }
         }
 
-        public bool StartLoadingBundleData()
+        public IEnumerator StartLoadingBundleData(Action<bool> onEnd)
         {
             m_bundleData = null;
             m_bundleDataHelper = null;
-            return LoadingBundleData();
+            yield return LoadingBundleData(onEnd);
+
         }
+
             #endregion
 
             public void Tick()

@@ -382,8 +382,10 @@ namespace bluebean.UGFramework.Build
             }
 
             var manifest = BuildPipeline.BuildAssetBundles(dir,
-                BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression,
-                EditorUserBuildSettings.activeBuildTarget);
+                BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression
+                ,// | BuildAssetBundleOptions.AppendHashToAssetBundleName,
+                EditorUserBuildSettings.activeBuildTarget
+               );
             if (manifest == null || manifest.GetAllAssetBundles() == null || manifest.GetAllAssetBundles().Length == 0)
             {
                 UnityEngine.Debug.LogErrorFormat("BuildPipeline.BuildAssetBundles() {0}, {1}",
@@ -587,6 +589,22 @@ namespace bluebean.UGFramework.Build
                        e.ToString()));
             }
             Debug.Log(string.Format("BuildAndroidApk Success!"));
+
+        }
+
+        [MenuItem("Framework/Build/BuildWebGL_AssetBundles")]
+        static void BuildWebGL()
+        {
+            EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.WebGL, BuildTarget.WebGL);
+            Debug.Log(string.Format("Start BuildWebGL_AssetBundles,{0}", EditorUserBuildSettings.activeBuildTarget));
+            if (!BuildAllAssets())
+            {
+                Debug.LogError("Build Failed");
+                return;
+            }
+            CopyAssetBundels2StreamingAssets();
+           
+            Debug.Log(string.Format("BuildWebGL_AssetBundles Success!"));
 
         }
     }
