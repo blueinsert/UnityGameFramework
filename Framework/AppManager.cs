@@ -39,7 +39,7 @@ namespace bluebean.UGFramework
         private ConfigDataLoader m_configDataLoader;
         private AssetLoader m_assetLoader;
         private TaskManager m_taskManager;
-        private UIManager m_uiManager;
+        private UI.UIManager m_uiManager;
         private SceneTreeManager m_sceneTree;
 
         private DelayExecMgrComp m_delayExecMgrComp;
@@ -49,7 +49,7 @@ namespace bluebean.UGFramework
         public CoroutineScheduler CoroutineHelper { get { return m_coroutineHelper; } }
         public TaskManager TaskManager { get { return m_taskManager; } }
         public AssetLoader ResourceManager { get { return m_assetLoader; } }
-        public UIManager UIManager { get { return m_uiManager; } }
+        public UI.UIManager UIManager { get { return m_uiManager; } }
         public SceneTreeManager SceneTree { get { return m_sceneTree; } }
 
         public static string BuildSystemInfoText(bool textColor)
@@ -147,7 +147,7 @@ namespace bluebean.UGFramework
                 return false;
             }
             m_taskManager = TaskManager.CreateInstance();
-            m_uiManager = UIManager.CreateInstance();
+            m_uiManager = UI.UIManager.CreateInstance();
             m_sceneTree = SceneTreeManager.CreateInstance();
             if (!m_sceneTree.Initialize())
             {
