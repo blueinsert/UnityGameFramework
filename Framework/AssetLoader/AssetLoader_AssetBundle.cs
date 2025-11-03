@@ -488,5 +488,52 @@ namespace bluebean.UGFramework.Asset
             }
             onLoadComplete(assets);
         }
+
+
+        public IEnumerator InitializeAssetBundlePipeline(Action<bool> onEnd)
+        {
+            var url = string.Format("{0}/{1}", Application.streamingAssetsPath, "AssetBundles/BundleData.json");
+
+            UnityWebRequest request = UnityWebRequest.Get(url);// new UnityWebRequest(url);
+            yield return request.SendWebRequest();
+            while (request.result == UnityWebRequest.Result.InProgress)
+            {
+                yield return null;
+            }
+            yield return new UnityEngine.WaitUntil(() => {
+                return request.isDone;
+            });
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("AssetLoader get BundleData.txt Failed!");
+                onEnd(false);
+                yield break;
+            }
+            else
+            {
+                var content = request.downloadHandler.text;
+                Debug.Log($"AssetLoader get BundleData.txt: {content}");
+                AssetPathHelper.BundleDataAssetBundleNamle = content;
+            }
+
+            bool res = false;
+            yield return AssetLoader.Instance.StartLoadingBundleData((bundleDataRes) => { res = bundleDataRes; });
+            if (!res)
+            {
+                Debug.LogError("AssetLoader.Instance.StartLoadingBundleData() Failed!");
+                onEnd(false);
+                yield break;
+            }
+
+            bool isAssetBundleManifestLoadSuccess = false;
+            yield return AssetLoader.Instance.StartAssetBundleManifestLoading((res) => { isAssetBundleManifestLoadSuccess = res; });
+            if (!isAssetBundleManifestLoadSuccess)
+            {
+                Debug.LogError("AssetLoader.Instance.StartAssetBundleManifestLoading Failed!");
+                onEnd(false);
+                yield break;
+            }
+            onEnd(true);
+        }
     }
 }
