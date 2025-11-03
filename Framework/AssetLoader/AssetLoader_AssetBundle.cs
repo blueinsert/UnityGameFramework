@@ -2,6 +2,7 @@ using bluebean.UGFramework;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Diagnostics;
 using UnityEngine.Networking;
@@ -352,19 +353,27 @@ namespace bluebean.UGFramework.Asset
                 yield break;
             }
 
+            var realBundleName = AssetPathHelper.GetRealBundleName(singleBundleData.m_bundleName, singleBundleData.m_bundleHash, BuildSetting.Instance.IsAppendHashToAssetBundleName);
             // 获取所有的直接依赖
-            var dependenceList = m_assetBundleManifest.GetDirectDependencies(singleBundleData.m_bundleName);
+            var dependenceList = m_assetBundleManifest.GetDirectDependencies(realBundleName);
             List<BundleCacheItem> dependBundleCacheList = null;
 
             // 加载依赖的bundle
             if (dependenceList != null && dependenceList.Length != 0)
             {
-                //Debug.LogWarning("LoadBundle load dependence bundles for " + bundleData.m_bundleName);
+                Debug.Log("LoadBundle load dependence bundles for " + singleBundleData.m_bundleName + " \n depends:"+ string.Join("/", dependenceList));
 
                 foreach (string dependence in dependenceList)
                 {
                     AssetBundle dependBundle = null;
-                    var iter = LoadBundle(dependence, (lbundle) => { dependBundle = lbundle; });
+                    BundleData.SingleBundleData bundleData = null;
+                    bundleData = m_bundleDataHelper.GetBundleDataByRealName(dependence);
+                    if(bundleData == null)
+                    {
+                        Debug.LogError(string.Format("load dependence bundle:{0} failed! bundleData == null", bundleName));
+                        continue;
+                    }
+                    var iter = LoadBundle(bundleData, (lbundle) => { dependBundle = lbundle; });
                     while (iter.MoveNext())
                     {
                         yield return null;
@@ -384,7 +393,7 @@ namespace bluebean.UGFramework.Asset
                         }
 
                         // 先记录下来所有依赖的缓存
-                        dependBundleCacheList.Add(GetAssetBundleFromCache(dependence));
+                        dependBundleCacheList.Add(GetAssetBundleFromCache(bundleData.m_bundleName));
                     }
                 }
             }
@@ -431,21 +440,21 @@ namespace bluebean.UGFramework.Asset
             }
         }
 
-        protected IEnumerator LoadBundle(string bundleName, Action<AssetBundle> onComplete)
-        {
-            var bundleData = m_bundleDataHelper.GetBundleDataByName(bundleName);
-            if (bundleData == null)
-            {
-                Debug.LogError(string.Format("LoadBundle fail {0},singleBundleData == null", bundleName)); 
-                onComplete(null);
-                yield break;
-            }
-            var iter = LoadBundle(bundleData, onComplete);
-            while (iter.MoveNext())
-            {
-                yield return null;
-            }
-        }
+        //protected IEnumerator LoadBundle(string bundleName, Action<AssetBundle> onComplete)
+        //{
+        //    var bundleData = m_bundleDataHelper.GetBundleDataByName(bundleName);
+        //    if (bundleData == null)
+        //    {
+        //        Debug.LogError(string.Format("LoadBundle fail {0},singleBundleData == null", bundleName)); 
+        //        onComplete(null);
+        //        yield break;
+        //    }
+        //    var iter = LoadBundle(bundleData, onComplete);
+        //    while (iter.MoveNext())
+        //    {
+        //        yield return null;
+        //    }
+        //}
 
         private IEnumerator LoadAssetFromBundle(string path, Action<UnityEngine.Object[]> onLoadComplete)
         {

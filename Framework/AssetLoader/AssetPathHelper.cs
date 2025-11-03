@@ -31,7 +31,7 @@ namespace bluebean.UGFramework.Asset
             return string.Format("{0}/{1}/{2}",Application.streamingAssetsPath,"AssetBundles",bundleName);
         }
 
-        public static string GetRealBundleName(string bundleName, Hash128 hash,bool useHash = false)
+        public static string GetRealBundleName(string bundleName, string hash,bool useHash = false)
         {
             if (!useHash)
                 return bundleName;

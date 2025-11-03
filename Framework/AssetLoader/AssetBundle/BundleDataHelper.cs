@@ -24,6 +24,11 @@ namespace bluebean.UGFramework.Asset
         /// <summary>
         /// 根据绑定的bundleData的bundleList获取的dict
         /// </summary>
+        private Dictionary<string, BundleData.SingleBundleData> m_bundleDataDictRealName = new Dictionary<string, BundleData.SingleBundleData>();
+
+        /// <summary>
+        /// 根据绑定的bundleData的bundleList获取的dict
+        /// </summary>
         private Dictionary<string, BundleData.SingleBundleData> m_bundleDataDict = new Dictionary<string, BundleData.SingleBundleData>();
 
         /// <summary>
@@ -40,7 +45,10 @@ namespace bluebean.UGFramework.Asset
             m_internalBundleData = bundleData;
             m_assetPathIgnoreCase = assetPathIgnoreCase;
 
-            m_internalBundleData.m_bundleList.ForEach((elem) => { m_bundleDataDict.Add(elem.m_bundleName, elem); });
+            m_internalBundleData.m_bundleList.ForEach((elem) => { 
+                m_bundleDataDict.Add(elem.m_bundleName, elem);
+                m_bundleDataDictRealName.Add(elem.m_realBundleName, elem);
+            });
             m_internalBundleData.m_bundleList.ForEach((elem) =>
             {
                 elem.m_assetList.ForEach((assetPath) =>
@@ -59,6 +67,21 @@ namespace bluebean.UGFramework.Asset
         {
             BundleData.SingleBundleData data;
             if (!m_bundleDataDict.TryGetValue(name, out data))
+            {
+                return null;
+            }
+            return data;
+        }
+
+        /// <summary>
+        /// 通过bundlename获取BundleData
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public BundleData.SingleBundleData GetBundleDataByRealName(string name)
+        {
+            BundleData.SingleBundleData data;
+            if (!m_bundleDataDictRealName.TryGetValue(name, out data))
             {
                 return null;
             }

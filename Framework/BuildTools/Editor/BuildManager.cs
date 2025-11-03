@@ -521,7 +521,7 @@ namespace bluebean.UGFramework.Build
                 }
 
                 if (IsAppendHashToAssetBundleName)
-                    data.m_realBundleName = AssetPathHelper.GetRealBundleName(data.m_bundleName, hash, true);
+                    data.m_realBundleName = AssetPathHelper.GetRealBundleName(data.m_bundleName, hash.ToString(), true);
                 else
                     data.m_realBundleName = data.m_bundleName;
             }
