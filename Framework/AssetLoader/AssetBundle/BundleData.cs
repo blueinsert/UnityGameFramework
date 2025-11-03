@@ -25,6 +25,8 @@ namespace bluebean.UGFramework.Asset
             /// CRC校验码
             /// </summary>
             public uint m_bundleCRC = 0;
+
+            public string m_realBundleName = null;
             /// <summary>
             /// bundle的大小，byte
             /// </summary>

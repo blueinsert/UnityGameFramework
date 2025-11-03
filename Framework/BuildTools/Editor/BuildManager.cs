@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Policy;
 using UnityEditor;
 using UnityEditor.Build.Content;
 using UnityEngine;
@@ -36,6 +37,14 @@ namespace bluebean.UGFramework.Build
             get
             {
                 return BuildSetting.Instance.AssetBundleDir + EditorUserBuildSettings.activeBuildTarget;
+            }
+        }
+
+        public static bool IsAppendHashToAssetBundleName
+        {
+            get
+            {
+                return BuildSetting.Instance.IsAppendHashToAssetBundleName;
             }
         }
 
@@ -380,10 +389,13 @@ namespace bluebean.UGFramework.Build
                 UnityEngine.Debug.LogErrorFormat("Failed to prepareDirectory: {0}", dir);
                 return false;
             }
-
+            BuildAssetBundleOptions options = BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression;
+            if (IsAppendHashToAssetBundleName)
+            {
+                options = options | BuildAssetBundleOptions.AppendHashToAssetBundleName;
+            }
             var manifest = BuildPipeline.BuildAssetBundles(dir,
-                BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression
-                ,// | BuildAssetBundleOptions.AppendHashToAssetBundleName,
+                options,
                 EditorUserBuildSettings.activeBuildTarget
                );
             if (manifest == null || manifest.GetAllAssetBundles() == null || manifest.GetAllAssetBundles().Length == 0)
@@ -405,6 +417,53 @@ namespace bluebean.UGFramework.Build
         }
 
         /// <summary>
+        /// Build BundleData的ab
+        /// </summary>
+        /// <returns></returns>
+        private static bool BuildBundleDataAssetBundle()
+        {
+            //Build/AssetBundles/
+            var dir = AssetBundleDir;
+           
+            BuildAssetBundleOptions options = BuildAssetBundleOptions.StrictMode | BuildAssetBundleOptions.ChunkBasedCompression;
+
+            AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
+
+            // 2. 配置要构建的AssetBundle
+            buildMap[0].assetBundleName = "bundledata_ab.b"; // 资源包名称
+                                                             // 明确指定要打入此资源包的所有资源路径
+            string[] assets = new string[] {
+                "Assets/GameProject/RuntimeAssets/BundleData_AB/BundleData.asset",
+             };
+            buildMap[0].assetNames = assets;
+
+            var manifest = BuildPipeline.BuildAssetBundles(dir, buildMap, options, EditorUserBuildSettings.activeBuildTarget);
+
+            if (manifest == null || manifest.GetAllAssetBundles() == null || manifest.GetAllAssetBundles().Length == 0)
+            {
+                UnityEngine.Debug.LogErrorFormat("BuildPipeline.BuildBundleDataAssetBundle() {0}, {1}",
+                   dir, EditorUserBuildSettings.activeBuildTarget);
+                return false;
+            }
+
+            // 刷新编辑器
+            AssetDatabase.Refresh();
+
+            UnityEngine.Debug.Log("BuildBundleDataAssetBundle complete");
+
+            Hash128 hash;
+            uint crc;
+            var bundlePath = string.Format("{0}/{1}", AssetBundleDir, "bundledata_ab.b");
+            if (!BuildPipeline.GetHashForAssetBundle(bundlePath, out hash))
+            {
+                Debug.LogError(string.Format("Failed to GetHashFor: {0}", bundlePath));
+            }
+            UnityEngine.Debug.Log($"BundleData_ab.b hash: {hash}");
+
+            return true;
+        }
+
+        /// <summary>
         /// 获取文件大小
         /// </summary>
         /// <param name="path"></param>
@@ -416,6 +475,8 @@ namespace bluebean.UGFramework.Build
             var fi = new FileInfo(path);
             return fi.Length;
         }
+
+       
 
         /// <summary>
         /// 更新bundledata中的版本信息
@@ -458,6 +519,11 @@ namespace bluebean.UGFramework.Build
                     data.m_size = GetFileSize(bundlePath);
                     anyChange = true;
                 }
+
+                if (IsAppendHashToAssetBundleName)
+                    data.m_realBundleName = AssetPathHelper.GetRealBundleName(data.m_bundleName, hash, true);
+                else
+                    data.m_realBundleName = data.m_bundleName;
             }
 
             if (anyChange)
@@ -465,11 +531,27 @@ namespace bluebean.UGFramework.Build
                 UnityEditor.EditorUtility.SetDirty(bundleData);
                 AssetDatabase.SaveAssets();
                 // 为了BundleData本身build一次bundle
-                // todo remove
+                //if (!BuildBundleDataAssetBundle())
                 if (!BuildAssetBundles())
                 {
+                    UnityEngine.Debug.LogError("BuildBundleDataAssetBundle() Failed!");
+
                     UnityEngine.Debug.LogError("UpdateBundleData4BundleVersion() Failed to build asset bundle.");
                     return false;
+                }
+                if (IsAppendHashToAssetBundleName)
+                {
+                    Hash128 hash;
+                    bundlePath = string.Format("{0}/{1}", AssetBundleDir, "bundledata_ab.b");
+                    if (!BuildPipeline.GetHashForAssetBundle(bundlePath, out hash))
+                    {
+                        Debug.LogError(string.Format("Failed to GetHashFor: {0}", bundlePath));
+                    }
+                    UnityEngine.Debug.Log($"BundleData_ab.b hash: {hash}");
+                    File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab_{hash}.b");
+                }else
+                {
+                    File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab.b");
                 }
             }
 
@@ -503,7 +585,7 @@ namespace bluebean.UGFramework.Build
 
             var bundleDataPath = BundleDataPath;
             var bundleData = AssetDatabase.LoadAssetAtPath(bundleDataPath, typeof(BundleData)) as BundleData;
-            System.Diagnostics.Debug.Assert(bundleData != null, "bundleData != null");
+            Debug.Assert(bundleData != null, "bundleData != null"); 
             sourcePath = string.Format("{0}", bundleDataPath);
             targetPath = string.Format("{0}/{1}", StreamingAssetsBundlePath, "BundleData.asset");
             if (File.Exists(sourcePath))

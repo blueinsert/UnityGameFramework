@@ -9,6 +9,8 @@ namespace bluebean.UGFramework
         //反射引用
         private readonly static string AssetPath = "Assets/GameProject/Resources/BuildSettingAsset.asset";
 
+        [Header("是否资源包名添加hash")]
+        public bool IsAppendHashToAssetBundleName = false;
         [Header("构建临时文件存放目录,相对于工程路径")]
         [SerializeField]
         public string BuildPath = "Build/";

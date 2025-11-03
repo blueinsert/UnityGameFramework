@@ -175,7 +175,7 @@ namespace bluebean.UGFramework.Asset
 
         private IEnumerator LoadSingleBundleFromStreaming(BundleData.SingleBundleData singleBundleData, Action<AssetBundle> onLoadComplete)
         {
-            var bundleName = singleBundleData.m_bundleName;
+            var bundleName = singleBundleData.m_realBundleName;
             var path = AssetPathHelper.GetAssetBundlePath(bundleName);
             Debug.Log($"LoadSingleBundleFromStreaming2 bundleName:{bundleName} path:{path}");
             AssetBundle loadedBundle = null;
