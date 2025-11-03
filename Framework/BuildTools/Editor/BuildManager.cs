@@ -1,7 +1,9 @@
 ﻿using bluebean.UGFramework.Asset;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Security.Policy;
 using UnityEditor;
 using UnityEditor.Build.Content;
@@ -538,25 +540,49 @@ namespace bluebean.UGFramework.Build
 
                     UnityEngine.Debug.LogError("UpdateBundleData4BundleVersion() Failed to build asset bundle.");
                     return false;
-                }
-                if (IsAppendHashToAssetBundleName)
+                }    
+            }
+
+            if (IsAppendHashToAssetBundleName)
+            {
+                //BundleData.json中记录BundleData文件名
+                Hash128 hash;
+                bundlePath = string.Format("{0}/{1}", AssetBundleDir, "bundledata_ab.b");
+                if (!BuildPipeline.GetHashForAssetBundle(bundlePath, out hash))
                 {
-                    Hash128 hash;
-                    bundlePath = string.Format("{0}/{1}", AssetBundleDir, "bundledata_ab.b");
-                    if (!BuildPipeline.GetHashForAssetBundle(bundlePath, out hash))
-                    {
-                        Debug.LogError(string.Format("Failed to GetHashFor: {0}", bundlePath));
-                    }
-                    UnityEngine.Debug.Log($"BundleData_ab.b hash: {hash}");
-                    File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab_{hash}.b");
-                }else
-                {
-                    File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab.b");
+                    Debug.LogError(string.Format("Failed to GetHashFor: {0}", bundlePath));
                 }
+                UnityEngine.Debug.Log($"BundleData_ab.b hash: {hash}");
+                File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab_{hash}.b");
+
+                //Platform.json中记录平台资源包文件名
+                var curPlatform = SystemUtility.GetCurrentTargetPlatform();
+                bundlePath = string.Format("{0}/{1}", AssetBundleDir, curPlatform);
+                var md5 = CalculateMD5ForAssetBundle(bundlePath);
+                UnityEngine.Debug.Log($"{curPlatform} hash: {md5}");
+                File.WriteAllText(Path.Combine(AssetBundleDir, "Platform.json"), $"{curPlatform}_{hash}");
+                File.Copy(bundlePath, string.Format("{0}/{1}", AssetBundleDir, $"{curPlatform}_{hash}"));
+            }
+            else
+            {
+                var curPlatform = SystemUtility.GetCurrentTargetPlatform();
+
+                File.WriteAllText(Path.Combine(AssetBundleDir, "BundleData.json"), $"bundledata_ab.b");
+                File.WriteAllText(Path.Combine(AssetBundleDir, "Platform.json"), $"{curPlatform}");
             }
 
             UnityEngine.Debug.Log("UpdateBundleData4BundleVersion completed");
             return true;
+        }
+
+        public static string CalculateMD5ForAssetBundle(string filePath)
+        {
+            using (var md5 = MD5.Create())
+            using (var stream = File.OpenRead(filePath))
+            {
+                byte[] hash = md5.ComputeHash(stream);
+                return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
         }
 
         /// <summary>

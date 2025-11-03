@@ -51,6 +51,8 @@ namespace bluebean.UGFramework.Asset
 
         protected Dictionary<string, BundleLoadingCtx> m_bundleLoadingCtxDict = new Dictionary<string, BundleLoadingCtx>();
 
+        public string m_platformAssetBundleName = null;
+
         /// <summary>
         /// 将bundle缓存到cache中
         /// </summary>
@@ -89,6 +91,8 @@ namespace bluebean.UGFramework.Asset
 
         protected string GetAssetBundleManifestBundleName()
         {
+            if (m_platformAssetBundleName != null)
+                return m_platformAssetBundleName;
             return SystemUtility.GetCurrentTargetPlatform();
         }
 
@@ -397,7 +401,10 @@ namespace bluebean.UGFramework.Asset
                     }
                 }
             }
-
+            else
+            {
+                Debug.Log("dependence bundles for " + singleBundleData.m_bundleName + " is null");
+            }
             // 加载本bundle
             AssetBundle loadedBundle = null;
             var iter2 = LoadSingleBundleImpl(singleBundleData, (ab) => {
@@ -492,8 +499,8 @@ namespace bluebean.UGFramework.Asset
 
         public IEnumerator InitializeAssetBundlePipeline(Action<bool> onEnd)
         {
+            //获取BundleData.json中的内容
             var url = string.Format("{0}/{1}", Application.streamingAssetsPath, "AssetBundles/BundleData.json");
-
             UnityWebRequest request = UnityWebRequest.Get(url);// new UnityWebRequest(url);
             yield return request.SendWebRequest();
             while (request.result == UnityWebRequest.Result.InProgress)
@@ -514,6 +521,30 @@ namespace bluebean.UGFramework.Asset
                 var content = request.downloadHandler.text;
                 Debug.Log($"AssetLoader get BundleData.txt: {content}");
                 AssetPathHelper.BundleDataAssetBundleNamle = content;
+            }
+
+            //获取Platform.json中的内容
+            url = string.Format("{0}/{1}", Application.streamingAssetsPath, "AssetBundles/Platform.json");
+            request = UnityWebRequest.Get(url);// new UnityWebRequest(url);
+            yield return request.SendWebRequest();
+            while (request.result == UnityWebRequest.Result.InProgress)
+            {
+                yield return null;
+            }
+            yield return new UnityEngine.WaitUntil(() => {
+                return request.isDone;
+            });
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError("AssetLoader get Platform.json Failed!");
+                onEnd(false);
+                yield break;
+            }
+            else
+            {
+                var content = request.downloadHandler.text;
+                Debug.Log($"AssetLoader get Platform.json: {content}");
+                m_platformAssetBundleName = content;
             }
 
             bool res = false;
