@@ -561,7 +561,7 @@ namespace bluebean.UGFramework.Build
                 var md5 = CalculateMD5ForAssetBundle(bundlePath);
                 UnityEngine.Debug.Log($"{curPlatform} hash: {md5}");
                 File.WriteAllText(Path.Combine(AssetBundleDir, "Platform.json"), $"{curPlatform}_{hash}");
-                File.Copy(bundlePath, string.Format("{0}/{1}", AssetBundleDir, $"{curPlatform}_{hash}"));
+                File.Copy(bundlePath, string.Format("{0}/{1}", AssetBundleDir, $"{curPlatform}_{hash}"),true);
             }
             else
             {
