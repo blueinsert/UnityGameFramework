@@ -11,6 +11,8 @@ namespace bluebean.UGFramework.UI
 
         [Header("显示时间间隔")]
         public float displayInterval = 1f;
+        [Header("开始显示索引")]
+        public int startIndex = 0;
 
         private int currentIndex = 0;
         private Coroutine displayCoroutine;
@@ -19,9 +21,10 @@ namespace bluebean.UGFramework.UI
         {
             // 初始时隐藏所有物体
             HideAllObjects();
-
-            // 开始显示循环
-            displayCoroutine = StartCoroutine(DisplaySequence());
+            startIndex = Mathf.Clamp(startIndex, 0, objectsToDisplay.Length - 1);
+            currentIndex = startIndex;
+             // 开始显示循环
+             displayCoroutine = StartCoroutine(DisplaySequence());
         }
 
         IEnumerator DisplaySequence()

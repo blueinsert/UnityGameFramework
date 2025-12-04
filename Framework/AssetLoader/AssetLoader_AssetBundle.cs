@@ -110,7 +110,7 @@ namespace bluebean.UGFramework.Asset
                 {
                     yield return null;
                 }
-                yield return new WaitUntil(() => {
+                yield return new UnityEngine.WaitUntil(() => {
                     return request.isDone;
                 });
                 if (request.result != UnityWebRequest.Result.Success)

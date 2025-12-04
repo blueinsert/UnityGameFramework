@@ -347,6 +347,7 @@ MonoBehaviour:
   - {fileID: 6594462187962135654}
   - {fileID: 4000910162575105456}
   displayInterval: 0.75
+  startIndex: 2
 --- !u!1 &2681537054566823498
 GameObject:
   m_ObjectHideFlags: 0
